@@ -2,12 +2,9 @@
   "publisherFiles": 5,
   "consumerFiles": 7,
   "brokerFiles": 2,
-  "patternHits": {
-    "event_notification": 4,
-    "event_carried_state_transfer": 2,
-    "event_sourcing": 0,
-    "cqrs": 1,
-    "saga": 0
-  },
-  "couplingIssueCount": 1
+  "cqrsFiles": 1,
+  "sagaFiles": 0,
+  "eventStoreFiles": 0,
+  "couplingIssueCount": 1,
+  "hasStateCarryingEvent": true
 }

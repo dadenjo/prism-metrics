@@ -1,1 +1,6 @@
-{ "hasEda": false, "confidence": 0, "patternsDetected": [], "couplingIssueCount": 0 }
+{
+  "hasEda": false,
+  "confidence": 0,
+  "patternsDetected": [],
+  "couplingIssueCount": 0
+}

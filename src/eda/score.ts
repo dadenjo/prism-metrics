@@ -1,30 +1,40 @@
 /**
- * EDA detection — returns hasEda, a confidence value, and the list of
- * patterns whose hit count exceeded threshold.
+ * EDA detection — mirrors prism0x2A dashboard's `analyzeEDA`:
+ *   hasEda     = ANY of producers/consumers/brokers/cqrs/sagas > 0
+ *   confidence = 0.3·prod + 0.2·con + 0.3·broker + 0.15·cqrs
+ *                + 0.15·saga + 0.1·eventStore, capped at 1.
  */
 
 import { clamp } from "../core/methodology.js";
 import type { EdaPattern, EdaResult, EdaSignals } from "./types.js";
 
-const PATTERN_THRESHOLD = 1;
-
 export function analyzeEda(sig: EdaSignals): EdaResult {
-  const totalActors = sig.publisherFiles + sig.consumerFiles + sig.brokerFiles;
-  const hasEda = totalActors >= 2 && sig.publisherFiles > 0 && sig.consumerFiles > 0;
+  const hasEda =
+    sig.publisherFiles > 0 ||
+    sig.consumerFiles > 0 ||
+    sig.brokerFiles > 0 ||
+    sig.cqrsFiles > 0 ||
+    sig.sagaFiles > 0;
 
-  const patternsDetected = (Object.keys(sig.patternHits) as EdaPattern[]).filter(
-    (k) => sig.patternHits[k] >= PATTERN_THRESHOLD,
-  );
-
-  // Confidence: 0.3 base if any actor, +0.2 per side covered (pub/con/broker),
-  // +0.05 per detected pattern, capped at 1.
   let confidence = 0;
-  if (totalActors > 0) confidence += 0.3;
-  if (sig.publisherFiles > 0) confidence += 0.2;
+  if (sig.publisherFiles > 0) confidence += 0.3;
   if (sig.consumerFiles > 0) confidence += 0.2;
-  if (sig.brokerFiles > 0) confidence += 0.1;
-  confidence += patternsDetected.length * 0.05;
-  confidence = clamp(Number(confidence.toFixed(2)), 0, 1);
+  if (sig.brokerFiles > 0) confidence += 0.3;
+  if (sig.cqrsFiles > 0) confidence += 0.15;
+  if (sig.sagaFiles > 0) confidence += 0.15;
+  if (sig.eventStoreFiles > 0) confidence += 0.1;
+  confidence = clamp(Math.round(confidence * 100) / 100, 0, 1);
+
+  const patternsDetected: EdaPattern[] = [];
+  if (sig.publisherFiles > 0 || sig.consumerFiles > 0) {
+    patternsDetected.push("event_notification");
+  }
+  if (sig.eventStoreFiles > 0) patternsDetected.push("event_sourcing");
+  if (sig.cqrsFiles > 0) patternsDetected.push("cqrs");
+  if (sig.sagaFiles > 0) patternsDetected.push("saga");
+  if (sig.hasStateCarryingEvent) {
+    patternsDetected.push("event_carried_state_transfer");
+  }
 
   return {
     hasEda,

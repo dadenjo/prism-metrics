@@ -1,1 +1,8 @@
-{ "hasEda": false, "confidence": 0.65, "patternsDetected": ["event_notification"], "couplingIssueCount": 0 }
+{
+  "hasEda": true,
+  "confidence": 0.6,
+  "patternsDetected": [
+    "event_notification"
+  ],
+  "couplingIssueCount": 0
+}
