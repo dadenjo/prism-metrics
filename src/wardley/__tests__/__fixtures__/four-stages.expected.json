@@ -1,0 +1,9 @@
+{
+  "components": [
+    { "id": "auth", "visibility": 0.8, "stage": "custom_built", "confidence": 0.7, "x": 0.3916005171641243, "y": 0.8 },
+    { "id": "payments", "visibility": 0.7, "stage": "product", "confidence": 0.7, "x": 0.6829893845501331, "y": 0.7 },
+    { "id": "analytics", "visibility": 0.4, "stage": "genesis", "confidence": 0.45, "x": 0.0969246452376071, "y": 0.4 },
+    { "id": "email", "visibility": 0.5, "stage": "commodity", "confidence": 0.7, "x": 0.8832254860336486, "y": 0.5 }
+  ],
+  "stageCounts": { "genesis": 1, "custom_built": 1, "product": 1, "commodity": 1 }
+}

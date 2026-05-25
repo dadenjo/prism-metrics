@@ -1,0 +1,8 @@
+{
+  "components": [
+    { "id": "auth", "visibility": 0.8, "stage": "custom_built", "confidence": 0.7 },
+    { "id": "payments", "visibility": 0.7, "stage": "product", "confidence": 0.7 },
+    { "id": "analytics", "visibility": 0.4, "stage": "genesis", "confidence": 0.45 },
+    { "id": "email", "visibility": 0.5, "stage": "commodity", "confidence": 0.7 }
+  ]
+}
