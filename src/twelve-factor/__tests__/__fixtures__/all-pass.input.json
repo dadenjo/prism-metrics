@@ -1,0 +1,16 @@
+{
+  "factors": [
+    { "factor": "codebase", "status": "pass" },
+    { "factor": "dependencies", "status": "pass" },
+    { "factor": "config", "status": "pass" },
+    { "factor": "backing_services", "status": "pass" },
+    { "factor": "build_release_run", "status": "pass" },
+    { "factor": "processes", "status": "pass" },
+    { "factor": "port_binding", "status": "pass" },
+    { "factor": "concurrency", "status": "pass" },
+    { "factor": "disposability", "status": "pass" },
+    { "factor": "dev_prod_parity", "status": "pass" },
+    { "factor": "logs", "status": "pass" },
+    { "factor": "admin_processes", "status": "pass" }
+  ]
+}

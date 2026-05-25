@@ -1,0 +1,16 @@
+{
+  "factors": [
+    { "factor": "codebase", "status": "unknown" },
+    { "factor": "dependencies", "status": "unknown" },
+    { "factor": "config", "status": "unknown" },
+    { "factor": "backing_services", "status": "unknown" },
+    { "factor": "build_release_run", "status": "unknown" },
+    { "factor": "processes", "status": "unknown" },
+    { "factor": "port_binding", "status": "unknown" },
+    { "factor": "concurrency", "status": "unknown" },
+    { "factor": "disposability", "status": "unknown" },
+    { "factor": "dev_prod_parity", "status": "unknown" },
+    { "factor": "logs", "status": "unknown" },
+    { "factor": "admin_processes", "status": "unknown" }
+  ]
+}
