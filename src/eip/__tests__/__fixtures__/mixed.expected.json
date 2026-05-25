@@ -1,0 +1,10 @@
+{
+  "patterns": [
+    { "pattern": "message_channel", "status": "present" },
+    { "pattern": "publish_subscribe", "status": "present" },
+    { "pattern": "request_reply", "status": "present" }
+  ],
+  "presentCount": 3,
+  "possibleCount": 0,
+  "architectureType": "mixed"
+}

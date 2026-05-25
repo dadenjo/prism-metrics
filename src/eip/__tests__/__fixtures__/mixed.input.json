@@ -1,0 +1,7 @@
+{
+  "patterns": [
+    { "pattern": "message_channel", "filenameMatches": 2, "capabilityMatches": 1 },
+    { "pattern": "publish_subscribe", "filenameMatches": 1, "capabilityMatches": 1 },
+    { "pattern": "request_reply", "filenameMatches": 3, "capabilityMatches": 2 }
+  ]
+}

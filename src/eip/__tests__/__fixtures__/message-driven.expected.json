@@ -1,0 +1,15 @@
+{
+  "patterns": [
+    { "pattern": "message_channel", "status": "present" },
+    { "pattern": "message_router", "status": "present" },
+    { "pattern": "publish_subscribe", "status": "present" },
+    { "pattern": "command_message", "status": "absent" },
+    { "pattern": "request_reply", "status": "absent" },
+    { "pattern": "message_endpoint", "status": "possible" },
+    { "pattern": "message_translator", "status": "possible" },
+    { "pattern": "process_manager", "status": "absent" }
+  ],
+  "presentCount": 3,
+  "possibleCount": 2,
+  "architectureType": "message_driven"
+}

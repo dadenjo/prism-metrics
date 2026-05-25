@@ -1,0 +1,12 @@
+{
+  "patterns": [
+    { "pattern": "message_channel", "filenameMatches": 3, "capabilityMatches": 2 },
+    { "pattern": "message_router", "filenameMatches": 1, "capabilityMatches": 1 },
+    { "pattern": "publish_subscribe", "filenameMatches": 2, "capabilityMatches": 1 },
+    { "pattern": "command_message", "filenameMatches": 0, "capabilityMatches": 0 },
+    { "pattern": "request_reply", "filenameMatches": 0, "capabilityMatches": 0 },
+    { "pattern": "message_endpoint", "filenameMatches": 1, "capabilityMatches": 0 },
+    { "pattern": "message_translator", "filenameMatches": 0, "capabilityMatches": 1 },
+    { "pattern": "process_manager", "filenameMatches": 0, "capabilityMatches": 0 }
+  ]
+}
