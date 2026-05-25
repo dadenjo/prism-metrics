@@ -1,0 +1,6 @@
+{
+  "detected": [
+    { "id": "drizzle", "name": "Drizzle", "confidence": 0.78, "reasons": ["dependency: drizzle-orm"] },
+    { "id": "express", "name": "Express", "confidence": 0.78, "reasons": ["dependency: express"] }
+  ]
+}

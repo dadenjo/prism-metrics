@@ -1,0 +1,7 @@
+{
+  "detected": [
+    { "id": "nextjs", "name": "Next.js", "confidence": 0.92, "reasons": ["dependency: next", "directory: app/"] },
+    { "id": "prisma", "name": "Prisma", "confidence": 0.85, "reasons": ["dependency: prisma", "supporting: @prisma/client"] },
+    { "id": "react", "name": "React", "confidence": 0.78, "reasons": ["dependency: react"] }
+  ]
+}
