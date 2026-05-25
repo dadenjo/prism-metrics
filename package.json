@@ -1,0 +1,134 @@
+{
+  "name": "prism-metrics",
+  "version": "0.1.0",
+  "description": "Open scoring methodology and reference implementations for the architecture frameworks measured by prism0x2A.",
+  "license": "MIT",
+  "author": "Daniel Schuldes",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dadenjo/prism-metrics.git"
+  },
+  "homepage": "https://github.com/dadenjo/prism-metrics",
+  "bugs": "https://github.com/dadenjo/prism-metrics/issues",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js",
+      "require": "./dist/core.cjs"
+    },
+    "./solid": {
+      "types": "./dist/solid.d.ts",
+      "import": "./dist/solid.js",
+      "require": "./dist/solid.cjs"
+    },
+    "./clean-arch": {
+      "types": "./dist/clean-arch.d.ts",
+      "import": "./dist/clean-arch.js",
+      "require": "./dist/clean-arch.cjs"
+    },
+    "./hexagonal": {
+      "types": "./dist/hexagonal.d.ts",
+      "import": "./dist/hexagonal.js",
+      "require": "./dist/hexagonal.cjs"
+    },
+    "./c4": {
+      "types": "./dist/c4.d.ts",
+      "import": "./dist/c4.js",
+      "require": "./dist/c4.cjs"
+    },
+    "./twelve-factor": {
+      "types": "./dist/twelve-factor.d.ts",
+      "import": "./dist/twelve-factor.js",
+      "require": "./dist/twelve-factor.cjs"
+    },
+    "./dora-predicted": {
+      "types": "./dist/dora-predicted.d.ts",
+      "import": "./dist/dora-predicted.js",
+      "require": "./dist/dora-predicted.cjs"
+    },
+    "./conways-law": {
+      "types": "./dist/conways-law.d.ts",
+      "import": "./dist/conways-law.js",
+      "require": "./dist/conways-law.cjs"
+    },
+    "./wardley": {
+      "types": "./dist/wardley.d.ts",
+      "import": "./dist/wardley.js",
+      "require": "./dist/wardley.cjs"
+    },
+    "./iso-25010": {
+      "types": "./dist/iso-25010.d.ts",
+      "import": "./dist/iso-25010.js",
+      "require": "./dist/iso-25010.cjs"
+    },
+    "./eip": {
+      "types": "./dist/eip.d.ts",
+      "import": "./dist/eip.js",
+      "require": "./dist/eip.cjs"
+    },
+    "./ddd": {
+      "types": "./dist/ddd.d.ts",
+      "import": "./dist/ddd.js",
+      "require": "./dist/ddd.cjs"
+    },
+    "./eda": {
+      "types": "./dist/eda.d.ts",
+      "import": "./dist/eda.js",
+      "require": "./dist/eda.cjs"
+    },
+    "./monorepo": {
+      "types": "./dist/monorepo.d.ts",
+      "import": "./dist/monorepo.js",
+      "require": "./dist/monorepo.cjs"
+    },
+    "./auto-detect": {
+      "types": "./dist/auto-detect.d.ts",
+      "import": "./dist/auto-detect.js",
+      "require": "./dist/auto-detect.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "architecture",
+    "metrics",
+    "solid",
+    "clean-architecture",
+    "hexagonal",
+    "c4",
+    "twelve-factor",
+    "dora",
+    "wardley",
+    "iso-25010",
+    "ddd"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
