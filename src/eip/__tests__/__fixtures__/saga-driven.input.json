@@ -1,0 +1,13 @@
+{
+  "candidates": [
+    "event-bus.ts",
+    "kafka-broker.ts",
+    "order-saga.ts",
+    "payment-orchestrator.ts",
+    "workflow-engine.ts",
+    "publish-order.ts",
+    "subscribe-payment.ts",
+    "dead-letter-queue.ts",
+    "idempotent-receiver.ts"
+  ]
+}

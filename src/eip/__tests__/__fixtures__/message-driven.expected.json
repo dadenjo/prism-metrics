@@ -1,15 +1,136 @@
 {
   "patterns": [
-    { "pattern": "message_channel", "status": "present" },
-    { "pattern": "message_router", "status": "present" },
-    { "pattern": "publish_subscribe", "status": "present" },
-    { "pattern": "command_message", "status": "absent" },
-    { "pattern": "request_reply", "status": "absent" },
-    { "pattern": "message_endpoint", "status": "possible" },
-    { "pattern": "message_translator", "status": "possible" },
-    { "pattern": "process_manager", "status": "absent" }
+    {
+      "name": "Message Channel",
+      "category": "messaging_infrastructure",
+      "status": "present",
+      "signals": [
+        "event-bus.ts",
+        "kafka-producer.ts",
+        "message-bus.ts"
+      ]
+    },
+    {
+      "name": "Message Bus",
+      "category": "messaging_infrastructure",
+      "status": "present",
+      "signals": [
+        "event-bus.ts",
+        "message-bus.ts"
+      ]
+    },
+    {
+      "name": "Publish-Subscribe Channel",
+      "category": "messaging_infrastructure",
+      "status": "present",
+      "signals": [
+        "user-event-emitter.ts",
+        "order-publisher.ts"
+      ]
+    },
+    {
+      "name": "Dead Letter Channel",
+      "category": "messaging_infrastructure",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Message Router",
+      "category": "routing",
+      "status": "present",
+      "signals": [
+        "router.ts"
+      ]
+    },
+    {
+      "name": "Content-Based Router",
+      "category": "routing",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Message Filter",
+      "category": "routing",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Splitter",
+      "category": "routing",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Aggregator",
+      "category": "routing",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Message Translator",
+      "category": "transformation",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Content Enricher",
+      "category": "transformation",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Content Filter",
+      "category": "transformation",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Normalizer",
+      "category": "transformation",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Polling Consumer",
+      "category": "endpoints",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Event-Driven Consumer",
+      "category": "endpoints",
+      "status": "present",
+      "signals": [
+        "event-handler.ts"
+      ]
+    },
+    {
+      "name": "Idempotent Receiver",
+      "category": "endpoints",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Process Manager / Saga",
+      "category": "orchestration",
+      "status": "absent",
+      "signals": []
+    },
+    {
+      "name": "Scatter-Gather",
+      "category": "orchestration",
+      "status": "absent",
+      "signals": []
+    }
   ],
-  "presentCount": 3,
-  "possibleCount": 2,
-  "architectureType": "message_driven"
+  "presentCount": 5,
+  "possibleCount": 0,
+  "absentCount": 13,
+  "architectureType": "event_driven_pubsub",
+  "missingPatternSuggestions": [
+    "Consider adding a Dead Letter Channel for undeliverable messages",
+    "Idempotent Receiver is recommended when message delivery is at-least-once",
+    "Add a Message Translator if routing crosses system boundaries with different schemas",
+    "A Saga / Process Manager pattern may help coordinate distributed transactions"
+  ]
 }

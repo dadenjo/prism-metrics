@@ -1,47 +1,56 @@
 /**
- * Enterprise Integration Patterns — detection only. Each pattern
- * status is present (both filename and capability match), possible
- * (one match), or absent.
+ * Enterprise Integration Patterns — detection only. No 0-100 score.
+ *
+ * Pattern set (18) and detection regexes mirror the prism0x2A dashboard's
+ * `enterpriseIntegrationPatterns` module. The pattern vocabulary itself
+ * (Message Channel, Aggregator, Saga, …) is from Hohpe & Woolf,
+ * "Enterprise Integration Patterns" (Addison-Wesley, 2003).
  */
 
 export type EipPatternStatus = "present" | "possible" | "absent";
 
-export type EipPattern =
-  | "message_channel"
-  | "message_router"
-  | "message_translator"
-  | "message_endpoint"
-  | "publish_subscribe"
-  | "command_message"
-  | "request_reply"
-  | "process_manager";
+export type EipCategory =
+  | "messaging_infrastructure"
+  | "routing"
+  | "transformation"
+  | "endpoints"
+  | "orchestration";
 
-export interface EipPatternMatches {
-  pattern: EipPattern;
-  /** How many filenames matched. */
-  filenameMatches: number;
-  /** How many capability names matched. */
-  capabilityMatches: number;
-}
-
-export interface EipSignals {
-  patterns: EipPatternMatches[];
+export interface EipPatternDef {
+  /** Human-readable pattern name (e.g. "Message Channel"). */
+  name: string;
+  description: string;
+  category: EipCategory;
+  /** Regex signals strong enough to mark the pattern "present". */
+  presentSignals: RegExp[];
+  /** Weaker signals that mark the pattern "possible". */
+  possibleSignals: RegExp[];
 }
 
 export interface EipPatternResult {
-  pattern: EipPattern;
+  name: string;
+  category: EipCategory;
   status: EipPatternStatus;
+  /** Up to 5 candidate strings that triggered detection. */
+  signals: string[];
 }
 
+/**
+ * Inferred high-level architecture style derived from the present
+ * pattern mix. Mirrors dashboard's `inferArchitectureType` output.
+ */
 export type EipArchitectureType =
-  | "message_driven"
-  | "request_response"
-  | "mixed"
-  | "unclassified";
+  | "event_driven_saga"
+  | "event_driven_pubsub"
+  | "message_based"
+  | "content_based_routing"
+  | "point_to_point";
 
 export interface EipResult {
   patterns: EipPatternResult[];
   presentCount: number;
   possibleCount: number;
+  absentCount: number;
   architectureType: EipArchitectureType;
+  missingPatternSuggestions: string[];
 }

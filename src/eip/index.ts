@@ -1,11 +1,10 @@
-export { analyzeEip } from "./score.js";
+export { analyzeEip, detectEipPatterns, EIP_PATTERN_DEFS } from "./score.js";
 export { EIP_METHODOLOGY } from "./methodology.js";
 export type {
-  EipSignals,
   EipResult,
-  EipPattern,
+  EipCategory,
   EipPatternStatus,
   EipPatternResult,
-  EipPatternMatches,
+  EipPatternDef,
   EipArchitectureType,
 } from "./types.js";

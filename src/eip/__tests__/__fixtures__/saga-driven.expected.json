@@ -3,26 +3,37 @@
     {
       "name": "Message Channel",
       "category": "messaging_infrastructure",
-      "status": "absent",
-      "signals": []
+      "status": "present",
+      "signals": [
+        "event-bus.ts",
+        "kafka-broker.ts",
+        "dead-letter-queue.ts"
+      ]
     },
     {
       "name": "Message Bus",
       "category": "messaging_infrastructure",
-      "status": "absent",
-      "signals": []
+      "status": "present",
+      "signals": [
+        "event-bus.ts"
+      ]
     },
     {
       "name": "Publish-Subscribe Channel",
       "category": "messaging_infrastructure",
-      "status": "absent",
-      "signals": []
+      "status": "present",
+      "signals": [
+        "publish-order.ts",
+        "subscribe-payment.ts"
+      ]
     },
     {
       "name": "Dead Letter Channel",
       "category": "messaging_infrastructure",
-      "status": "absent",
-      "signals": []
+      "status": "present",
+      "signals": [
+        "dead-letter-queue.ts"
+      ]
     },
     {
       "name": "Message Router",
@@ -93,14 +104,20 @@
     {
       "name": "Idempotent Receiver",
       "category": "endpoints",
-      "status": "absent",
-      "signals": []
+      "status": "present",
+      "signals": [
+        "idempotent-receiver.ts"
+      ]
     },
     {
       "name": "Process Manager / Saga",
       "category": "orchestration",
-      "status": "absent",
-      "signals": []
+      "status": "present",
+      "signals": [
+        "order-saga.ts",
+        "payment-orchestrator.ts",
+        "workflow-engine.ts"
+      ]
     },
     {
       "name": "Scatter-Gather",
@@ -109,9 +126,9 @@
       "signals": []
     }
   ],
-  "presentCount": 0,
+  "presentCount": 6,
   "possibleCount": 0,
-  "absentCount": 18,
-  "architectureType": "point_to_point",
+  "absentCount": 12,
+  "architectureType": "event_driven_saga",
   "missingPatternSuggestions": []
 }
