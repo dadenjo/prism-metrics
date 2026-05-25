@@ -61,18 +61,32 @@ See `src/<framework>/methodology.ts` for the human-readable specs.
 
 ## Verify on your own data
 
-Every scorer ships with input/expected fixtures. To check that scores reproduce on your own machine:
+Every scorer ships with `input.json` / `expected.json` fixture pairs under `src/<framework>/__tests__/__fixtures__/`. To reproduce scores locally:
 
-```ts
-import { analyzeSolid } from "prism-metrics/solid";
-import input from "./src/solid/__tests__/__fixtures__/healthy.input.json";
-import expected from "./src/solid/__tests__/__fixtures__/healthy.expected.json";
-
-const actual = analyzeSolid(input);
-console.assert(actual.overallScore === expected.overallScore);
+```bash
+git clone https://github.com/dadenjo/prism-metrics
+cd prism-metrics
+npm install
+npm test
 ```
 
-The scorers are pure functions: same input, same output, no I/O.
+72 fixture-backed assertions cover every scorer. Same input, same output, no I/O — the scorers are pure functions.
+
+Inside your own project:
+
+```ts
+import { analyzeCleanArch } from "prism-metrics/clean-arch";
+
+const result = analyzeCleanArch({
+  totalCapabilities: 24,
+  unknownCapabilities: 2,
+  adjacentViolations: 0,
+  mediumViolations: 0,
+  criticalViolations: 0,
+});
+
+// { score: 100, grade: 'A+', totalViolations: 0, ... }
+```
 
 ## Honest gaps
 
