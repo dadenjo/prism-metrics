@@ -1,1 +1,1 @@
-{ "coherenceScore": 55, "importCycles": 3, "driftCount": 3, "criticalDriftCount": 0, "averageCognitiveLoad": 58, "highCogLoadCapabilities": 2 }
+{ "coherenceScore": 55, "importCycles": 3, "driftCount": 3, "criticalDrifted": false, "averageCognitiveLoad": 58, "highCogLoadCapabilities": 2 }

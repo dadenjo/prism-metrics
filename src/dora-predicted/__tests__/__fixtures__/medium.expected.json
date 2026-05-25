@@ -1,1 +1,8 @@
-{ "deploymentFrequency": "medium", "leadTimeForChanges": "medium", "changeFailureRate": "medium", "meanTimeToRestore": "medium", "overallRank": 2, "overallLevel": "medium" }
+{
+  "deploymentFrequency": "medium",
+  "leadTimeForChanges": "medium",
+  "changeFailureRate": "medium",
+  "meanTimeToRestore": "medium",
+  "overallRank": 1,
+  "overallLevel": "medium"
+}

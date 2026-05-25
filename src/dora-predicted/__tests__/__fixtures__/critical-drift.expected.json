@@ -1,1 +1,8 @@
-{ "deploymentFrequency": "elite", "leadTimeForChanges": "elite", "changeFailureRate": "low", "meanTimeToRestore": "elite", "overallRank": 3.25, "overallLevel": "high" }
+{
+  "deploymentFrequency": "elite",
+  "leadTimeForChanges": "high",
+  "changeFailureRate": "low",
+  "meanTimeToRestore": "high",
+  "overallRank": 1.75,
+  "overallLevel": "high"
+}

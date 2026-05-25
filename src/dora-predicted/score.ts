@@ -1,20 +1,29 @@
 /**
- * DORA-predicted scoring — deterministic stepwise thresholds per metric.
- * These predict the architectural _drivers_ of DORA outcomes, not the
- * outcomes themselves (which need CI/CD logs and incident data).
+ * DORA-predicted scoring — deterministic level assignment per metric,
+ * mirroring the prism0x2A dashboard's `analyzeDORA` logic.
+ *
+ * Note: these predict the _architectural drivers_ of DORA outcomes,
+ * not the outcomes themselves (which need CI/CD logs and incident data).
  */
 
 import type { DoraLevel, DoraScoreResult, DoraSignals } from "./types.js";
 
 const LEVEL_RANK: Record<DoraLevel, number> = {
-  elite: 4,
-  high: 3,
-  medium: 2,
-  low: 1,
+  elite: 3,
+  high: 2,
+  medium: 1,
+  low: 0,
 };
 
-const RANK_TO_LEVEL: DoraLevel[] = ["low", "low", "medium", "high", "elite"];
+function rankToLevel(avg: number): DoraLevel {
+  if (avg >= 2.5) return "elite";
+  if (avg >= 1.5) return "high";
+  if (avg >= 0.75) return "medium";
+  return "low";
+}
 
+// Dashboard: coherence > 80 && cycles === 0 → elite; ≥60 && ≤2 → high;
+// ≥40 → medium; else low.
 function deploymentFrequency(sig: DoraSignals): DoraLevel {
   if (sig.coherenceScore > 80 && sig.importCycles === 0) return "elite";
   if (sig.coherenceScore >= 60 && sig.importCycles <= 2) return "high";
@@ -22,26 +31,44 @@ function deploymentFrequency(sig: DoraSignals): DoraLevel {
   return "low";
 }
 
+// Dashboard: driftRiskLevel = floor(driftCount / 3)
+//   cogAvg < 30 && driftRisk === 0    → elite
+//   cogAvg < 50 && driftRisk <= 1     → high
+//   cogAvg < 70 && driftRisk <= 2     → medium
+//   else                              → low
 function leadTimeForChanges(sig: DoraSignals): DoraLevel {
-  if (sig.coherenceScore > 80 && sig.averageCognitiveLoad < 40) return "elite";
-  if (sig.coherenceScore >= 60 && sig.averageCognitiveLoad < 55) return "high";
-  if (sig.coherenceScore >= 40) return "medium";
+  const driftRiskLevel = Math.floor(sig.driftCount / 3);
+  const cog = sig.averageCognitiveLoad;
+  if (cog < 30 && driftRiskLevel === 0) return "elite";
+  if (cog < 50 && driftRiskLevel <= 1) return "high";
+  if (cog < 70 && driftRiskLevel <= 2) return "medium";
   return "low";
 }
 
+// Dashboard: criticalDrifted shortcut → low.
+//   cycles === 0 && drift === 0      → elite
+//   cycles ≤ 2  && drift ≤ 3         → high
+//   cycles ≤ 5  && drift ≤ 8         → medium
+//   else                              → low
 function changeFailureRate(sig: DoraSignals): DoraLevel {
-  if (sig.criticalDriftCount > 0) return "low";
-  if (sig.driftCount === 0 && sig.coherenceScore > 80) return "elite";
-  if (sig.driftCount <= 2 && sig.coherenceScore >= 60) return "high";
-  if (sig.driftCount <= 5) return "medium";
+  if (sig.criticalDrifted) return "low";
+  if (sig.importCycles === 0 && sig.driftCount === 0) return "elite";
+  if (sig.importCycles <= 2 && sig.driftCount <= 3) return "high";
+  if (sig.importCycles <= 5 && sig.driftCount <= 8) return "medium";
   return "low";
 }
 
+// Dashboard:
+//   drift === 0 && cog < 40           → elite
+//   drift ≤ 3  && cog < 55            → high
+//   criticalDrifted || (drift > 8 && cog > 65)  → low
+//   else                              → medium
 function meanTimeToRestore(sig: DoraSignals): DoraLevel {
-  if (sig.coherenceScore > 80 && sig.highCogLoadCapabilities === 0) return "elite";
-  if (sig.coherenceScore >= 60 && sig.highCogLoadCapabilities <= 1) return "high";
-  if (sig.coherenceScore >= 40) return "medium";
-  return "low";
+  const cog = sig.averageCognitiveLoad;
+  if (sig.driftCount === 0 && cog < 40) return "elite";
+  if (sig.driftCount <= 3 && cog < 55) return "high";
+  if (sig.criticalDrifted || (sig.driftCount > 8 && cog > 65)) return "low";
+  return "medium";
 }
 
 export function analyzeDoraPredicted(sig: DoraSignals): DoraScoreResult {
@@ -49,9 +76,9 @@ export function analyzeDoraPredicted(sig: DoraSignals): DoraScoreResult {
   const lt = leadTimeForChanges(sig);
   const cfr = changeFailureRate(sig);
   const mttr = meanTimeToRestore(sig);
-  const overallRank = (LEVEL_RANK[df] + LEVEL_RANK[lt] + LEVEL_RANK[cfr] + LEVEL_RANK[mttr]) / 4;
-  const rounded = Math.round(overallRank);
-  const overallLevel = RANK_TO_LEVEL[rounded] ?? "low";
+  const overallRank =
+    (LEVEL_RANK[df] + LEVEL_RANK[lt] + LEVEL_RANK[cfr] + LEVEL_RANK[mttr]) / 4;
+  const overallLevel = rankToLevel(overallRank);
   return {
     deploymentFrequency: df,
     leadTimeForChanges: lt,

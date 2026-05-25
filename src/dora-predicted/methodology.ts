@@ -8,15 +8,15 @@ export const DORA_PREDICTED_METHODOLOGY: Methodology = {
   signals: [
     "Coherence score (computed upstream from the cross-layer snapshot)",
     "Import cycle count between capabilities",
-    "Drift count (and a separate criticalDriftCount for security/contract drifts)",
+    "Drift count + a boolean `criticalDrifted` (any drifted capability flagged critical)",
     "Average cognitive load + per-capability outliers > 60",
   ],
   formula: {
     description:
-      "Deterministic stepwise thresholds per metric. Examples: Deployment Frequency = elite if coherence > 80 AND cycles == 0; high if coherence >= 60 AND cycles <= 2; medium if coherence >= 40; else low. Change Failure Rate immediately drops to 'low' on any critical drift. Overall = rounded mean of the 4 level-ranks (elite=4..low=1).",
+      "Deterministic level assignment per metric, matching prism0x2A dashboard. Deployment Frequency keys on coherence+cycles. Lead Time uses cognitive load + driftRiskLevel=floor(drift/3) buckets. Change Failure Rate combines cycles AND drift thresholds with a criticalDrifted shortcut → low. MTTR keys on drift+cognitive-load with a criticalDrifted+highCog shortcut → low. Overall = mean of the 4 level-ranks (elite=3..low=0) bucketed via 2.5/1.5/0.75 thresholds.",
     codeRef: "src/dora-predicted/score.ts",
     snippet:
-      "df = coherence>80 && cycles==0 ? elite\n   : coherence>=60 && cycles<=2 ? high\n   : coherence>=40              ? medium\n   :                              low",
+      "df  = coherence>80 && cycles==0 ? elite : coherence>=60 && cycles<=2 ? high : coherence>=40 ? medium : low\nlt  = cog<30 && drift/3==0 ? elite : cog<50 && drift/3<=1 ? high : cog<70 && drift/3<=2 ? medium : low\ncfr = criticalDrifted ? low : (cycles==0 && drift==0 ? elite : cycles<=2 && drift<=3 ? high : cycles<=5 && drift<=8 ? medium : low)\nmttr = drift==0 && cog<40 ? elite : drift<=3 && cog<55 ? high : (criticalDrifted || (drift>8 && cog>65)) ? low : medium",
   },
   coverage:
     "Predicts the architectural drivers of DORA outcomes — not the deploy logs themselves. Compare side-by-side with measured values for the full picture.",
