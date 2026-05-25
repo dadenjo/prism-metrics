@@ -1,0 +1,12 @@
+{
+  "overallScore": 84,
+  "grade": "A",
+  "characteristics": [
+    { "id": "functional_suitability", "score": 85 },
+    { "id": "performance_efficiency", "score": 90 },
+    { "id": "reliability", "score": 79 },
+    { "id": "security", "score": 85 },
+    { "id": "maintainability", "score": 65 },
+    { "id": "portability", "score": 100 }
+  ]
+}

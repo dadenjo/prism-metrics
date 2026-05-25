@@ -1,0 +1,13 @@
+{
+  "coherenceScore": 0,
+  "driftRatio": 0,
+  "averageTestCoverage": 0,
+  "averageChurn": 0,
+  "totalFiles": 0,
+  "fileDensity": 0,
+  "hardcodedSecretHits": 0,
+  "hasDockerfile": false,
+  "hasK8sManifests": false,
+  "hasEnvExample": false,
+  "orphanCapabilities": 0
+}

@@ -1,0 +1,14 @@
+{
+  "coherenceScore": 85,
+  "previousCoherenceScore": 80,
+  "driftRatio": 0.05,
+  "averageTestCoverage": 75,
+  "averageChurn": 25,
+  "totalFiles": 120,
+  "fileDensity": 6,
+  "hardcodedSecretHits": 0,
+  "hasDockerfile": true,
+  "hasK8sManifests": true,
+  "hasEnvExample": true,
+  "orphanCapabilities": 0
+}

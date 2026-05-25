@@ -1,0 +1,12 @@
+{
+  "overallScore": 33,
+  "grade": "F",
+  "characteristics": [
+    { "id": "functional_suitability", "score": 0 },
+    { "id": "performance_efficiency", "score": 30 },
+    { "id": "reliability", "score": 40 },
+    { "id": "security", "score": 80 },
+    { "id": "maintainability", "score": 10 },
+    { "id": "portability", "score": 40 }
+  ]
+}
