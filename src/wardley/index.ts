@@ -1,4 +1,8 @@
-export { analyzeWardley } from "./score.js";
+export {
+  analyzeWardley,
+  classifyEvolution,
+  classifyValueChain,
+} from "./score.js";
 export { WARDLEY_METHODOLOGY } from "./methodology.js";
 export type {
   WardleySignals,
@@ -6,4 +10,8 @@ export type {
   WardleyComponent,
   WardleyPlottedComponent,
   EvolutionStage,
+  ClassifyEvolutionInput,
+  ClassifyEvolutionResult,
+  LifecycleHint,
+  CriticalityHint,
 } from "./types.js";

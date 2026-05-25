@@ -6,15 +6,17 @@ export const WARDLEY_METHODOLOGY: Methodology = {
   referenceUrl: "https://learnwardleymapping.com/",
   referenceLabel: "learnwardleymapping.com",
   signals: [
-    "Per-component evolution stage + Y visibility (classification supplied by caller)",
-    "Per-component confidence supplied by caller",
+    "Capability name + id (for keyword-based stage and value-chain classification)",
+    "Optional lifecycle (experimental | stable | deprecated) and criticality hints",
+    "Optional fileCount for custom_built fallback",
   ],
   formula: {
     description:
-      "X-position is computed deterministically via a seeded FNV-1a hash of the component id (no Math.random — same input always plots in the same place). Y-position is supplied by the caller. Stage center X-positions: genesis 0.125, custom_built 0.375, product 0.625, commodity 0.875. Jitter is ± 0.10.",
+      "Three deterministic pieces: classifyEvolution(input) walks commodity → genesis → product signal sets, then lifecycle, then criticality/fileCount fallbacks, producing {stage, score 0..1, signals}. classifyValueChain(name, id) keyword-matches against a 26-entry map for Y-position, defaulting to a mid-band [0.40, 0.55] seeded by id. analyzeWardley jitters X around the stage center (genesis 0.125, custom_built 0.375, product 0.625, commodity 0.875) by ±0.10 via FNV-1a hash so same id → same X.",
     codeRef: "src/wardley/score.ts",
-    snippet: "x = stageBaseX(stage) + seededOffset(id)  // ±0.10",
+    snippet:
+      "stage   = classifyEvolution({name,id,lifecycle,criticality,fileCount}).stage\nvisibility = classifyValueChain(name, id)\nx       = stageBaseX(stage) + seededOffset(id)  // ±0.10",
   },
   honestGap:
-    "Classification of components into evolution stages is upstream of this scorer and is typically a name-pattern match — a custom-built solution whose name contains 'auth' may be mis-classified as commodity. The seededOffset only jitters X; the stage itself can be visually disputed.",
+    "Classification is keyword-based: a custom-built solution whose name contains 'auth' will be mis-classified as commodity. The X jitter only nudges position within a stage; the stage itself can be visually disputed.",
 };
