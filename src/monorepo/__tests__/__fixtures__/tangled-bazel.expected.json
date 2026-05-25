@@ -1,0 +1,10 @@
+{
+  "buildSystem": "bazel",
+  "capabilities": [
+    { "id": "core", "healthScore": 0, "crossTargetDeps": 12 },
+    { "id": "auth", "healthScore": 20, "crossTargetDeps": 8 },
+    { "id": "payments", "healthScore": 40, "crossTargetDeps": 6 }
+  ],
+  "averageHealth": 20,
+  "unhealthyCount": 3
+}

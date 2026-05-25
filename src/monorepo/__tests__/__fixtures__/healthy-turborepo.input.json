@@ -1,0 +1,9 @@
+{
+  "buildSystem": "turborepo",
+  "capabilities": [
+    { "id": "ui", "crossTargetDeps": 0 },
+    { "id": "api", "crossTargetDeps": 2 },
+    { "id": "worker", "crossTargetDeps": 1 },
+    { "id": "shared", "crossTargetDeps": 3 }
+  ]
+}

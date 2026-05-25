@@ -1,0 +1,11 @@
+{
+  "buildSystem": "turborepo",
+  "capabilities": [
+    { "id": "ui", "healthScore": 100, "crossTargetDeps": 0 },
+    { "id": "api", "healthScore": 80, "crossTargetDeps": 2 },
+    { "id": "worker", "healthScore": 90, "crossTargetDeps": 1 },
+    { "id": "shared", "healthScore": 70, "crossTargetDeps": 3 }
+  ],
+  "averageHealth": 85,
+  "unhealthyCount": 0
+}

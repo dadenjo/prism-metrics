@@ -1,0 +1,8 @@
+{
+  "buildSystem": "bazel",
+  "capabilities": [
+    { "id": "core", "crossTargetDeps": 12 },
+    { "id": "auth", "crossTargetDeps": 8 },
+    { "id": "payments", "crossTargetDeps": 6 }
+  ]
+}
