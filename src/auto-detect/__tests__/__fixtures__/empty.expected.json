@@ -1,1 +1,9 @@
-{ "detected": [] }
+{
+  "detected": [],
+  "architectureStyle": {
+    "primary": "unknown",
+    "confidence": 0.3,
+    "rationale": "Insufficient signals to determine architecture style. Add architecture directories or dependency markers."
+  },
+  "detectionSignals": []
+}

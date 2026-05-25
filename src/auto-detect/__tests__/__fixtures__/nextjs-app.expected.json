@@ -1,7 +1,55 @@
 {
   "detected": [
-    { "id": "nextjs", "name": "Next.js", "confidence": 0.92, "reasons": ["dependency: next", "directory: app/"] },
-    { "id": "prisma", "name": "Prisma", "confidence": 0.85, "reasons": ["dependency: prisma", "supporting: @prisma/client"] },
-    { "id": "react", "name": "React", "confidence": 0.78, "reasons": ["dependency: react"] }
+    {
+      "id": "nextjs",
+      "name": "Next.js",
+      "category": "frontend",
+      "confidence": 0.97,
+      "signals": [
+        "package.json: next"
+      ],
+      "version": "15.0.0"
+    },
+    {
+      "id": "vitest",
+      "name": "Vitest",
+      "category": "testing",
+      "confidence": 0.97,
+      "signals": [
+        "package.json: vitest"
+      ],
+      "version": "2.1.0"
+    },
+    {
+      "id": "react",
+      "name": "React",
+      "category": "frontend",
+      "confidence": 0.95,
+      "signals": [
+        "package.json: react"
+      ],
+      "version": "19.0.0"
+    },
+    {
+      "id": "prisma",
+      "name": "Prisma (Repository Pattern)",
+      "category": "architecture_pattern",
+      "confidence": 0.85,
+      "signals": [
+        "package.json: prisma"
+      ],
+      "version": "5.20.0"
+    }
+  ],
+  "architectureStyle": {
+    "primary": "layered_traditional",
+    "confidence": 0.55,
+    "rationale": "Single src/ directory with no strong architectural signals — likely a traditional layered monolith."
+  },
+  "detectionSignals": [
+    "package.json: next",
+    "package.json: react",
+    "package.json: prisma",
+    "package.json: vitest"
   ]
 }

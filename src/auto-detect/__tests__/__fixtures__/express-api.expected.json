@@ -1,6 +1,56 @@
 {
   "detected": [
-    { "id": "drizzle", "name": "Drizzle", "confidence": 0.78, "reasons": ["dependency: drizzle-orm"] },
-    { "id": "express", "name": "Express", "confidence": 0.78, "reasons": ["dependency: express"] }
+    {
+      "id": "jest",
+      "name": "Jest",
+      "category": "testing",
+      "confidence": 0.97,
+      "signals": [
+        "package.json: jest"
+      ],
+      "version": "29.0.0"
+    },
+    {
+      "id": "kafka",
+      "name": "Kafka (Event-Driven)",
+      "category": "architecture_pattern",
+      "confidence": 0.92,
+      "signals": [
+        "package.json: kafkajs or kafka-node"
+      ],
+      "version": "2.2.0"
+    },
+    {
+      "id": "express",
+      "name": "Express.js",
+      "category": "backend",
+      "confidence": 0.9,
+      "signals": [
+        "package.json: express"
+      ],
+      "version": "4.21.0"
+    },
+    {
+      "id": "hexagonal",
+      "name": "Hexagonal Architecture",
+      "category": "architecture_pattern",
+      "confidence": 0.88,
+      "signals": [
+        "directory: ports/",
+        "directory: adapters/"
+      ]
+    }
+  ],
+  "architectureStyle": {
+    "primary": "hexagonal",
+    "confidence": 0.88,
+    "rationale": "ports/ and adapters/ directories follow the Ports & Adapters pattern (Alistair Cockburn)."
+  },
+  "detectionSignals": [
+    "package.json: express",
+    "package.json: kafkajs or kafka-node",
+    "package.json: jest",
+    "directory: ports/",
+    "directory: adapters/"
   ]
 }

@@ -1,4 +1,12 @@
 {
-  "dependencies": { "next": "15.0.0", "react": "19.0.0", "@prisma/client": "5.20.0", "prisma": "5.20.0" },
-  "topLevelDirs": ["app", "public", "src"]
+  "dependencies": {
+    "next": "15.0.0",
+    "react": "19.0.0",
+    "@prisma/client": "5.20.0",
+    "prisma": "5.20.0"
+  },
+  "devDependencies": { "vitest": "2.1.0" },
+  "topLevelDirs": ["app", "public", "src"],
+  "srcDirs": [],
+  "topLevelFiles": ["package.json", "next.config.js"]
 }
