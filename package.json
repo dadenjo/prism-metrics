@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Open scoring methodology and reference implementations for the architecture frameworks measured by prism0x2A.",
   "license": "MIT",
-  "author": "Daniel Schuldes",
+  "author": "Joachim Schuldes",
   "repository": {
     "type": "git",
     "url": "https://github.com/dadenjo/prism-metrics.git"
