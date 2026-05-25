@@ -1,0 +1,11 @@
+{
+  "overallScore": 70,
+  "grade": "B",
+  "principles": [
+    { "principle": "S", "name": "Single Responsibility", "strength": "strong", "score": 90, "confidence": 0.5 },
+    { "principle": "O", "name": "Open/Closed", "strength": "moderate", "score": 65, "confidence": 0.45 },
+    { "principle": "L", "name": "Liskov Substitution", "strength": "moderate", "score": 65, "confidence": 0.5 },
+    { "principle": "I", "name": "Interface Segregation", "strength": "moderate", "score": 65, "confidence": 0.5 },
+    { "principle": "D", "name": "Dependency Inversion", "strength": "moderate", "score": 65, "confidence": 0.5 }
+  ]
+}

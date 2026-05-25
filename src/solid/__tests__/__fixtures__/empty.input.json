@@ -1,0 +1,15 @@
+{
+  "analyzedFiles": 0,
+  "largeFiles": 0,
+  "heavyExportFiles": 0,
+  "largeSwitchFiles": 0,
+  "cascadingIfFiles": 0,
+  "strategyPatternFiles": 0,
+  "inheritanceFiles": 0,
+  "narrowingStubFiles": 0,
+  "totalInterfaces": 0,
+  "fatInterfaces": 0,
+  "hasDiContainer": false,
+  "abstractionPatternFiles": 0,
+  "directInfraImportFiles": 0
+}
