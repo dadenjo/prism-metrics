@@ -1,0 +1,17 @@
+{
+  "contexts": [
+    { "id": "billing", "kind": "core", "inboundDeps": 3, "outboundDeps": 2 },
+    { "id": "catalog", "kind": "core", "inboundDeps": 4, "outboundDeps": 1 },
+    { "id": "shipping", "kind": "supporting", "inboundDeps": 1, "outboundDeps": 1 },
+    { "id": "notifications", "kind": "generic", "inboundDeps": 2, "outboundDeps": 0 },
+    { "id": "audit", "kind": "supporting", "inboundDeps": 0, "outboundDeps": 0 }
+  ],
+  "relationships": [
+    { "from": "billing", "to": "catalog", "relationship": "customer_supplier" },
+    { "from": "billing", "to": "shipping", "relationship": "open_host" },
+    { "from": "catalog", "to": "notifications", "relationship": "published_language" },
+    { "from": "shipping", "to": "notifications", "relationship": "published_language" }
+  ],
+  "ubiquitousTermCount": 28,
+  "inferredDomainEvents": 12
+}

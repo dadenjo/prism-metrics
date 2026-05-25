@@ -1,0 +1,16 @@
+{
+  "contextCount": 0,
+  "subdomainCounts": { "core": 0, "supporting": 0, "generic": 0 },
+  "relationshipCounts": {
+    "shared_kernel": 0,
+    "customer_supplier": 0,
+    "conformist": 0,
+    "anti_corruption_layer": 0,
+    "open_host": 0,
+    "published_language": 0,
+    "separate_ways": 0
+  },
+  "ubiquitousTermCount": 0,
+  "inferredDomainEvents": 0,
+  "isolatedContexts": 0
+}
