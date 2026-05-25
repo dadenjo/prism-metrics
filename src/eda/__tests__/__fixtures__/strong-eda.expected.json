@@ -1,0 +1,6 @@
+{
+  "hasEda": true,
+  "confidence": 0.95,
+  "patternsDetected": ["event_notification", "event_carried_state_transfer", "cqrs"],
+  "couplingIssueCount": 1
+}
