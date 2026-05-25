@@ -1,14 +1,17 @@
 {
   "contextCount": 5,
-  "subdomainCounts": { "core": 2, "supporting": 2, "generic": 1 },
+  "subdomainCounts": {
+    "core_domain": 2,
+    "supporting": 2,
+    "generic": 1
+  },
   "relationshipCounts": {
+    "upstream_downstream": 1,
     "shared_kernel": 0,
-    "customer_supplier": 1,
-    "conformist": 0,
-    "anti_corruption_layer": 0,
-    "open_host": 1,
-    "published_language": 2,
-    "separate_ways": 0
+    "anticorruption_layer": 1,
+    "open_host_service": 0,
+    "conformist": 2,
+    "partnership": 0
   },
   "ubiquitousTermCount": 28,
   "inferredDomainEvents": 12,

@@ -1,10 +1,19 @@
-export { analyzeDdd } from "./score.js";
+export {
+  analyzeDdd,
+  classifyContext,
+  extractUbiquitousLanguage,
+  inferRelationshipPattern,
+  GENERIC_KEYWORDS,
+  CORE_BUSINESS_KEYWORDS,
+} from "./score.js";
 export { DDD_METHODOLOGY } from "./methodology.js";
 export type {
   DddSignals,
   DddResult,
   DddBoundedContext,
   DddContextRelation,
-  SubdomainKind,
-  ContextRelationship,
+  ContextType,
+  RelationshipPattern,
+  ClassifyContextInput,
+  InferRelationshipInput,
 } from "./types.js";

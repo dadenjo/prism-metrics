@@ -1,16 +1,16 @@
 {
   "contexts": [
-    { "id": "billing", "kind": "core", "inboundDeps": 3, "outboundDeps": 2 },
-    { "id": "catalog", "kind": "core", "inboundDeps": 4, "outboundDeps": 1 },
-    { "id": "shipping", "kind": "supporting", "inboundDeps": 1, "outboundDeps": 1 },
-    { "id": "notifications", "kind": "generic", "inboundDeps": 2, "outboundDeps": 0 },
-    { "id": "audit", "kind": "supporting", "inboundDeps": 0, "outboundDeps": 0 }
+    { "id": "billing", "type": "core_domain", "inboundDeps": 3, "outboundDeps": 2 },
+    { "id": "catalog", "type": "core_domain", "inboundDeps": 4, "outboundDeps": 1 },
+    { "id": "shipping", "type": "supporting", "inboundDeps": 1, "outboundDeps": 1 },
+    { "id": "notifications", "type": "generic", "inboundDeps": 2, "outboundDeps": 0 },
+    { "id": "audit", "type": "supporting", "inboundDeps": 0, "outboundDeps": 0 }
   ],
   "relationships": [
-    { "from": "billing", "to": "catalog", "relationship": "customer_supplier" },
-    { "from": "billing", "to": "shipping", "relationship": "open_host" },
-    { "from": "catalog", "to": "notifications", "relationship": "published_language" },
-    { "from": "shipping", "to": "notifications", "relationship": "published_language" }
+    { "from": "billing", "to": "catalog", "pattern": "upstream_downstream" },
+    { "from": "billing", "to": "shipping", "pattern": "anticorruption_layer" },
+    { "from": "catalog", "to": "notifications", "pattern": "conformist" },
+    { "from": "shipping", "to": "notifications", "pattern": "conformist" }
   ],
   "ubiquitousTermCount": 28,
   "inferredDomainEvents": 12
