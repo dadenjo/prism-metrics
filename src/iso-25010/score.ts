@@ -1,7 +1,8 @@
 /**
- * ISO/IEC 25010 scoring — 6 per-characteristic sub-formulas. Overall
- * is the mean of the six scores, rounded. Weights are hand-picked and
- * locked at launch; see methodology for the honest-gap.
+ * ISO/IEC 25010 scoring — 6 per-characteristic LOCKED_FORMULA
+ * implementations, mirroring the prism0x2A dashboard.
+ *
+ * Overall = mean(characteristics), rounded.
  */
 
 import { clamp, roundScore, scoreToGrade } from "../core/methodology.js";
@@ -11,49 +12,91 @@ import type {
   Iso25010Signals,
 } from "./types.js";
 
-function trendBonus(sig: Iso25010Signals): number {
-  if (sig.previousCoherenceScore === undefined) return 0;
-  const delta = sig.coherenceScore - sig.previousCoherenceScore;
-  if (delta > 5) return 5;
-  if (delta < -5) return -5;
-  return 0;
-}
-
+// LOCKED_FORMULA — functional_suitability
+//   coverageScore = min(100, avgCoverage)
+//   driftPenalty  = driftRatio × 30
+//   score         = max(0, round(coverageScore × 0.6 + (100 − driftPenalty) × 0.4))
 function functionalSuitability(sig: Iso25010Signals): number {
-  // Coherence dominates; orphan capabilities erode functional cohesion.
-  const orphanPenalty = Math.min(20, sig.orphanCapabilities * 4);
-  return clamp(sig.coherenceScore - orphanPenalty, 0, 100);
+  const coverageScore = Math.min(100, sig.averageTestCoverage);
+  const driftPenalty = sig.driftRatio * 30;
+  return clamp(coverageScore * 0.6 + (100 - driftPenalty) * 0.4, 0, 100);
 }
 
+// LOCKED_FORMULA — performance_efficiency
+//   densityScore = files-per-cap > 20 ? 50 : > 10 ? 70 : 85
+//   churnPenalty = min(50, avgChurn × 2)
+//   score        = max(0, round(densityScore − churnPenalty))
 function performanceEfficiency(sig: Iso25010Signals): number {
-  // Higher density of files per capability ~> larger surface to load
-  const densityPenalty = Math.min(20, Math.max(0, sig.fileDensity - 10) * 2);
-  return clamp(0.7 * sig.coherenceScore + 30 - densityPenalty, 0, 100);
+  const churnPenalty = Math.min(50, sig.averageChurn * 2);
+  const fileDensity = sig.fileDensity;
+  const densityScore = fileDensity > 20 ? 50 : fileDensity > 10 ? 70 : 85;
+  return clamp(densityScore - churnPenalty, 0, 100);
 }
 
+// LOCKED_FORMULA — reliability
+//   trendBonus = +5 if delta > 0, -10 if < -5, else 0
+//   score = min(100, max(0, round(
+//             coherence × 0.5
+//             + (100 − driftRatio × 100) × 0.4
+//             − driftRatio × 40
+//             + trendBonus)))
 function reliability(sig: Iso25010Signals): number {
-  const driftPenalty = sig.driftRatio * 100;
-  return clamp(0.5 * sig.coherenceScore + 0.4 * (100 - driftPenalty) - 0.4 * driftPenalty + trendBonus(sig), 0, 100);
+  const trend =
+    sig.previousCoherenceScore === undefined
+      ? 0
+      : sig.coherenceScore - sig.previousCoherenceScore;
+  const trendBonus = trend > 0 ? 5 : trend < -5 ? -10 : 0;
+  const coherenceContrib = sig.coherenceScore * 0.5;
+  const driftPenalty = sig.driftRatio * 40;
+  return clamp(
+    coherenceContrib +
+      (100 - sig.driftRatio * 100) * 0.4 -
+      driftPenalty +
+      trendBonus,
+    0,
+    100,
+  );
 }
 
+// LOCKED_FORMULA — security
+//   secretPenalty = min(60, 15 × hardcodedSecretFiles)
+//   configPenalty = min(20,  5 × hardcodedConfigFiles)
+//   score         = max(0, 85 − secretPenalty − configPenalty)
 function security(sig: Iso25010Signals): number {
-  const secretsPenalty = Math.min(60, sig.hardcodedSecretHits * 15);
-  const envBonus = sig.hasEnvExample ? 5 : 0;
-  return clamp(80 - secretsPenalty + envBonus, 0, 100);
+  const secretPenalty = Math.min(60, sig.hardcodedSecretHits * 15);
+  const configPenalty = Math.min(20, sig.hardcodedConfigHits * 5);
+  return clamp(85 - secretPenalty - configPenalty, 0, 100);
 }
 
+// LOCKED_FORMULA — maintainability
+//   coherenceContrib = coherence × 0.4
+//   coverageContrib  = min(30, avgCoverage × 0.3)
+//   driftPenalty     = driftRatio × 25
+//   orphanPenalty    = min(20, 3 × orphanCaps)
+//   score = min(100, max(0, round(
+//             coherenceContrib + coverageContrib + 30
+//             − driftPenalty − orphanPenalty)))
 function maintainability(sig: Iso25010Signals): number {
-  const churnPenalty = sig.averageChurn * 0.4;
-  const coverageBonus = sig.averageTestCoverage * 0.3;
-  return clamp(0.5 * sig.coherenceScore + coverageBonus - churnPenalty + 10, 0, 100);
+  const orphanPenalty = Math.min(20, sig.orphanCapabilities * 3);
+  const coverageContrib = Math.min(30, sig.averageTestCoverage * 0.3);
+  const coherenceContrib = sig.coherenceScore * 0.4;
+  const driftPenalty = sig.driftRatio * 25;
+  return clamp(
+    coherenceContrib + coverageContrib + 30 - driftPenalty - orphanPenalty,
+    0,
+    100,
+  );
 }
 
+// LOCKED_FORMULA — portability
+//   points = (Dockerfile?35:0) + (Helm/K8s?30:0) + (.env.example?25:0)
+//   score  = min(100, max(10, points))
 function portability(sig: Iso25010Signals): number {
-  let s = 40;
-  if (sig.hasDockerfile) s += 25;
-  if (sig.hasK8sManifests) s += 20;
-  if (sig.hasEnvExample) s += 15;
-  return clamp(s, 0, 100);
+  const points =
+    (sig.hasDockerfile ? 35 : 0) +
+    (sig.hasK8sManifests ? 30 : 0) +
+    (sig.hasEnvExample ? 25 : 0);
+  return clamp(Math.max(10, points), 0, 100);
 }
 
 export function analyzeIso25010(sig: Iso25010Signals): Iso25010ScoreResult {

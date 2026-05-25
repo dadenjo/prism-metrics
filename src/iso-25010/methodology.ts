@@ -8,9 +8,9 @@ export const ISO_25010_METHODOLOGY: Methodology = {
   signals: [
     "Coherence score (most recent + optional trend)",
     "Drift ratio (drifted capabilities / total)",
-    "Average test coverage and average file churn",
+    "Average test coverage and average file churn (raw count per capability)",
     "File count + file-to-capability density",
-    "Hardcoded-secret hit count",
+    "Hardcoded-secret hit count and hardcoded host/port config hit count",
     "Portability markers: Dockerfile, K8s manifests, .env.example",
     "Orphan-capability count",
   ],

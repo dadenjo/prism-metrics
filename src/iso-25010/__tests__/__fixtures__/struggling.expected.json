@@ -1,12 +1,30 @@
 {
-  "overallScore": 33,
+  "overallScore": 31,
   "grade": "F",
   "characteristics": [
-    { "id": "functional_suitability", "score": 25 },
-    { "id": "performance_efficiency", "score": 54 },
-    { "id": "reliability", "score": 31 },
-    { "id": "security", "score": 35 },
-    { "id": "maintainability", "score": 15 },
-    { "id": "portability", "score": 40 }
+    {
+      "id": "functional_suitability",
+      "score": 47
+    },
+    {
+      "id": "performance_efficiency",
+      "score": 40
+    },
+    {
+      "id": "reliability",
+      "score": 31
+    },
+    {
+      "id": "security",
+      "score": 30
+    },
+    {
+      "id": "maintainability",
+      "score": 26
+    },
+    {
+      "id": "portability",
+      "score": 10
+    }
   ]
 }

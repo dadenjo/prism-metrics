@@ -6,6 +6,7 @@
   "totalFiles": 0,
   "fileDensity": 0,
   "hardcodedSecretHits": 0,
+  "hardcodedConfigHits": 0,
   "hasDockerfile": false,
   "hasK8sManifests": false,
   "hasEnvExample": false,
