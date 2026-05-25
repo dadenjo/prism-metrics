@@ -1,6 +1,6 @@
 {
   "name": "prism-metrics",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Open scoring methodology and reference implementations for the architecture frameworks measured by prism0x2A.",
   "license": "MIT",
   "author": "Joachim Schuldes",
