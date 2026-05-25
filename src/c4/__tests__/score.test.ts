@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { analyzeC4 } from "../score.js";
+import { analyzeC4, containerGroup, isPersonCap } from "../score.js";
 import { C4_METHODOLOGY } from "../methodology.js";
 
 import fullIn from "./__fixtures__/full.input.json";
@@ -21,6 +21,36 @@ describe("analyzeC4", () => {
   });
   it("never marks code level as covered", () => {
     expect(analyzeC4({ systemCount: 99, containerCount: 99, componentCount: 99 }).hasCode).toBe(false);
+  });
+});
+
+describe("containerGroup", () => {
+  it("classifies API service by name", () => {
+    expect(containerGroup("user_api", "User API")).toBe("API Service");
+    expect(containerGroup("graphql_endpoint", "GraphQL")).toBe("API Service");
+  });
+  it("classifies databases", () => {
+    expect(containerGroup("user_store", "User Storage")).toBe("Database");
+    expect(containerGroup("cache", "Redis cache")).toBe("Database");
+  });
+  it("classifies web apps", () => {
+    expect(containerGroup("frontend", "Next Web Client")).toBe("Web App");
+  });
+  it("classifies background workers", () => {
+    expect(containerGroup("billing_job", "Cron processor")).toBe(
+      "Background Worker",
+    );
+  });
+  it("falls back to Application", () => {
+    expect(containerGroup("auth", "Authentication module")).toBe("Application");
+  });
+});
+
+describe("isPersonCap", () => {
+  it("detects person-like capability names", () => {
+    expect(isPersonCap("Admin user")).toBe(true);
+    expect(isPersonCap("Customer")).toBe(true);
+    expect(isPersonCap("billing pipeline")).toBe(false);
   });
 });
 
