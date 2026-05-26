@@ -15,7 +15,7 @@ export const AUTO_DETECT_METHODOLOGY: Methodology = {
     codeRef: "src/auto-detect/score.ts",
   },
   coverage:
-    "Detects 14 dependency-driven frameworks + 6 file/directory-driven patterns and infers 1 of 8 architecture styles. Recommendation-text generation (UI copy) is intentionally out of scope and stays in the dashboard.",
+    "Detects 14 library signatures (dependency-driven) + 6 file/directory-driven patterns and infers 1 of 8 architecture styles. Recommendation-text generation (UI copy) is intentionally out of scope and stays in the dashboard.",
   honestGap:
     "Confidence values look more precise than they really are — they're calibrated by hand, not from a labelled dataset. The no-score design means there's no headline number to defend.",
 };
