@@ -88,6 +88,10 @@ const result = analyzeCleanArch({
 // { score: 100, grade: 'A+', totalViolations: 0, ... }
 ```
 
+## What's new in 0.3.0
+
+- **auto-detect** — added `node:test` (Node.js built-in test runner) as the 15th library signature, detected via a script-driven heuristic (`node --test` or `tsx --test` in `package.json` scripts). The detector now accepts an optional `scripts` field on `AutoDetectSignals` (backward compatible). Methodology `coverage` text clarified accordingly.
+
 ## What's new in 0.2.0
 
 This release aligns every scorer with the prism0x2A dashboard reference implementation, so the public package can serve as the single source of truth for framework scoring. Highlights:

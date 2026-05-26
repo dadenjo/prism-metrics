@@ -31,6 +31,8 @@ export interface AutoDetectSignals {
   srcDirs?: string[];
   /** Names of top-level files observed in the project root. */
   topLevelFiles?: string[];
+  /** package.json scripts map (script name -> command). Optional. */
+  scripts?: Record<string, string>;
 }
 
 export interface FrameworkDetection {

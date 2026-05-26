@@ -201,6 +201,25 @@ export function detectFrameworks(
     detectionSignals.push(s.signalLabel);
   }
 
+  // 1b. Script-driven signatures (node:test built-in runner)
+  const scripts = sig.scripts;
+  if (scripts) {
+    const nodeTestPattern = /\b(?:node|tsx)\s+[^"']*--test\b/;
+    for (const cmd of Object.values(scripts)) {
+      if (typeof cmd === "string" && nodeTestPattern.test(cmd)) {
+        frameworks.push({
+          id: "node-test",
+          name: "node:test",
+          category: "testing",
+          confidence: 0.96,
+          signals: ["package.json: scripts contain 'node --test' or 'tsx --test'"],
+        });
+        detectionSignals.push("package.json: scripts contain 'node --test' or 'tsx --test'");
+        break;
+      }
+    }
+  }
+
   // 2. File / directory signals
 
   // Hexagonal Architecture: ports/ + adapters/ (top-level or src/)

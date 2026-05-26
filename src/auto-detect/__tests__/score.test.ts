@@ -62,6 +62,34 @@ describe("detectFrameworks", () => {
   });
 });
 
+describe("node:test detection (script-driven)", () => {
+  it("detects node:test when scripts contain 'node --test'", () => {
+    const r = detectFrameworks({
+      dependencies: {},
+      topLevelDirs: [],
+      scripts: { test: "node --test" },
+    });
+    expect(r.detected.find((d) => d.id === "node-test")).toBeDefined();
+    expect(r.detected.find((d) => d.id === "node-test")?.confidence).toBe(0.96);
+  });
+  it("detects node:test when scripts contain 'tsx --test foo.ts'", () => {
+    const r = detectFrameworks({
+      dependencies: {},
+      topLevelDirs: [],
+      scripts: { test: "tsx --test foo.ts" },
+    });
+    expect(r.detected.find((d) => d.id === "node-test")).toBeDefined();
+  });
+  it("does NOT falsely detect node:test when scripts use jest", () => {
+    const r = detectFrameworks({
+      dependencies: {},
+      topLevelDirs: [],
+      scripts: { test: "jest" },
+    });
+    expect(r.detected.find((d) => d.id === "node-test")).toBeUndefined();
+  });
+});
+
 describe("analyzeAutoDetect alias", () => {
   it("is the same function as detectFrameworks", () => {
     expect(analyzeAutoDetect).toBe(detectFrameworks);
