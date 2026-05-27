@@ -55,10 +55,24 @@ export interface PrincipleResult {
   strength: PrincipleStrength;
   score: number;
   confidence: number;
+  /**
+   * Actionable, count-aware recommendation. Recommendations that would
+   * bake a literal "0 …" count into their text (e.g. "Replace 0 large
+   * switch/if chains") are suppressed and a maintenance-style hint is
+   * emitted instead.
+   */
+  recommendation: string;
 }
 
 export interface SolidScoreResult {
   overallScore: number;
   grade: string;
   principles: PrincipleResult[];
+  /**
+   * True when no source files were analyzed (every signal is zero
+   * because nothing was scanned). Consumers should treat the score as
+   * undefined / N/A and surface a "no data" state instead of the
+   * default-bucket fallback.
+   */
+  noData: boolean;
 }
