@@ -1,5 +1,6 @@
 {
-  "overallScore": 31,
+  "ok": true,
+  "overallScore": 34,
   "grade": "F",
   "characteristics": [
     {
@@ -16,7 +17,7 @@
     },
     {
       "id": "security",
-      "score": 30
+      "score": 47
     },
     {
       "id": "maintainability",
