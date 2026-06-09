@@ -23,6 +23,12 @@ export interface CleanArchSignals {
   mediumViolations: number;
   /** Edges that skip from entities/use_cases all the way to outermost. */
   criticalViolations: number;
+  /**
+   * Optional audit-only field. The list of filesystem paths the caller
+   * excluded before counting capabilities (typically derived from
+   * `src/core/scanner-exclusions.ts`). Does NOT affect the score.
+   */
+  excludedPaths?: string[];
 }
 
 export interface CleanArchScoreResult {
