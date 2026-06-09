@@ -3,7 +3,9 @@ export { SOLID_METHODOLOGY } from "./methodology.js";
 export type {
   SolidSignals,
   SolidScoreResult,
+  SolidLanguage,
   PrincipleResult,
+  PrincipleResultOrNA,
   PrincipleStrength,
   PrincipleCode,
 } from "./types.js";

@@ -16,6 +16,12 @@ export interface HexagonalSignals {
   adapterCount: number;
   /** Edges that violate the rule "core must not depend on adapter/infra". */
   dependencyViolations: number;
+  /**
+   * Optional audit-only field. The list of filesystem paths the caller
+   * excluded before counting (typically derived from
+   * `src/core/scanner-exclusions.ts`). Does NOT affect the score.
+   */
+  excludedPaths?: string[];
 }
 
 export interface HexagonalScoreResult {
