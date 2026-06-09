@@ -107,6 +107,25 @@ This release aligns every scorer with the prism0x2A dashboard reference implemen
 
 Breaking changes affect signal/result shapes for the scorers above — see each module's TypeScript types for the new contract.
 
+## Scanner exclusions (methodology, not internals)
+
+Production scorers in this package walk the filesystem and count regex
+hits. To stay consistent with the published methodology, they share a
+single exclusion contract — directories that are skipped (`node_modules`,
+`__tests__`, `.claude/worktrees/`, …), filename patterns that mark a
+file as test/fixture/mock, and a `stripComments` helper applied before
+regex tests run.
+
+These primitives are exported from `prism-metrics/core` as
+`IGNORE_DIRS`, `TEST_FILE_PATTERNS`, `stripComments`, and
+`shouldScanFile`. They are part of the methodology — silently skipping
+files would look like cheating. Any downstream scorer that ignores them
+is publishing a different methodology than this package documents.
+
+See [`docs/scanner-exclusions.md`](docs/scanner-exclusions.md) for the
+full list and the empirical trigger (Atomar's ISO 25010 Security `10 / F`
+result driven by hits inside `.claude/worktrees/`).
+
 ## Honest gaps
 
 The methodology constants spell out where signals are weak (heuristic naming, sample caps, predictive-not-measured for DORA, 6-of-8 for ISO 25010). Read the `honestGap` field before using a score in production.
