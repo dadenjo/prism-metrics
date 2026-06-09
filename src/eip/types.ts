@@ -39,12 +39,21 @@ export interface EipPatternResult {
  * Inferred high-level architecture style derived from the present
  * pattern mix. Mirrors dashboard's `inferArchitectureType` output.
  */
+/**
+ * Inferred high-level architecture style.
+ *
+ * `"unknown"` is returned when zero patterns are present — we do not
+ * silently fall through to `"point_to_point"` because that is an
+ * opinionated default that misrepresents "no signal" as "we measured
+ * point-to-point". Callers should render `"unknown"` as N/A.
+ */
 export type EipArchitectureType =
   | "event_driven_saga"
   | "event_driven_pubsub"
   | "message_based"
   | "content_based_routing"
-  | "point_to_point";
+  | "point_to_point"
+  | "unknown";
 
 export interface EipResult {
   patterns: EipPatternResult[];

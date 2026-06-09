@@ -9,6 +9,14 @@
  *   - `analyzeEip(patterns)`         — combine per-pattern results into
  *     overall counts, architecture-type label, and a list of
  *     missing-pattern suggestions.
+ *
+ * Exclusion contract — IMPORTANT: `detectEipPatterns` runs raw regex
+ * tests over caller-supplied strings with no production/test/fixture
+ * distinction. A file `event-bus.mock.ts` will match Message Bus + Saga
+ * trivially. Callers MUST pre-filter their candidate list against
+ * test/fixture/mock paths BEFORE invoking this function. The shared
+ * primitives in `src/core/scanner-exclusions.ts` (`shouldScanFile`,
+ * `IGNORE_DIRS`, `TEST_FILE_PATTERNS`) are the supported way to do this.
  */
 
 import type {
@@ -45,11 +53,15 @@ export const EIP_PATTERN_DEFS: EipPatternDef[] = [
     description:
       "Shared communication channel enabling many applications to send and receive messages",
     category: "messaging_infrastructure",
+    // eip-2: `\bbus\b` matched `business`, `omnibus`, `busy`. Anchor to a
+    // qualified bus identifier: event_bus / message_bus / service_bus / a
+    // bare `bus` only when followed by end / dot / slash (filename or
+    // property access). `\bbus\b` alone is too generic for production scans.
     presentSignals: [
-      /\bbus\b/i,
-      /event[_-]?bus/i,
-      /service[_-]?bus/i,
-      /message[_-]?bus/i,
+      /event[_-]?bus(?![a-z])/i,
+      /service[_-]?bus(?![a-z])/i,
+      /message[_-]?bus(?![a-z])/i,
+      /(^|[/_-])bus(\.|$|[/_-])/i,
     ],
     possibleSignals: [/dispatcher/i, /mediator/i],
   },
@@ -105,8 +117,11 @@ export const EIP_PATTERN_DEFS: EipPatternDef[] = [
     name: "Message Filter",
     description: "Eliminates undesired messages from a channel based on criteria",
     category: "routing",
-    presentSignals: [/message[_-]?filter/i, /event[_-]?filter/i, /\bfilter\b/i],
-    possibleSignals: [/predicate/i, /guard/i, /interceptor/i],
+    // eip-2: `\bfilter\b` alone is too generic (matches every UI filter,
+    // array filter, search filter). Require message_filter / event_filter
+    // or filter co-occurring with explicit messaging context.
+    presentSignals: [/message[_-]?filter/i, /event[_-]?filter/i],
+    possibleSignals: [/\bfilter\b/i, /predicate/i, /guard/i, /interceptor/i],
   },
   {
     name: "Splitter",
@@ -182,13 +197,16 @@ export const EIP_PATTERN_DEFS: EipPatternDef[] = [
     name: "Event-Driven Consumer",
     description: "Receives messages as they arrive, automatically",
     category: "endpoints",
+    // eip-3: `on[A-Z][a-z]+\.` matched `onClick.something`, making every
+    // React app present. Scope to message/event handlers only.
     presentSignals: [
       /event[_-]?handler/i,
       /event[_-]?consumer/i,
       /\bwebhook\b/i,
       /\blistener\b/i,
       /\bsubscriber\b/i,
-      /on[A-Z][a-z]+\./,
+      /\bonMessage\b/,
+      /\bonEvent\b/,
     ],
     possibleSignals: [/callback/i, /\bhook\b/i],
   },
@@ -254,6 +272,14 @@ function testSignals(candidates: string[], patterns: RegExp[]): string[] {
  * and capability-name candidates. Returns one EipPatternResult per
  * pattern, with status ∈ {present, possible, absent} and up to 5
  * matched candidate strings.
+ *
+ * Caller exclusion contract (see file-level docstring): callers MUST
+ * pre-filter their candidate strings to exclude paths matching
+ * `__tests__`, `__fixtures__`, `*.mock.*`, `*.spec.*`, `*.test.*`. The
+ * shared `shouldScanFile()` helper in `src/core/scanner-exclusions.ts`
+ * implements this contract. Without that pre-filter, a file named
+ * `event-bus.mock.ts` will trip Message Bus / Process Manager / Saga
+ * detection trivially.
  */
 export function detectEipPatterns(candidates: string[]): EipPatternResult[] {
   return EIP_PATTERN_DEFS.map((def) => {
@@ -287,17 +313,27 @@ export function detectEipPatterns(candidates: string[]): EipPatternResult[] {
 // ─── Architecture-type inference ──────────────────────────────────────────────
 
 function inferArchitectureType(patterns: EipPatternResult[]): EipArchitectureType {
-  const presentNames = patterns
-    .filter((p) => p.status === "present")
-    .map((p) => p.name);
+  const presentResults = patterns.filter((p) => p.status === "present");
+  const presentCount = presentResults.length;
 
-  const hasMsgInfra =
-    patterns.filter(
-      (p) =>
-        p.category === "messaging_infrastructure" && p.status === "present",
-    ).length >= 2;
-  const hasSaga = presentNames.some((n) => /saga|orchestrat|workflow/i.test(n));
-  const hasPubSub = presentNames.some((n) => /publish|subscribe/i.test(n));
+  // eip-5: empty input no longer lands silently on "point_to_point" (an
+  // opinionated default). With zero present patterns we genuinely don't
+  // know — surface that as "unknown".
+  if (presentCount === 0) return "unknown";
+
+  const presentNames = presentResults.map((p) => p.name);
+
+  const msgInfraPresent = patterns.filter(
+    (p) => p.category === "messaging_infrastructure" && p.status === "present",
+  );
+  const hasMsgInfra = msgInfraPresent.length >= 2;
+
+  // eip-4: workflow / orchestration keywords in OTHER capability names
+  // ("Workflow Engine") used to trip hasSaga via /workflow/. Tighten to
+  // the literal pattern name so Saga inference requires actual Saga.
+  const hasSaga = presentNames.includes("Process Manager / Saga");
+  const hasPubSub = presentNames.includes("Publish-Subscribe Channel");
+
   const hasRouting =
     patterns.filter((p) => p.category === "routing" && p.status === "present")
       .length >= 2;
@@ -312,6 +348,12 @@ function inferArchitectureType(patterns: EipPatternResult[]): EipArchitectureTyp
 function buildMissingSuggestions(patterns: EipPatternResult[]): string[] {
   const suggestions: string[] = [];
   const detectedCount = patterns.filter((p) => p.status === "present").length;
+
+  // eip-6: gate ALL missing-pattern suggestions on a meaningful
+  // detection floor. Recommending Dead Letter / Idempotent Receiver
+  // because we found one Message Bus hit is over-eager and noisy.
+  if (detectedCount < 3) return suggestions;
+
   const hasMessaging = patterns.some(
     (p) => p.category === "messaging_infrastructure" && p.status === "present",
   );
@@ -319,7 +361,7 @@ function buildMissingSuggestions(patterns: EipPatternResult[]): string[] {
     (p) => p.category === "routing" && p.status === "present",
   );
   const hasSaga = patterns.some(
-    (p) => p.name.includes("Saga") && p.status === "present",
+    (p) => p.name === "Process Manager / Saga" && p.status === "present",
   );
   const isPresent = (name: string) =>
     patterns.some((p) => p.name === name && p.status === "present");

@@ -112,6 +112,6 @@
   "presentCount": 0,
   "possibleCount": 0,
   "absentCount": 18,
-  "architectureType": "point_to_point",
+  "architectureType": "unknown",
   "missingPatternSuggestions": []
 }
