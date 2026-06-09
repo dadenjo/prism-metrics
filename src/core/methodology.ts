@@ -35,8 +35,26 @@ export interface Methodology {
   honestGap?: string;
 }
 
-/** Letter grade from a 0-100 score, standard A-F scale. */
-export function scoreToGrade(score: number): string {
+import { isInsufficient, type InsufficientSignalResult } from "./insufficient.js";
+
+/**
+ * Letter grade from a 0-100 score, standard A-F scale.
+ *
+ * If passed an {@link InsufficientSignalResult}, this throws — callers
+ * MUST narrow the union (e.g. via {@link isInsufficient}) before grading,
+ * so an "insufficient signal" result is never silently rendered as a
+ * letter grade like "D" or "F".
+ */
+export function scoreToGrade(score: number): string;
+export function scoreToGrade(input: InsufficientSignalResult): never;
+export function scoreToGrade(input: number | InsufficientSignalResult): string {
+  if (isInsufficient(input)) {
+    throw new TypeError(
+      `scoreToGrade called on InsufficientSignalResult (reason=${input.reason}): ${input.detail}. ` +
+        `Callers must handle insufficient-signal results before grading.`,
+    );
+  }
+  const score = input;
   if (score >= 90) return "A+";
   if (score >= 80) return "A";
   if (score >= 70) return "B";
