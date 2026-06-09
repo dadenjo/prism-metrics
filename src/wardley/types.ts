@@ -27,6 +27,30 @@ export interface ClassifyEvolutionResult {
   stage: EvolutionStage;
   /** 0..1 evolution-axis score (0=genesis, 1=commodity). */
   score: number;
+  /**
+   * 0..1 confidence in the stage label.
+   *
+   *  - <=0.55  single weak signal (e.g. a single regex name match, or
+   *            a fileCount-only promotion). Treat as "candidate only".
+   *  - 0.55-0.75 a lifecycle/criticality signal corroborates a stage.
+   *  - >=0.82  multiple independent signals agree.
+   *
+   * Added to fix wardley-2: previously consumers saw a precise
+   * `score: 0.847` for what was, internally, a one-regex guess and
+   * had no way to detect it.
+   */
+  confidence: number;
+  /**
+   * `true` when the classification rests on a SINGLE keyword-regex
+   * match with no corroborating lifecycle / criticality signal. Set
+   * on commodity / product / genesis matches whose only evidence is
+   * the name-pattern. Surfaced so dashboards can render a "review"
+   * affordance instead of treating the stage as settled.
+   *
+   * Added to fix wardley-1: the bespoke-auth → commodity false
+   * positive was previously emitted at 0.82-0.97 with no flag.
+   */
+  disputed: boolean;
   signals: string[];
 }
 

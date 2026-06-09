@@ -1,1 +1,1 @@
-{ "score": 100, "grade": "A+", "singleTeamRepo": false, "couplingRatio": 0.025, "unownedRatio": 0, "verdict": "aligned" }
+{ "score": 100, "grade": "A+", "singleTeamRepo": false, "couplingRatio": 0.025, "unownedRatio": 0, "verdict": "aligned", "structuralProxy": "aligned", "requiresHumanVerification": true }
