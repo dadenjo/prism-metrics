@@ -5,4 +5,6 @@ export type {
   Iso25010ScoreResult,
   Iso25010CharacteristicScore,
   Iso25010Characteristic,
+  Iso25010InsufficientSignal,
+  Iso25010Report,
 } from "./types.js";

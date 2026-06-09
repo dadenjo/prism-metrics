@@ -24,5 +24,5 @@ export const ISO_25010_METHODOLOGY: Methodology = {
   coverage:
     "Ships 6 of ISO 25010's 8 characteristics: Functional Suitability, Performance Efficiency, Reliability, Security, Maintainability, Portability.",
   honestGap:
-    "Compatibility and Usability are intentionally excluded — Compatibility's static signal inverts the ISO definition (more integrations != better interoperability), and Usability genuinely requires runtime user feedback that static analysis cannot provide. Per-characteristic weights inside the kept 6 are hand-picked and locked at launch.",
+    "Compatibility and Usability are intentionally excluded — Compatibility's static signal inverts the ISO definition (more integrations != better interoperability), and Usability genuinely requires runtime user feedback that static analysis cannot provide. Per-characteristic weights inside the kept 6 are hand-picked and locked at launch. Security's secret/config penalties use a log2 curve (15 × log2(1 + hits), capped at 60) rather than a linear 15 × hits multiplier — the linear form sent 4 hits to a guaranteed F regardless of whether the hits came from test fixtures, comments, or real code. The scorer also returns an explicit { ok: false, reason: 'no_input' } sentinel when every input signal is zero or absent, so brand-new or unscanned repos no longer render as 'D' by default.",
 };

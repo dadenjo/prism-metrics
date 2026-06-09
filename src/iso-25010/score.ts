@@ -8,9 +8,31 @@
 import { clamp, roundScore, scoreToGrade } from "../core/methodology.js";
 import type {
   Iso25010CharacteristicScore,
-  Iso25010ScoreResult,
+  Iso25010InsufficientSignal,
+  Iso25010Report,
   Iso25010Signals,
 } from "./types.js";
+
+/**
+ * True if the signal bundle carries at least one non-zero, defined input.
+ * Used to short-circuit empty-input scoring so brand-new / unscanned repos
+ * don't get rendered as "D" out of the box (see iso-1 finding).
+ */
+function hasAnySignal(sig: Iso25010Signals): boolean {
+  if ((sig.totalFiles ?? 0) > 0) return true;
+  if ((sig.totalCapabilities ?? 0) > 0) return true;
+  if ((sig.hardcodedSecretHits ?? 0) > 0) return true;
+  if ((sig.hardcodedConfigHits ?? 0) > 0) return true;
+  if ((sig.coherenceScore ?? 0) > 0) return true;
+  if (sig.previousCoherenceScore !== undefined) return true;
+  if ((sig.driftRatio ?? 0) > 0) return true;
+  if ((sig.averageTestCoverage ?? 0) > 0) return true;
+  if ((sig.averageChurn ?? 0) > 0) return true;
+  if ((sig.fileDensity ?? 0) > 0) return true;
+  if ((sig.orphanCapabilities ?? 0) > 0) return true;
+  if (sig.hasDockerfile || sig.hasK8sManifests || sig.hasEnvExample) return true;
+  return false;
+}
 
 // LOCKED_FORMULA — functional_suitability
 //   coverageScore = min(100, avgCoverage)
@@ -58,13 +80,24 @@ function reliability(sig: Iso25010Signals): number {
   );
 }
 
-// LOCKED_FORMULA — security
-//   secretPenalty = min(60, 15 × hardcodedSecretFiles)
-//   configPenalty = min(20,  5 × hardcodedConfigFiles)
+// LOCKED_FORMULA — security  (iso-2 softened curve, 2026-06-09)
+//   secretPenalty = min(60, 15 × log2(1 + hardcodedSecretHits))
+//   configPenalty = min(20,  5 × log2(1 + hardcodedConfigHits))
 //   score         = max(0, 85 − secretPenalty − configPenalty)
+//
+// The previous linear `15 × hits` cliff sent 4 hits to a score of 25 (F),
+// regardless of whether the hits came from test fixtures, comments, or
+// real code. Log2 keeps the penalty meaningful while removing the cliff:
+// 1 hit → 15, 4 hits → ~35, 10 hits → ~52, 60 hits → capped at 60.
 function security(sig: Iso25010Signals): number {
-  const secretPenalty = Math.min(60, sig.hardcodedSecretHits * 15);
-  const configPenalty = Math.min(20, sig.hardcodedConfigHits * 5);
+  const secretPenalty = Math.min(
+    60,
+    15 * Math.log2(1 + sig.hardcodedSecretHits),
+  );
+  const configPenalty = Math.min(
+    20,
+    5 * Math.log2(1 + sig.hardcodedConfigHits),
+  );
   return clamp(85 - secretPenalty - configPenalty, 0, 100);
 }
 
@@ -99,7 +132,20 @@ function portability(sig: Iso25010Signals): number {
   return clamp(Math.max(10, points), 0, 100);
 }
 
-export function analyzeIso25010(sig: Iso25010Signals): Iso25010ScoreResult {
+export function analyzeIso25010(
+  sig: Iso25010Signals,
+): Iso25010Report | Iso25010InsufficientSignal {
+  if (!hasAnySignal(sig)) {
+    return {
+      ok: false,
+      reason: "no_input",
+      detail:
+        "No signal: every scored input (files, capabilities, coherence, drift, secret/config hits, infra markers) is zero or absent. Run a scan before grading.",
+      ...(sig.excludedPaths && sig.excludedPaths.length > 0
+        ? { excludedPaths: sig.excludedPaths }
+        : {}),
+    };
+  }
   const characteristics: Iso25010CharacteristicScore[] = [
     { id: "functional_suitability", score: roundScore(functionalSuitability(sig)) },
     { id: "performance_efficiency", score: roundScore(performanceEfficiency(sig)) },
@@ -112,8 +158,12 @@ export function analyzeIso25010(sig: Iso25010Signals): Iso25010ScoreResult {
     characteristics.reduce((sum, c) => sum + c.score, 0) / characteristics.length,
   );
   return {
+    ok: true,
     overallScore,
     grade: scoreToGrade(overallScore),
     characteristics,
+    ...(sig.excludedPaths && sig.excludedPaths.length > 0
+      ? { excludedPaths: sig.excludedPaths }
+      : {}),
   };
 }
