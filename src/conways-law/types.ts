@@ -16,14 +16,15 @@ export interface ConwaysLawSignals {
 /**
  * High-level verdict for a Conway's-Law result.
  *
- *   - "undefined" — single-team repo: the question "is org structure
- *     aligned with code?" is ill-posed because there is no inter-team
- *     coupling to measure. Score is clamped to 50 baseline.
  *   - "aligned" / "partially_aligned" / "misaligned" / "fragmented"
  *     follow the standard >=75 / >=50 / >=25 / <25 banding.
+ *
+ * The historical "undefined" verdict (single-team repo) is no longer
+ * produced — that path now returns {@link import("../core/insufficient.js").InsufficientSignalResult}
+ * because Conway's Law is undefined when there is exactly one team and
+ * a letter grade is meaningless.
  */
 export type ConwaysLawVerdict =
-  | "undefined"
   | "aligned"
   | "partially_aligned"
   | "misaligned"
@@ -32,9 +33,28 @@ export type ConwaysLawVerdict =
 export interface ConwaysLawScoreResult {
   score: number;
   grade: string;
-  /** True when totalTeams <= 1 (no inter-team coupling possible). */
-  singleTeamRepo: boolean;
+  /** Always false on this path — single-team repos return an
+   * {@link import("../core/insufficient.js").InsufficientSignalResult} instead. Kept for
+   * back-compat with consumers that destructured this field. */
+  singleTeamRepo: false;
   couplingRatio: number;
   unownedRatio: number;
+  /**
+   * Structural alignment band — DERIVED from code-only signals
+   * (ownership + dependency edges). Conway's Law is an organizational
+   * claim, not a code claim; this field is a STRUCTURAL PROXY only.
+   * Use `structuralProxy` for the same value with the honest name.
+   */
   verdict: ConwaysLawVerdict;
+  /** Alias of `verdict` with a name that does not over-promise. The
+   * methodology computes an alignment PROXY from code, not Conway's
+   * Law itself, which requires an org-chart we cannot infer. */
+  structuralProxy: ConwaysLawVerdict;
+  /**
+   * Always true on this path — Conway's Law is an organizational claim
+   * and the runtime value here is a code-derived proxy. Downstream
+   * dashboards MUST surface the org-chart-verification requirement to
+   * the user before treating this grade as actionable.
+   */
+  requiresHumanVerification: true;
 }

@@ -4,7 +4,7 @@
  * Three exported pieces, mirroring the prism0x2A dashboard's
  * `wardleyMap.ts` heuristics:
  *
- *   - classifyEvolution(input)    → {stage, score, signals}
+ *   - classifyEvolution(input)    → {stage, score, confidence, disputed, signals}
  *   - classifyValueChain(name,id) → 0..1 visibility position
  *   - analyzeWardley(signals)     → plotted components + stage counts,
  *                                   with deterministic FNV-1a X-jitter
@@ -20,6 +20,22 @@ import type {
   WardleyPlottedComponent,
   WardleySignals,
 } from "./types.js";
+import {
+  CORROBORATED_BASE,
+  CORROBORATED_RANGE,
+  CRITICALITY_BASE,
+  CRITICALITY_RANGE,
+  DEFAULT_CUSTOM_BASE,
+  DEFAULT_CUSTOM_RANGE,
+  FILECOUNT_ONLY_BASE,
+  FILECOUNT_ONLY_RANGE,
+  JITTER_HALF_WIDTH,
+  LIFECYCLE_BASE,
+  LIFECYCLE_RANGE,
+  SINGLE_SIGNAL_BASE,
+  SINGLE_SIGNAL_RANGE,
+  STAGE_BASE_X,
+} from "./constants.js";
 
 // ─── Classification regexes (lifted verbatim from dashboard) ──────────────────
 
@@ -125,6 +141,22 @@ function seededOffset01(seed: string): number {
  * Classify a capability's evolution stage from name + id + lifecycle +
  * criticality + fileCount. Mirrors dashboard's classifyEvolution
  * exactly (including signal precedence and score bands per stage).
+ *
+ * The result includes `confidence` (0..1) and `disputed` (boolean):
+ *
+ *  - A single keyword match (e.g. `name="Auth"`) with no corroborating
+ *    lifecycle/criticality signal returns `confidence ≈ 0.5` and
+ *    `disputed: true`. The historical 0.82-0.97 confidence on a single
+ *    regex match was the source of the "bespoke auth → commodity →
+ *    outsource it" false positive.
+ *  - The same keyword match WITH `lifecycle=stable` or `=deprecated`
+ *    (or `criticality=low` for commodity-shaped names) raises
+ *    confidence to 0.82+ and clears `disputed`.
+ *  - For genesis: `lifecycle=experimental` is itself a strong signal,
+ *    so a name-match + lifecycle still corroborates.
+ *  - For custom_built via fileCount alone: `confidence ≈ 0.4` and the
+ *    stage is returned but flagged so dashboards do not promote a
+ *    nascent capability to "core custom" on file-count signal alone.
  */
 export function classifyEvolution(
   input: ClassifyEvolutionInput,
@@ -135,12 +167,38 @@ export function classifyEvolution(
   // Commodity check first
   if (COMMODITY_SIGNALS.some((p) => p.test(combined))) {
     signals.push("matches commodity service pattern");
-    if (input.lifecycle === "deprecated" || input.lifecycle === "stable") {
+    // Corroborate with lifecycle. `criticality=critical` actually
+    // ARGUES AGAINST commodity (a critical bespoke auth service is
+    // not a commodity even if its name contains "auth"), so we do
+    // NOT count it as corroboration here.
+    const lifecycleCorroborates =
+      input.lifecycle === "stable" || input.lifecycle === "deprecated";
+    const criticalityDisputes = input.criticality === "critical";
+    if (lifecycleCorroborates) {
       signals.push(`lifecycle=${input.lifecycle}`);
     }
+    if (criticalityDisputes) {
+      signals.push("criticality=critical → bespoke custom_built, overriding name match");
+      // Adversarial path: a critical capability whose name matches a
+      // commodity keyword (e.g. "Custom Auth" with criticality=critical)
+      // should NOT be commoditized. Route it to custom_built with
+      // moderate confidence.
+      return {
+        stage: "custom_built",
+        score: 0.32 + seededOffset01(`${combined}:critical-override`) * 0.18,
+        confidence: CORROBORATED_BASE,
+        disputed: false,
+        signals,
+      };
+    }
+    const corroborated = lifecycleCorroborates;
     return {
       stage: "commodity",
-      score: 0.82 + seededOffset01(`${combined}:commodity-match`) * 0.15,
+      score: corroborated
+        ? CORROBORATED_BASE + seededOffset01(`${combined}:commodity-match`) * CORROBORATED_RANGE
+        : SINGLE_SIGNAL_BASE + seededOffset01(`${combined}:commodity-match`) * SINGLE_SIGNAL_RANGE,
+      confidence: corroborated ? CORROBORATED_BASE : SINGLE_SIGNAL_BASE,
+      disputed: !corroborated,
       signals,
     };
   }
@@ -148,9 +206,13 @@ export function classifyEvolution(
   // Genesis check
   if (GENESIS_SIGNALS.some((p) => p.test(combined))) {
     signals.push("matches genesis/experimental pattern");
+    const corroborated = input.lifecycle === "experimental";
+    if (corroborated) signals.push("lifecycle=experimental");
     return {
       stage: "genesis",
       score: 0.02 + seededOffset01(`${combined}:genesis-match`) * 0.15,
+      confidence: corroborated ? CORROBORATED_BASE : SINGLE_SIGNAL_BASE,
+      disputed: !corroborated,
       signals,
     };
   }
@@ -158,9 +220,13 @@ export function classifyEvolution(
   // Product check
   if (PRODUCT_SIGNALS.some((p) => p.test(combined))) {
     signals.push("matches product/SaaS-available pattern");
+    const corroborated =
+      input.lifecycle === "stable" || input.criticality === "medium" || input.criticality === "low";
     return {
       stage: "product",
       score: 0.55 + seededOffset01(`${combined}:product-match`) * 0.2,
+      confidence: corroborated ? CORROBORATED_BASE : SINGLE_SIGNAL_BASE,
+      disputed: !corroborated,
       signals,
     };
   }
@@ -171,6 +237,8 @@ export function classifyEvolution(
     return {
       stage: "genesis",
       score: 0.05 + seededOffset01(`${combined}:lifecycle-exp`) * 0.1,
+      confidence: LIFECYCLE_BASE + seededOffset01(`${combined}:lifecycle-exp-conf`) * LIFECYCLE_RANGE,
+      disputed: false,
       signals,
     };
   }
@@ -179,16 +247,34 @@ export function classifyEvolution(
     return {
       stage: "commodity",
       score: 0.8 + seededOffset01(`${combined}:lifecycle-dep`) * 0.15,
+      confidence: LIFECYCLE_BASE + seededOffset01(`${combined}:lifecycle-dep-conf`) * LIFECYCLE_RANGE,
+      disputed: false,
       signals,
     };
   }
 
-  // Criticality / file count heuristics for custom_built
-  if (input.criticality === "critical" || (input.fileCount ?? 0) > 3) {
-    signals.push("high criticality / many files → core custom capability");
+  // Criticality / file count heuristics for custom_built.
+  // Split the cases: criticality=critical is a real signal; fileCount
+  // alone is weak and previously promoted every young repo's nascent
+  // capability to "core custom" (wardley-3).
+  if (input.criticality === "critical") {
+    signals.push("criticality=critical → core custom capability");
     return {
       stage: "custom_built",
       score: 0.32 + seededOffset01(`${combined}:critical`) * 0.18,
+      confidence: CRITICALITY_BASE + seededOffset01(`${combined}:critical-conf`) * CRITICALITY_RANGE,
+      disputed: false,
+      signals,
+    };
+  }
+  if ((input.fileCount ?? 0) > 3) {
+    signals.push("fileCount > 3 → tentatively custom_built (weak signal)");
+    return {
+      stage: "custom_built",
+      score: 0.32 + seededOffset01(`${combined}:filecount`) * 0.18,
+      // fileCount alone is the wardley-3 trigger — flag as disputed.
+      confidence: FILECOUNT_ONLY_BASE + seededOffset01(`${combined}:fc-conf`) * FILECOUNT_ONLY_RANGE,
+      disputed: true,
       signals,
     };
   }
@@ -200,6 +286,8 @@ export function classifyEvolution(
   return {
     stage: "custom_built",
     score: 0.28 + seededOffset01(`${combined}:default`) * 0.22,
+    confidence: DEFAULT_CUSTOM_BASE + seededOffset01(`${combined}:default-conf`) * DEFAULT_CUSTOM_RANGE,
+    disputed: true,
     signals,
   };
 }
@@ -218,15 +306,6 @@ export function classifyValueChain(name: string, id: string): number {
 }
 
 // ─── X-axis jitter + plotter ──────────────────────────────────────────────────
-
-const STAGE_BASE_X: Record<EvolutionStage, number> = {
-  genesis: 0.125,
-  custom_built: 0.375,
-  product: 0.625,
-  commodity: 0.875,
-};
-
-const JITTER_HALF_WIDTH = 0.1; // ± 0.10 around the stage center
 
 function symmetricSeededOffset(id: string): number {
   return ((fnv1a(id) / 0xffffffff) * 2 - 1) * JITTER_HALF_WIDTH;
@@ -249,3 +328,6 @@ export function analyzeWardley(sig: WardleySignals): WardleyMapResult {
   });
   return { components, stageCounts };
 }
+
+// Re-export constants for consumers that want to assert against them.
+export { STAGE_BASE_X, JITTER_HALF_WIDTH } from "./constants.js";

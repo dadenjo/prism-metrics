@@ -1,1 +1,1 @@
-{ "score": 50, "grade": "D", "singleTeamRepo": true, "couplingRatio": 0, "unownedRatio": 0, "verdict": "undefined" }
+{ "ok": false, "reason": "single_team", "detail": "Conway's Law is undefined for a single-team repo — there is no inter-team coupling to measure.", "hint": "Provide a multi-team ownership graph (totalTeams > 1) to compute an alignment proxy." }
