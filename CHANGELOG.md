@@ -1,5 +1,66 @@
 # prism-metrics changelog
 
+## 0.7.0
+
+Closes the last open audit-table item flagged as `drift` in
+`docs/handbook.html`. Non-breaking — adds one OPTIONAL signal.
+
+### solid — tiered LSP signal (`solid-lsp-ast`)
+
+The handbook's 2026-06-10 audit listed the SOLID delta-table
+entry "LSP substring heuristic" as drift with the note "Weakest
+signal in the catalog (matches 'not implemented' / 'TODO:
+implement')." Recommendation: "Replace LSP substring scan with
+AST-based override analysis once an AST signal feed is available."
+
+`prism-metrics/solid` now accepts BOTH signals via a tiered
+contract:
+
+```ts
+interface SolidSignals {
+  // existing — weak, substring-based, confidence 0.65
+  narrowingStubFiles: number;
+
+  // NEW — strong, parser/AST-confirmed, confidence 0.85
+  confirmedLspViolations?: number;
+}
+```
+
+Semantics:
+- `confirmedLspViolations` undefined → fallback to the weak signal
+  (existing 0.6.0 behaviour preserved exactly)
+- `confirmedLspViolations` defined → the scorer uses this count
+  AND lifts the L principle's confidence from 0.65 to 0.85
+- 0 confirmed violations → automatic 'strong' bucket, even if the
+  weak signal would otherwise flag the file count
+
+Strong-signal buckets:
+  0 violations              → strong
+  ratio < 0.05              → moderate
+  ratio >= 0.05             → needs_work
+
+What qualifies as a 'confirmed' LSP violation:
+- Subclass method that throws unconditionally on entry (precondition
+  strengthening)
+- Subclass method with narrower parameter types (contravariant)
+- Subclass method returning less general values than the parent
+  declared (postcondition weakening on the wrong side)
+
+Closed audit findings: **52 of 57** (was 51). The handbook table
+row went from <pill drift>'drift'</pill> to <pill info>'info'</pill>;
+the "Recommended changes" line is now marked as Closed 2026-06-10.
+
+### Handbook + audit document numbers refreshed
+
+- Conformance summary table: per-framework test counts updated to
+  current state (solid 32 → 38, twelve-factor 4 → 11, monorepo
+  4 → 10, dora-predicted 4 → 12, c4 11 → 17; new row for core 43)
+- Totals: 241 → 278 tests; 51/57 → 52/57 findings closed
+- Cover metadata: version "0.3.1 published / 0.4.0 in-tree" → "0.6.0 /
+  0.7.0 in-tree"; existing test suite line includes coverage %
+- Trust & Verification table updated to match
+- Footer audit pass id annotated with "refresh 2026-06-10"
+
 ## 0.6.0
 
 Audit-tail clean-up release. Closes the remaining HIGH and MEDIUM

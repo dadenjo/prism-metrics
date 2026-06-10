@@ -465,12 +465,12 @@ footer p { margin: 0.4rem 0; }
   <h1>prism-metrics Fachkonzept &amp; Implementation Audit</h1>
   <p class="subtitle">Specification handbook and read-only audit of the public npm package <code>prism-metrics</code> — 14 architecture-quality scoring modules, their primary sources, and per-framework conformance evidence.</p>
   <dl class="meta">
-    <dt>Version audited</dt><dd>prism-metrics 0.3.1 (published) / 0.4.0 (in-tree)</dd>
+    <dt>Version audited</dt><dd>prism-metrics 0.6.0 / 0.7.0 in-tree (post-solid-lsp-ast tier upgrade)</dd>
     <dt>Date</dt><dd>2026-06-10</dd>
     <dt>License</dt><dd>MIT</dd>
-    <dt>Audit pass</dt><dd>fachkonzept-2026-06-10-pass-1</dd>
+    <dt>Audit pass</dt><dd>fachkonzept-2026-06-10-pass-1 · refresh 2026-06-10 (solid-lsp-ast closed, numbers brought up to 0.7.0)</dd>
     <dt>Frameworks audited</dt><dd>14 (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect)</dd>
-    <dt>Existing test suite</dt><dd>241 tests across 17 test files — all passing at audit start</dd>
+    <dt>Existing test suite</dt><dd>278 tests across 17 test files — all passing (96.4 % line / 88.1 % branch coverage)</dd>
     <dt>Empirical fixtures</dt><dd>56 (4 per framework: clean / violated / adversarial / ambiguous) — 56/56 pass</dd>
     <dt>Citations</dt><dd>42 primary/secondary sources cited; 42/42 verified live (URL reachable + attribution matches)</dd>
     <dt>Author</dt><dd>prism-metrics autonomous Fachkonzept generator</dd>
@@ -515,21 +515,22 @@ footer p { margin: 0.4rem 0; }
 <table>
 <tr><th>Framework</th><th>Conformance</th><th>Citations verified</th><th>Fixtures</th><th>Test count</th></tr>
 <tr><td>iso-25010</td><td><span class="pill drift">Partial</span></td><td>3/3</td><td>4/4</td><td>16</td></tr>
-<tr><td>solid</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>28</td></tr>
+<tr><td>solid</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>38</td></tr>
 <tr><td>clean-arch</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
 <tr><td>hexagonal</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>17</td></tr>
 <tr><td>eip</td><td><span class="pill drift">Partial (18/65 patterns)</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
 <tr><td>eda</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
 <tr><td>conways-law</td><td><span class="pill good">Conformant (proxy disclosed)</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
 <tr><td>wardley</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
-<tr><td>twelve-factor</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>4</td></tr>
-<tr><td>monorepo</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>4</td></tr>
-<tr><td>dora-predicted</td><td><span class="pill good">Conformant (disclaimed)</span></td><td>3/3</td><td>4/4</td><td>4</td></tr>
+<tr><td>twelve-factor</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
+<tr><td>monorepo</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>10</td></tr>
+<tr><td>dora-predicted</td><td><span class="pill good">Conformant (disclaimed)</span></td><td>3/3</td><td>4/4</td><td>12</td></tr>
 <tr><td>ddd</td><td><span class="pill drift">Partial (6/9 strategic patterns)</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
-<tr><td>c4</td><td><span class="pill drift">Partial (3/4 levels, by design)</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
+<tr><td>c4</td><td><span class="pill drift">Partial (3/4 levels, by design)</span></td><td>3/3</td><td>4/4</td><td>17</td></tr>
 <tr><td>auto-detect</td><td><span class="pill good">Conformant (internal spec)</span></td><td>3/3</td><td>4/4</td><td>13</td></tr>
+<tr><td><strong>core</strong> (foundation)</td><td><span class="pill good">Conformant</span></td><td>n/a</td><td>n/a</td><td>43</td></tr>
 </table>
-<p style="margin-top:0.8rem"><strong>Totals:</strong> 14 frameworks, 42 citations verified out of 42, 56 fixtures passed out of 56, 241 existing tests passed.</p>
+<p style="margin-top:0.8rem"><strong>Totals (as of 0.7.0):</strong> 14 frameworks + core foundation · 42/42 citations verified · 56/56 fixtures passed · <strong>278 tests passing</strong> · 96.4 % line / 88.1 % branch coverage · <strong>52 of 57 audit findings closed</strong> (5 LOW open, acknowledged in <code>honestGap</code>).</p>
 </section>
 
 <!-- ============ FRAMEWORK SECTIONS ============ -->
@@ -945,7 +946,7 @@ footer p { margin: 0.4rem 0; }
 <p>To regenerate this handbook from scratch:</p>
 <pre><code>cd /Users/schuldes/prism-metrics
 npm install
-npm test               # all 241 tests should pass
+npm test               # all 278 tests should pass
 # regenerate fixtures (4 per framework × 14 frameworks)
 npx tsx scripts/regenerate-handbook.mjs   # equivalent to the audit script
 </code></pre>
@@ -987,7 +988,7 @@ npx vitest run --coverage</code></pre>
   <thead><tr><th>Framework</th><th>Tests</th><th>Lines</th><th>Branches</th><th>Test file</th><th>Audit findings closed</th></tr></thead>
   <tbody>
     <tr><td>iso-25010</td><td>16</td><td>100.0%</td><td>84.1%</td><td><code>src/iso-25010/__tests__/score.test.ts</code></td><td>iso-1, iso-2, iso-3, iso-4</td></tr>
-    <tr><td>solid</td><td>32</td><td>98.8%</td><td>96.9%</td><td><code>src/solid/__tests__/score.test.ts</code></td><td>solid-1, solid-2, solid-5, solid-6 (model)</td></tr>
+    <tr><td>solid</td><td>38</td><td>98.8%</td><td>96.9%</td><td><code>src/solid/__tests__/score.test.ts</code></td><td>solid-1, solid-2, solid-5, solid-6, solid-lsp-ast</td></tr>
     <tr><td>clean-arch</td><td>15</td><td>100.0%</td><td>100.0%</td><td><code>src/clean-arch/__tests__/score.test.ts</code></td><td>ca-1, ca-2</td></tr>
     <tr><td>hexagonal</td><td>17</td><td>100.0%</td><td>100.0%</td><td><code>src/hexagonal/__tests__/score.test.ts</code></td><td>hex-1, hex-3</td></tr>
     <tr><td>eip</td><td>20</td><td>100.0%</td><td>99.1%</td><td><code>src/eip/__tests__/score.test.ts</code></td><td>eip-1 through eip-6</td></tr>
@@ -1001,7 +1002,7 @@ npx vitest run --coverage</code></pre>
     <tr><td>c4</td><td>17</td><td>99.0%</td><td>97.6%</td><td><code>src/c4/__tests__/score.test.ts</code></td><td>c4-1, c4-2</td></tr>
     <tr><td>auto-detect</td><td>13</td><td>94.3%</td><td>92.7%</td><td><code>src/auto-detect/__tests__/score.test.ts</code></td><td>(no critical findings)</td></tr>
     <tr><td><strong>core</strong> (foundation)</td><td>43</td><td>100.0%</td><td>95.8%</td><td>3 test files</td><td>Item 0.1, Item 0.2</td></tr>
-    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>96.4%</strong></td><td><strong>88.1%</strong></td><td>17 test files · 272 tests</td><td><strong>51 of 57 findings closed</strong></td></tr>
+    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>96.4%</strong></td><td><strong>88.1%</strong></td><td>17 test files · 278 tests</td><td><strong>52 of 57 findings closed</strong></td></tr>
   </tbody>
 </table>
 
@@ -1028,7 +1029,7 @@ npx vitest run --coverage</code></pre>
   <li><strong>Acknowledgement</strong> — for findings that can't be fully closed (e.g. magic constants whose empirical study is out of scope), the framework's <code>methodology.ts</code> <code>honestGap</code> field documents the limitation explicitly.</li>
 </ol>
 
-<p>The 6 still-open LOW-severity items (Item 0.3 InputQuality, dora-2 magic thresholds, solid-3 + solid-4 ISP/LSP normalization + skippedPaths API, mono-3 sublinear slope, ddd-1 + ddd-2) are all in category 3 — acknowledged in <code>honestGap</code> rather than silently shipped.</p>
+<p>The 5 still-open LOW-severity items (Item 0.3 <code>InputQuality</code> cross-cutting · dora-2 magic thresholds · solid-3 + solid-4 ISP/LSP normalisation + <code>skippedPaths</code> API · mono-3 sublinear slope · ddd-1 + ddd-2 keyword false-positives) are all in category 3 — acknowledged in <code>honestGap</code> rather than silently shipped. <em>solid-lsp-ast was closed on 2026-06-10 via a tiered-signal contract; that bumped the closed-finding tally from 51 to 52.</em></p>
 
 <h3>Reproducing the audit</h3>
 
