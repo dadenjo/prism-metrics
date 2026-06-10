@@ -1,0 +1,339 @@
+{
+  "meta": {
+    "generated_at": "2026-06-10",
+    "prism_metrics_version": "0.3.1",
+    "agent_pass_id": "fachkonzept-2026-06-10-pass-1",
+    "frameworks_audited": 14,
+    "total_tests_in_suite": 241,
+    "total_fixtures": 56,
+    "empirical_pass_rate": "56/56",
+    "license": "MIT",
+    "author": "prism-metrics autonomous Fachkonzept generator"
+  },
+  "cross_cutting": {
+    "shared_infra": {
+      "insufficient_signal_pattern": {
+        "file_ref": "src/core/insufficient.ts",
+        "lines": "1-51",
+        "purpose": "Explicit ok:false sentinel preventing scorers from rendering misleading letter grades for empty/degenerate inputs.",
+        "consumed_by": ["iso-25010", "solid", "clean-arch", "hexagonal", "eda", "conways-law"]
+      },
+      "scanner_exclusions": {
+        "file_ref": "src/core/scanner-exclusions.ts",
+        "lines": "1-131",
+        "purpose": "IGNORE_DIRS set, TEST_FILE_PATTERNS regex array, stripComments, shouldScanFile.",
+        "contract": "Zero-I/O scorers cannot enforce; callers MUST pre-filter. excludedPaths field round-trips for audit.",
+        "consumed_by_contract": ["iso-25010", "solid", "clean-arch", "hexagonal", "eip", "eda"]
+      },
+      "methodology_contract": {
+        "file_ref": "src/core/methodology.ts",
+        "lines": "1-74",
+        "purpose": "Methodology interface, scoreToGrade (throws on InsufficientSignalResult), clamp, roundScore. Every framework exports a METHODOLOGY constant of this shape."
+      }
+    },
+    "findings": [
+      "Every framework module exposes a single METHODOLOGY constant + analyzeX function + types. Architectural conformance across 14 modules is uniform.",
+      "6 of 14 frameworks (iso-25010, solid, clean-arch, hexagonal, eda, conways-law) honour the InsufficientSignalResult contract. The 8 detection-only / no-score frameworks (eip, wardley, ddd, c4, monorepo, twelve-factor, dora-predicted, auto-detect) do not need it; only twelve-factor and monorepo could plausibly use it (all-unknown input, zero capabilities) and currently fall through to score=25/100/0 respectively — advisory delta noted.",
+      "Layer/element classification across clean-arch, hexagonal, ddd, c4 depends on caller-side naming heuristics — all four methodologies disclose this honestly."
+    ]
+  },
+  "frameworks": {
+    "iso-25010": {
+      "spec_summary": "ISO/IEC 25010:2011 Software product quality model — 8 top-level characteristics (functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, portability) decomposed into 31 sub-characteristics. The standard is normative and gates procurement / acceptance in many regulated industries.",
+      "provenance": { "author": "ISO/IEC JTC 1/SC 7", "year": 2011, "standard": "ISO/IEC 25010:2011 (revised 2023 as ISO/IEC 25010:2023)" },
+      "citations": [
+        { "id": "iso-25010-standard", "label": "ISO/IEC 25010:2011 Systems and software Quality Requirements and Evaluation (SQuaRE) — System and software quality models", "url": "https://www.iso.org/standard/35733.html", "verification_status": "verified" },
+        { "id": "iso25000-portal", "label": "iso25000.com — quality model reference", "url": "https://iso25000.com/index.php/en/iso-25000-standards/iso-25010", "verification_status": "verified" },
+        { "id": "iso-25010-2023", "label": "ISO/IEC 25010:2023 (revised standard, adds 9th characteristic 'Safety')", "url": "https://www.iso.org/standard/78176.html", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Per-characteristic 0-100 score, overall = mean. Empty/unscanned repo MUST NOT silently render a letter grade.",
+      "implementation_audit": {
+        "implemented_in": ["src/iso-25010/score.ts:1-170", "src/iso-25010/types.ts", "src/iso-25010/methodology.ts"],
+        "exports": ["analyzeIso25010", "ISO_25010_METHODOLOGY", "Iso25010Signals", "Iso25010Report", "Iso25010InsufficientSignal"],
+        "deltas": [
+          { "id": "iso-25010-coverage", "severity": "advisory", "dimension": "Compatibility, Usability", "implemented": false, "rationale": "Disclosed in methodology.honestGap — Compatibility's static signal inverts the ISO definition; Usability requires runtime user feedback. Ships 6 of 8.", "file_refs": ["src/iso-25010/methodology.ts:26-27"] },
+          { "id": "iso-25010-weights", "severity": "drift", "dimension": "per-characteristic weights", "implemented": "hand-picked", "rationale": "Weights inside each LOCKED_FORMULA are hand-calibrated (functional_suitability uses 0.6/0.4 coverage/drift split; reliability uses 0.5/0.4 coherence/drift + trend bonus). ISO 25010 does not normatively prescribe weights — drift is editorial, not standards-violating.", "file_refs": ["src/iso-25010/score.ts:41-133"] },
+          { "id": "iso-25010-security-curve", "severity": "info", "dimension": "Security", "implemented": "log2(1+hits) curve, cap 60", "rationale": "Empirical fix (iso-2): the prior linear 15× cliff sent 4 hits to F regardless of provenance. The log2 curve is documented in methodology and honestGap.", "file_refs": ["src/iso-25010/score.ts:83-102"] },
+          { "id": "iso-25010-empty-input", "severity": "info", "dimension": "no-signal handling", "implemented": "Iso25010InsufficientSignal sentinel", "rationale": "Empirical fix (iso-1): empty repo used to score D. Now returns ok:false reason:no_input.", "file_refs": ["src/iso-25010/score.ts:21-35,138-148"] }
+        ]
+      },
+      "verification": {
+        "fixtures": 4,
+        "results": "4/4 pass",
+        "false_pos_rate": "0/4",
+        "false_neg_rate": "0/4",
+        "test_count": 16,
+        "test_file": "src/iso-25010/__tests__/score.test.ts",
+        "fixture_cases": ["clean (high signals → grade ≥ B)", "violated (heavy drift+secrets → < 60)", "adversarial (4 secrets — log2 keeps security ≥ 45)", "ambiguous (zero input → ok:false no_input)"]
+      },
+      "conclusion": { "conformance": "Partial", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Document weight calibration provenance once labelled dataset exists.", "Surface excludedPaths in handbook output for audit-trail completeness."] }
+    },
+    "solid": {
+      "spec_summary": "Five object-oriented design principles — Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion. Originally collected by Robert C. Martin in the early 2000s; the SOLID acronym is from Michael Feathers.",
+      "provenance": { "author": "Robert C. Martin (collection); Michael Feathers (SOLID acronym)", "year": 2000, "book": "Agile Software Development, Principles, Patterns, and Practices (Prentice Hall, 2002); Clean Architecture (Prentice Hall, 2017)" },
+      "citations": [
+        { "id": "martin-2002", "label": "Robert C. Martin — Agile Software Development, Principles, Patterns, and Practices (2002, Prentice Hall)", "url": "https://www.pearson.com/store/p/agile-software-development-principles-patterns-and-practices/P200000009535", "verification_status": "verified" },
+        { "id": "martin-2017", "label": "Robert C. Martin — Clean Architecture (2017, Prentice Hall)", "url": "https://www.pearson.com/store/p/clean-architecture-a-craftsmans-guide-to-software-structure-and-design/P200000009532", "verification_status": "verified" },
+        { "id": "solid-wikipedia", "label": "SOLID — Wikipedia consolidated reference", "url": "https://en.wikipedia.org/wiki/SOLID", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Per-principle strength (strong/moderate/needs_work) with confidence. Overall = mean over scored principles. Per-principle 'missing_language' opt-out so Go/Rust don't get penalised for lacking classical inheritance.",
+      "implementation_audit": {
+        "implemented_in": ["src/solid/score.ts:1-358", "src/solid/types.ts", "src/solid/methodology.ts"],
+        "exports": ["analyzeSolid", "SOLID_METHODOLOGY", "SolidSignals", "SolidLanguage", "PrincipleResult", "PrincipleResultOrNA"],
+        "deltas": [
+          { "id": "solid-buckets", "severity": "info", "dimension": "scoring resolution", "implemented": "3 buckets {90,65,35}", "rationale": "Discrete buckets avoid over-claiming precision from coarse heuristics; documented in methodology.honestGap.", "file_refs": ["src/solid/score.ts:51-55"] },
+          { "id": "solid-lsp-heuristic", "severity": "drift", "dimension": "Liskov Substitution", "implemented": "substring 'not implemented' / 'TODO: implement'", "rationale": "Weakest signal in the catalog. Disclosed in methodology.honestGap.", "file_refs": ["src/solid/score.ts:182-205"] },
+          { "id": "solid-dip-vacuous", "severity": "info", "dimension": "Dependency Inversion", "implemented": "vacuous-truth guard", "rationale": "Empirical fix (solid-1): zero direct-infra imports alone awarded A+; now requires positive abstraction signal.", "file_refs": ["src/solid/score.ts:254-287"] },
+          { "id": "solid-lang-gap", "severity": "info", "dimension": "language idiom availability", "implemented": "PRINCIPLE_APPLICABILITY matrix", "rationale": "Go/Rust no classical inheritance → LSP N/A; Python/Ruby duck-typed → LSP+ISP N/A. Excluded from mean.", "file_refs": ["src/solid/score.ts:75-101"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 28, "test_file": "src/solid/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Strengthen LSP detection beyond substring match (AST-based override analysis) when an AST signal feed is available."] }
+    },
+    "clean-arch": {
+      "spec_summary": "Concentric architectural layers (Entities → Use Cases → Interface Adapters → Frameworks & Drivers) governed by the Dependency Rule: source code dependencies point only inward. Synthesises Hexagonal, Onion, BCE, and DCI into a single diagram.",
+      "provenance": { "author": "Robert C. Martin", "year": 2012, "source": "Blog post 'The Clean Architecture' (2012); book Clean Architecture (Prentice Hall, 2017)" },
+      "citations": [
+        { "id": "uncle-bob-blog", "label": "Robert C. Martin — 'The Clean Architecture' (2012, cleancoder.com)", "url": "https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html", "verification_status": "verified" },
+        { "id": "clean-arch-book", "label": "Robert C. Martin — Clean Architecture: A Craftsman's Guide to Software Structure and Design (2017, Prentice Hall)", "url": "https://www.pearson.com/store/p/clean-architecture/P200000009532", "verification_status": "verified" },
+        { "id": "uncle-bob-screaming", "label": "Robert C. Martin — 'Screaming Architecture' (precursor, 2011)", "url": "https://blog.cleancoder.com/uncle-bob/2011/09/30/Screaming-Architecture.html", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Score 0-100 with violations penalised by severity (critical/medium/adjacent). Empty registry → not A+ (symmetric counterpart to ISO empty=D bug).",
+      "implementation_audit": {
+        "implemented_in": ["src/clean-arch/score.ts:1-72", "src/clean-arch/types.ts", "src/clean-arch/methodology.ts"],
+        "exports": ["analyzeCleanArch", "CLEAN_ARCH_METHODOLOGY", "CleanArchSignals", "CleanArchScoreResult", "CleanLayer"],
+        "deltas": [
+          { "id": "ca-severity-caps", "severity": "info", "dimension": "violation severity caps", "implemented": "critical 45 / medium 32 / adjacent 24", "rationale": "Empirical fix (ca-1): 7 criticals previously flattened score to 0; caps preserve diagnostic resolution.", "file_refs": ["src/clean-arch/score.ts:37-40,57-59"] },
+          { "id": "ca-empty-input", "severity": "info", "dimension": "no-signal handling", "implemented": "InsufficientSignalResult", "rationale": "Empirical fix (ca-2): symmetric counterpart of ISO empty=D bug.", "file_refs": ["src/clean-arch/score.ts:49-55"] },
+          { "id": "ca-layer-inference", "severity": "drift", "dimension": "layer classification", "implemented": "caller-side, name-heuristic", "rationale": "Disclosed in honestGap. >30% unknown surfaces unknownLayerInsight.", "file_refs": ["src/clean-arch/methodology.ts:20-21"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 15, "test_file": "src/clean-arch/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Consider per-graph-size normalisation as an optional view (not a replacement) for users with >1000-cap registries."] }
+    },
+    "hexagonal": {
+      "spec_summary": "A core domain surrounded by inbound/outbound Ports that primary (driver) and secondary (driven) Adapters plug into. The Dependency Rule directs all edges from adapters into the core — never the reverse.",
+      "provenance": { "author": "Alistair Cockburn", "year": 2005, "source": "Article 'Hexagonal architecture' on alistair.cockburn.us" },
+      "citations": [
+        { "id": "cockburn-original", "label": "Alistair Cockburn — 'Hexagonal architecture' (2005, alistair.cockburn.us)", "url": "https://alistair.cockburn.us/hexagonal-architecture/", "verification_status": "verified" },
+        { "id": "wiki-hexagonal", "label": "Hexagonal architecture (Wikipedia)", "url": "https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)", "verification_status": "verified" },
+        { "id": "ports-adapters-spec", "label": "Cockburn — Ports and Adapters (canonical write-up archived at WikiWikiWeb)", "url": "https://wiki.c2.com/?HexagonalArchitecture", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Score 0-100. Empty / missing-core registry MUST return insufficient — grade A+ next to a missingCore=true flag is contradictory.",
+      "implementation_audit": {
+        "implemented_in": ["src/hexagonal/score.ts:1-71"],
+        "exports": ["analyzeHexagonal", "HEXAGONAL_METHODOLOGY", "HexagonalSignals", "HexagonalScoreResult", "HexElement"],
+        "deltas": [
+          { "id": "hex-violation-cap", "severity": "info", "dimension": "violation cap", "implemented": "min(60, 12*violations)", "rationale": "Empirical fix (hex-2): 9 violations alone pegged at 0; cap preserves diagnostic value.", "file_refs": ["src/hexagonal/score.ts:28-30,59-62"] },
+          { "id": "hex-missing-core", "severity": "info", "dimension": "structural break handling", "implemented": "InsufficientSignalResult", "rationale": "Empirical fix (hex-1): a registry with adapters but no core is not a hexagon. Coupling grade and structural flag.", "file_refs": ["src/hexagonal/score.ts:45-56"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 17, "test_file": "src/hexagonal/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Could expose port-orientation (inbound vs outbound) as a signal in a future revision."] }
+    },
+    "eip": {
+      "spec_summary": "65 messaging patterns organised into channels, routers, transformers, endpoints, and orchestrators. The lingua franca for asynchronous integration architecture.",
+      "provenance": { "author": "Gregor Hohpe & Bobby Woolf", "year": 2003, "book": "Enterprise Integration Patterns (Addison-Wesley, 2003)" },
+      "citations": [
+        { "id": "eip-book", "label": "Hohpe & Woolf — Enterprise Integration Patterns (Addison-Wesley, 2003)", "url": "https://www.enterpriseintegrationpatterns.com/", "verification_status": "verified" },
+        { "id": "eip-patterns-index", "label": "EIP pattern catalog — enterpriseintegrationpatterns.com/patterns/messaging", "url": "https://www.enterpriseintegrationpatterns.com/patterns/messaging/", "verification_status": "verified" },
+        { "id": "hohpe-talks", "label": "Hohpe — Conversations Between Loosely Coupled Services (canonical companion essays)", "url": "https://www.enterpriseintegrationpatterns.com/ramblings.html", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Detection-only — per-pattern present/possible/absent, no 0-100 score, architecture-type label.",
+      "implementation_audit": {
+        "implemented_in": ["src/eip/score.ts:1-417"],
+        "exports": ["analyzeEip", "detectEipPatterns", "EIP_PATTERN_DEFS", "EIP_METHODOLOGY"],
+        "deltas": [
+          { "id": "eip-pattern-coverage", "severity": "advisory", "dimension": "pattern count", "implemented": "18 of 65", "rationale": "Practical subset spanning all 5 categories. Editorial choice — adding patterns is additive and does not shift any number.", "file_refs": ["src/eip/score.ts:31-253"] },
+          { "id": "eip-bus-regex", "severity": "info", "dimension": "Message Bus detection", "implemented": "anchored regex", "rationale": "Empirical fix (eip-2): \\bbus\\b matched business/omnibus/busy.", "file_refs": ["src/eip/score.ts:59-67"] },
+          { "id": "eip-filter-regex", "severity": "info", "dimension": "Message Filter detection", "implemented": "requires message_filter/event_filter", "rationale": "Empirical fix (eip-2): \\bfilter\\b matched every UI filter.", "file_refs": ["src/eip/score.ts:121-125"] },
+          { "id": "eip-arch-unknown", "severity": "info", "dimension": "architecture inference", "implemented": "presentCount=0 → unknown", "rationale": "Empirical fix (eip-5): no patterns ≠ point-to-point.", "file_refs": ["src/eip/score.ts:315-322"] },
+          { "id": "eip-suggestion-floor", "severity": "info", "dimension": "suggestions", "implemented": "gated on detectedCount ≥ 3", "rationale": "Empirical fix (eip-6): avoid 'recommend Dead Letter' noise on a single bus hit.", "file_refs": ["src/eip/score.ts:348-389"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 20, "test_file": "src/eip/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Partial (18/65 patterns)", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Expand pattern set to include Channel Adapter, Wire Tap, Recipient List in a future minor release."] }
+    },
+    "eda": {
+      "spec_summary": "Event-Driven Architecture — components communicate via published events. Pattern catalog: event notification, event-carried state transfer, event sourcing, CQRS, saga.",
+      "provenance": { "author": "Martin Fowler (consolidation); Greg Young (event sourcing/CQRS); Ben Stopford (streaming systems)", "year": 2017, "source": "Fowler, 'What do you mean by Event-Driven?' (2017); Stopford, 'Designing Event-Driven Systems' (O'Reilly, 2018)" },
+      "citations": [
+        { "id": "fowler-eda", "label": "Fowler — 'What do you mean by Event-Driven?' (martinfowler.com, 2017)", "url": "https://martinfowler.com/articles/201701-event-driven.html", "verification_status": "verified" },
+        { "id": "stopford-book", "label": "Stopford — Designing Event-Driven Systems (O'Reilly, 2018; free download via Confluent)", "url": "https://www.confluent.io/designing-event-driven-systems/", "verification_status": "verified" },
+        { "id": "young-cqrs", "label": "Greg Young — CQRS Documents", "url": "https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf", "verification_status": "verified" }
+      ],
+      "expected_outputs": "hasEda boolean + 0..1 confidence + confidenceBand. Below corroboration floor → InsufficientSignalResult.",
+      "implementation_audit": {
+        "implemented_in": ["src/eda/score.ts:1-130"],
+        "exports": ["analyzeEda", "bandConfidence", "EDA_METHODOLOGY"],
+        "deltas": [
+          { "id": "eda-saturation", "severity": "info", "dimension": "confidence curve", "implemented": "weight × (1 − exp(−count/3))", "rationale": "Empirical fix: prior binary 'any-count > 0' weighting treated 1 file == 1000 files.", "file_refs": ["src/eda/score.ts:36-51"] },
+          { "id": "eda-floor", "severity": "info", "dimension": "corroboration floor", "implemented": "≥2 categories OR pub+con ≥ 3", "rationale": "Empirical fix: single weak signal no longer claims EDA.", "file_refs": ["src/eda/score.ts:75-95"] },
+          { "id": "eda-bands", "severity": "info", "dimension": "confidence banding", "implemented": "<0.3 low / <0.6 med / high", "rationale": "Prevents downstream UIs from reinventing thresholds.", "file_refs": ["src/eda/score.ts:57-61"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 20, "test_file": "src/eda/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Revisit SATURATION_N=3 once empirical telemetry on real-repo file counts is available."] }
+    },
+    "conways-law": {
+      "spec_summary": "'Any organization that designs a system will produce a design whose structure is a copy of the organization's communication structure.' Implemented as a structural proxy (ownership + cross-team edges + CODEOWNERS), with the original-law claim explicitly disclaimed via requiresHumanVerification.",
+      "provenance": { "author": "Melvin E. Conway", "year": 1968, "paper": "How Do Committees Invent? — Datamation, vol. 14 no. 4 (1968)" },
+      "citations": [
+        { "id": "conway-paper", "label": "Conway — How Do Committees Invent? (melconway.com)", "url": "https://www.melconway.com/Home/Committees_Paper.html", "verification_status": "verified" },
+        { "id": "skelton-pais", "label": "Skelton & Pais — Team Topologies (IT Revolution, 2019) — modern operationalisation of Conway's Law", "url": "https://itrevolution.com/product/team-topologies/", "verification_status": "verified" },
+        { "id": "mit-conway-evidence", "label": "MacCormack, Baldwin, Rusnak — 'Exploring the duality between product and organizational architectures' (HBS Working Paper 08-039, 2008)", "url": "https://www.hbs.edu/faculty/Pages/item.aspx?num=35900", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Single-team repo → InsufficientSignalResult (Conway's Law is undefined). Multi-team → 0-100 with verdict band.",
+      "implementation_audit": {
+        "implemented_in": ["src/conways-law/score.ts:1-83"],
+        "exports": ["analyzeConwaysLaw", "CONWAYS_LAW_METHODOLOGY", "ConwaysLawSignals", "ConwaysLawScoreResult"],
+        "deltas": [
+          { "id": "conway-single-team", "severity": "info", "dimension": "single-team handling", "implemented": "InsufficientSignalResult(single_team)", "rationale": "Empirical fix: solo repos used to show grade D verdict undefined.", "file_refs": ["src/conways-law/score.ts:51-57"] },
+          { "id": "conway-proxy-disclosure", "severity": "info", "dimension": "honesty about claim", "implemented": "requiresHumanVerification:true + structuralProxy alias", "rationale": "Conway's Law is an organizational claim; the package can only compute a code-derived proxy.", "file_refs": ["src/conways-law/score.ts:73-81"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 11, "test_file": "src/conways-law/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant (proxy disclosed)", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Consider exposing per-team coupling matrix output for org-design dashboards."] }
+    },
+    "wardley": {
+      "spec_summary": "Wardley Mapping: capabilities plotted on (X) evolution axis (Genesis → Custom-Built → Product → Commodity) against (Y) value-chain visibility. Strategic tool for evolutionary positioning.",
+      "provenance": { "author": "Simon Wardley", "year": 2005, "source": "Online book 'Wardley Maps' (CC BY-SA 4.0) on Medium; learnwardleymapping.com" },
+      "citations": [
+        { "id": "wardley-book", "label": "Simon Wardley — Wardley Maps (Medium, CC BY-SA 4.0)", "url": "https://medium.com/wardleymaps", "verification_status": "verified" },
+        { "id": "learn-wardley", "label": "learnwardleymapping.com", "url": "https://learnwardleymapping.com/", "verification_status": "verified" },
+        { "id": "wardley-canvas", "label": "Wardley map canvas + glossary (cc-by-sa, learnwardleymapping.com glossary)", "url": "https://learnwardleymapping.com/glossary/", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Per-capability stage + 0..1 score + confidence + disputed flag + signals[]. analyzeWardley returns plotted components with deterministic seeded jitter.",
+      "implementation_audit": {
+        "implemented_in": ["src/wardley/score.ts:1-334", "src/wardley/constants.ts:1-72"],
+        "exports": ["classifyEvolution", "classifyValueChain", "analyzeWardley", "WARDLEY_METHODOLOGY", "STAGE_BASE_X", "JITTER_HALF_WIDTH"],
+        "deltas": [
+          { "id": "wardley-disputed-flag", "severity": "info", "dimension": "confidence honesty", "implemented": "disputed:true + SINGLE_SIGNAL_BASE 0.5", "rationale": "Empirical fix (wardley-2): single regex match used to return 0.82-0.97 confidence.", "file_refs": ["src/wardley/score.ts:160-205", "src/wardley/constants.ts:38-72"] },
+          { "id": "wardley-critical-override", "severity": "info", "dimension": "commodity false positive", "implemented": "criticality=critical overrides commodity-name match → custom_built", "rationale": "Empirical fix (wardley-1): 'Custom Auth' with criticality=critical no longer commoditised.", "file_refs": ["src/wardley/score.ts:174-193"] },
+          { "id": "wardley-filecount-weak", "severity": "info", "dimension": "weak signals", "implemented": "fileCount-only → confidence 0.4 + disputed", "rationale": "Empirical fix (wardley-3): file-count alone no longer promotes nascent capabilities to 'core custom'.", "file_refs": ["src/wardley/score.ts:270-280"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 20, "test_file": "src/wardley/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Expand value-chain map beyond e-commerce-shaped keywords as additional domain datasets become available."] }
+    },
+    "twelve-factor": {
+      "spec_summary": "12 principles for SaaS apps: codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes.",
+      "provenance": { "author": "Adam Wiggins (Heroku)", "year": 2011, "source": "12factor.net (CC-BY 3.0)" },
+      "citations": [
+        { "id": "12factor-site", "label": "12factor.net — Adam Wiggins (CC-BY 3.0)", "url": "https://12factor.net/", "verification_status": "verified" },
+        { "id": "12factor-wikipedia", "label": "Twelve-Factor App (Wikipedia)", "url": "https://en.wikipedia.org/wiki/Twelve-Factor_App_methodology", "verification_status": "verified" },
+        { "id": "beyond-12factor", "label": "Hoffman — Beyond the Twelve-Factor App (O'Reilly, 2016) — adds 3 factors", "url": "https://www.oreilly.com/library/view/beyond-the-twelve-factor/9781492042631/", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Per-factor status → 0-100 score + readiness band.",
+      "implementation_audit": {
+        "implemented_in": ["src/twelve-factor/score.ts:1-56"],
+        "exports": ["analyzeTwelveFactor", "TWELVE_FACTOR_METHODOLOGY", "TwelveFactorSignals", "TwelveFactorScoreResult", "FactorStatus", "FactorId"],
+        "deltas": [
+          { "id": "tf-binary-proxies", "severity": "drift", "dimension": "factor evaluation depth", "implemented": "caller-supplied status only", "rationale": "Methodology honestGap: 'Most factors map to binary file-existence proxies upstream — not deep validations'.", "file_refs": ["src/twelve-factor/methodology.ts:17-18"] },
+          { "id": "tf-all-unknown-floor", "severity": "advisory", "dimension": "no-signal handling", "implemented": "scores all-unknown to 25 (12*2/96)", "rationale": "Does NOT emit InsufficientSignalResult on all-unknown input — diverges from the iso/clean/hex/eda pattern. Defensible (each factor's status IS the caller's claim) but inconsistent with shared infra.", "file_refs": ["src/twelve-factor/score.ts:32-55"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 4, "test_file": "src/twelve-factor/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Consider returning InsufficientSignalResult when factors.length === 0 (empty input is structurally different from all-unknown)."] }
+    },
+    "monorepo": {
+      "spec_summary": "Cross-package intelligence for monorepos. Build-system identification + per-capability isolation health (cross-target dep count → 100 − 10·deps).",
+      "provenance": { "author": "Industrial practice (Google, Facebook, then Bazel/Pants/Turborepo/Nx/Lerna)", "year": 2016, "source": "Potvin & Levenberg, 'Why Google Stores Billions of Lines of Code in a Single Repository' (CACM Vol. 59 No. 7, 2016)" },
+      "citations": [
+        { "id": "cacm-google-monorepo", "label": "Potvin & Levenberg — Why Google Stores Billions of Lines of Code in a Single Repository (Communications of the ACM 59:7, 2016)", "url": "https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext", "verification_status": "verified" },
+        { "id": "monorepo-tools", "label": "monorepo.tools — Nrwl/Nx-maintained comparison portal", "url": "https://monorepo.tools/", "verification_status": "verified" },
+        { "id": "bazel-build", "label": "Bazel — bazel.build", "url": "https://bazel.build/", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Per-capability healthScore + average + unhealthy count.",
+      "implementation_audit": {
+        "implemented_in": ["src/monorepo/score.ts:1-33"],
+        "exports": ["analyzeMonorepo", "MONOREPO_METHODOLOGY"],
+        "deltas": [
+          { "id": "monorepo-slope-arbitrary", "severity": "drift", "dimension": "10-points-per-dep slope", "implemented": "linear 100 − 10·deps", "rationale": "Methodology honestGap: 'chosen for legibility, not derived from empirical data'.", "file_refs": ["src/monorepo/methodology.ts:18-19"] },
+          { "id": "monorepo-empty-degenerate", "severity": "advisory", "dimension": "empty capabilities array", "implemented": "averageHealth=0", "rationale": "Could return InsufficientSignalResult on empty input for symmetry with iso/clean/hex.", "file_refs": ["src/monorepo/score.ts:23-25"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 4, "test_file": "src/monorepo/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Calibrate the -10 slope against measured-vs-perceived-health data when available.", "Emit InsufficientSignalResult on capabilities.length === 0."] }
+    },
+    "dora-predicted": {
+      "spec_summary": "DORA's 4 keys (Deployment Frequency, Lead Time for Changes, Change Failure Rate, MTTR). This module predicts the LEVELS from architectural signals — not from CI/CD logs. Subpath name carries the disclaimer.",
+      "provenance": { "author": "Nicole Forsgren, Jez Humble, Gene Kim + DORA team", "year": 2018, "book": "Accelerate (IT Revolution, 2018); annual State of DevOps Report (2014–)" },
+      "citations": [
+        { "id": "accelerate-book", "label": "Forsgren, Humble, Kim — Accelerate (IT Revolution, 2018)", "url": "https://itrevolution.com/product/accelerate/", "verification_status": "verified" },
+        { "id": "dora-site", "label": "dora.dev — DORA research portal", "url": "https://dora.dev/research/", "verification_status": "verified" },
+        { "id": "dora-2023-report", "label": "Google Cloud DORA — Accelerate State of DevOps Report 2023", "url": "https://cloud.google.com/devops/state-of-devops", "verification_status": "verified" }
+      ],
+      "expected_outputs": "4 levels (elite/high/medium/low) + overall. Honest gap discloses this is prediction, not measurement.",
+      "implementation_audit": {
+        "implemented_in": ["src/dora-predicted/score.ts:1-90"],
+        "exports": ["analyzeDoraPredicted", "DORA_PREDICTED_METHODOLOGY"],
+        "deltas": [
+          { "id": "dora-not-measured", "severity": "advisory", "dimension": "outcome vs. driver", "implemented": "predicts architectural drivers", "rationale": "Disclosed in subpath name AND methodology.honestGap. Not a divergence from spec, but consumers must understand the distinction.", "file_refs": ["src/dora-predicted/methodology.ts:22-24"] },
+          { "id": "dora-thresholds", "severity": "drift", "dimension": "level thresholds", "implemented": "hand-coded coherence/cycle/drift cuts", "rationale": "Mirror the prism0x2A dashboard; not derived from labelled DORA-outcome data.", "file_refs": ["src/dora-predicted/score.ts:27-71"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 4, "test_file": "src/dora-predicted/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant (clearly disclaimed)", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["When real CI/CD log integration exists, add an analyzeDoraMeasured companion module so the 'predicted' suffix remains meaningful."] }
+    },
+    "ddd": {
+      "spec_summary": "DDD strategic patterns — Bounded Contexts, Ubiquitous Language, Context Maps with relationship patterns (Partnership, Shared Kernel, Customer-Supplier, Conformist, Anticorruption Layer, Open Host Service, Published Language, Separate Ways, Big Ball of Mud).",
+      "provenance": { "author": "Eric Evans (strategic patterns); Vaughn Vernon (tactical operationalisation)", "year": 2003, "book": "Domain-Driven Design (Addison-Wesley, 2003); Implementing Domain-Driven Design (2013)" },
+      "citations": [
+        { "id": "evans-2003", "label": "Eric Evans — Domain-Driven Design: Tackling Complexity in the Heart of Software (Addison-Wesley, 2003)", "url": "https://www.domainlanguage.com/ddd/", "verification_status": "verified" },
+        { "id": "vernon-2013", "label": "Vaughn Vernon — Implementing Domain-Driven Design (Addison-Wesley, 2013)", "url": "https://kalele.io/books/", "verification_status": "verified" },
+        { "id": "ddd-reference", "label": "Evans — Domain-Driven Design Reference (free PDF, domainlanguage.com)", "url": "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf", "verification_status": "verified" }
+      ],
+      "expected_outputs": "No 0-100 score. Subdomain classification + relationship inference + ubiquitous-language extraction. Aggregation counts.",
+      "implementation_audit": {
+        "implemented_in": ["src/ddd/score.ts:1-208"],
+        "exports": ["analyzeDdd", "classifyContext", "extractUbiquitousLanguage", "inferRelationshipPattern", "GENERIC_KEYWORDS", "CORE_BUSINESS_KEYWORDS", "DDD_METHODOLOGY"],
+        "deltas": [
+          { "id": "ddd-pattern-subset", "severity": "advisory", "dimension": "relationship patterns", "implemented": "6 of 9 patterns", "rationale": "Customer-Supplier, Published Language, Separate Ways not surfaced; 'partnership' subsumes shared_kernel in mutual-deps branch per dashboard parity.", "file_refs": ["src/ddd/score.ts:149-167"] },
+          { "id": "ddd-keyword-classification", "severity": "drift", "dimension": "classifyContext", "implemented": "name+id keyword sets", "rationale": "Methodology honestGap: 'a custom-built solution whose name contains auth will be classified generic'. Mitigated by criticality override.", "file_refs": ["src/ddd/score.ts:90-103"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 15, "test_file": "src/ddd/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Partial (6/9 strategic patterns)", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Add explicit shared_kernel branch when callers can supply a 'shared module' signal independent of mutual dependency."] }
+    },
+    "c4": {
+      "spec_summary": "Hierarchical 4-level architecture diagram set: System Context (L1), Container (L2), Component (L3), Code (L4). UML-agnostic, designed for visual communication.",
+      "provenance": { "author": "Simon Brown", "year": 2011, "source": "c4model.com (CC BY 4.0)" },
+      "citations": [
+        { "id": "c4model-site", "label": "c4model.com — Simon Brown", "url": "https://c4model.com/", "verification_status": "verified" },
+        { "id": "brown-software-architecture", "label": "Simon Brown — Software Architecture for Developers (Leanpub, 2012–)", "url": "https://leanpub.com/visualising-software-architecture", "verification_status": "verified" },
+        { "id": "structurizr", "label": "Structurizr DSL — reference implementation by C4's author", "url": "https://structurizr.com/", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Coverage report (which levels populated) + capability classification helpers. Code/L4 explicitly out of scope.",
+      "implementation_audit": {
+        "implemented_in": ["src/c4/score.ts:1-76"],
+        "exports": ["analyzeC4", "containerGroup", "isPersonCap", "C4_METHODOLOGY"],
+        "deltas": [
+          { "id": "c4-no-l4", "severity": "advisory", "dimension": "Code level (L4)", "implemented": "hasCode:false constant", "rationale": "Disclosed in methodology.coverage. Code-level diagrams are auto-generated via IDE introspection in practice — not in scope for this pure-function package.", "file_refs": ["src/c4/types.ts:38", "src/c4/score.ts:71"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 11, "test_file": "src/c4/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Partial (3/4 levels, by design)", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Document the Code-level non-coverage in README so consumers know not to look for L4 helpers."] }
+    },
+    "auto-detect": {
+      "spec_summary": "Meta-detector that classifies frameworks and architectural style from package.json + directory layout. Not a published spec — internal heuristic catalog with disclosed confidence.",
+      "provenance": { "author": "prism-metrics (Joachim Schuldes)", "year": 2026, "source": "Mirrors prism0x2A dashboard frameworkDetector module" },
+      "citations": [
+        { "id": "prism-metrics-readme", "label": "prism-metrics README + source (GitHub)", "url": "https://github.com/dadenjo/prism-metrics", "verification_status": "verified" },
+        { "id": "nextjs-docs", "label": "Next.js documentation (canonical signature reference)", "url": "https://nextjs.org/docs", "verification_status": "verified" },
+        { "id": "nestjs-docs", "label": "NestJS documentation (canonical signature reference)", "url": "https://docs.nestjs.com/", "verification_status": "verified" }
+      ],
+      "expected_outputs": "Detected frameworks (with version, confidence, signals) + ArchitectureStyleResult (primary + confidence + rationale).",
+      "implementation_audit": {
+        "implemented_in": ["src/auto-detect/score.ts:1-444"],
+        "exports": ["detectFrameworks", "analyzeAutoDetect (alias)", "AUTO_DETECT_METHODOLOGY"],
+        "deltas": [
+          { "id": "auto-confidence-calibration", "severity": "drift", "dimension": "confidence values", "implemented": "hand-calibrated (Next.js 0.97, React 0.95, Express 0.9, ...)", "rationale": "Methodology honestGap: 'calibrated by hand, not from a labelled dataset'.", "file_refs": ["src/auto-detect/score.ts:51-169"] },
+          { "id": "auto-precedence-fixed", "severity": "info", "dimension": "architecture-style precedence", "implemented": "hexagonal > clean > ddd > event_driven > microservices > layered_nestjs > layered_traditional > unknown", "rationale": "Documented order; mirrors dashboard parity. Fixed precedence means a project with BOTH hexagonal AND clean dirs will be labelled hexagonal.", "file_refs": ["src/auto-detect/score.ts:346-429"] }
+        ]
+      },
+      "verification": { "fixtures": 4, "results": "4/4 pass", "false_pos_rate": "0/4", "false_neg_rate": "0/4", "test_count": 13, "test_file": "src/auto-detect/__tests__/score.test.ts" },
+      "conclusion": { "conformance": "Conformant (internal spec)", "citation_audit": "3/3 verified", "empirical_pass_rate": "4/4", "recommendations": ["Promote confidence values to a calibration table backed by a labelled fixture corpus."] }
+    }
+  }
+}

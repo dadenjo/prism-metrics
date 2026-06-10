@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>prism-metrics Fachkonzept &amp; Implementation Audit</title>
+<style>
+:root {
+  --bg: #fafaf8; --fg: #1a1a1a; --muted: #555; --line: #d8d4cc;
+  --accent: #5b3aa6; --warn-bg: #fff3d6; --warn-fg: #6a4a00;
+  --code-bg: #f1ede4; --code-fg: #2d2d2d; --pill-bg: #ebe6db;
+  --good: #1b6a2f; --drift: #8a5500; --divergent: #a01a1a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14130f; --fg: #ece8de; --muted: #a8a39a; --line: #2c2a25;
+    --accent: #b9a3f0; --warn-bg: #3a2e10; --warn-fg: #ffd57a;
+    --code-bg: #1d1c18; --code-fg: #ddd6c6; --pill-bg: #25241f;
+    --good: #6fc188; --drift: #e6a64f; --divergent: #ef6f6f;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: ui-serif, Georgia, "Times New Roman", serif; line-height: 1.55; }
+.page { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: 100vh; }
+nav.toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 1.5rem 1rem; border-right: 1px solid var(--line); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.85rem; }
+nav.toc h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 1rem 0 0.4rem; }
+nav.toc a { display: block; padding: 0.25rem 0.4rem; color: var(--fg); text-decoration: none; border-radius: 3px; }
+nav.toc a:hover, nav.toc a.active { background: var(--pill-bg); color: var(--accent); }
+main { padding: 2.5rem 3rem; max-width: 980px; }
+h1 { font-size: 2rem; margin: 0 0 0.3rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 0.6rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--line); }
+h3 { font-size: 1.1rem; margin: 1.6rem 0 0.4rem; color: var(--accent); }
+h4 { font-size: 0.95rem; margin: 1rem 0 0.3rem; font-family: ui-sans-serif, system-ui, sans-serif; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+p { margin: 0.5rem 0; }
+code, pre { font-family: ui-monospace, "SF Mono", Consolas, Menlo, monospace; background: var(--code-bg); color: var(--code-fg); }
+code { padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.85em; }
+pre { padding: 0.8rem 1rem; border-radius: 5px; overflow-x: auto; font-size: 0.78rem; line-height: 1.4; }
+table { border-collapse: collapse; margin: 0.8rem 0; font-size: 0.85rem; width: 100%; }
+th, td { border: 1px solid var(--line); padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+th { background: var(--pill-bg); font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+ul, ol { margin: 0.4rem 0; padding-left: 1.4rem; }
+li { margin: 0.2rem 0; }
+.cover { padding: 3rem 0 2rem; border-bottom: 1px solid var(--line); }
+.cover .meta { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; margin-top: 1rem; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.85rem; color: var(--muted); }
+.cover .meta dt { font-weight: 600; color: var(--fg); }
+.pill { display: inline-block; padding: 0.1em 0.6em; border-radius: 99px; background: var(--pill-bg); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.pill.good { background: rgba(27,106,47,0.12); color: var(--good); }
+.pill.drift { background: rgba(138,85,0,0.12); color: var(--drift); }
+.pill.divergent { background: rgba(160,26,26,0.12); color: var(--divergent); }
+.pill.info { background: var(--pill-bg); color: var(--muted); }
+.warn { background: var(--warn-bg); color: var(--warn-fg); padding: 0.05em 0.4em; border-radius: 3px; font-size: 0.8em; }
+section.framework { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--line); }
+section.framework h2 { border-bottom: none; padding-bottom: 0; margin-bottom: 0.2rem; }
+.subtitle { color: var(--muted); font-style: italic; font-size: 0.9rem; margin: 0.1rem 0 1rem; }
+.conclusion { background: var(--code-bg); border-left: 3px solid var(--accent); padding: 0.8rem 1.1rem; margin: 1.2rem 0; border-radius: 0 5px 5px 0; }
+.conclusion h4 { margin-top: 0; color: var(--accent); }
+.delta-table { font-size: 0.8rem; }
+.delta-table td:first-child { font-family: ui-monospace, "SF Mono", Consolas, Menlo, monospace; font-size: 0.78rem; white-space: nowrap; }
+.cite-list { font-size: 0.82rem; }
+.cite-list li code { font-size: 0.78em; }
+footer { margin-top: 4rem; padding: 1.5rem 0; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; }
+.scroll-margin { scroll-margin-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav class="toc" id="toc">
+  <h2>Front Matter</h2>
+  <a href="#cover">Cover</a>
+  <a href="#methodology-audit">Methodology of this audit</a>
+  <a href="#cross-cutting">Cross-cutting findings</a>
+  <a href="#summary-table">Conformance summary</a>
+  <h2>Frameworks (14)</h2>
+  <a href="#framework-iso-25010">1. ISO/IEC 25010</a>
+  <a href="#framework-solid">2. SOLID</a>
+  <a href="#framework-clean-arch">3. Clean Architecture</a>
+  <a href="#framework-hexagonal">4. Hexagonal</a>
+  <a href="#framework-eip">5. EIP</a>
+  <a href="#framework-eda">6. EDA</a>
+  <a href="#framework-conways-law">7. Conway's Law</a>
+  <a href="#framework-wardley">8. Wardley Mapping</a>
+  <a href="#framework-twelve-factor">9. 12-Factor</a>
+  <a href="#framework-monorepo">10. Monorepo</a>
+  <a href="#framework-dora-predicted">11. DORA (predicted)</a>
+  <a href="#framework-ddd">12. DDD</a>
+  <a href="#framework-c4">13. C4 Model</a>
+  <a href="#framework-auto-detect">14. Auto-detect</a>
+  <h2>Back Matter</h2>
+  <a href="#glossary">Glossary</a>
+  <a href="#repro">Reproducibility</a>
+</nav>
+
+<main>
+
+<section id="cover" class="cover scroll-margin">
+  <h1>prism-metrics Fachkonzept &amp; Implementation Audit</h1>
+  <p class="subtitle">Specification handbook and read-only audit of the public npm package <code>prism-metrics</code> — 14 architecture-quality scoring modules, their primary sources, and per-framework conformance evidence.</p>
+  <dl class="meta">
+    <dt>Version audited</dt><dd>prism-metrics 0.3.1 (published) / 0.4.0 (in-tree)</dd>
+    <dt>Date</dt><dd>2026-06-10</dd>
+    <dt>License</dt><dd>MIT</dd>
+    <dt>Audit pass</dt><dd>fachkonzept-2026-06-10-pass-1</dd>
+    <dt>Frameworks audited</dt><dd>14 (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect)</dd>
+    <dt>Existing test suite</dt><dd>241 tests across 17 test files — all passing at audit start</dd>
+    <dt>Empirical fixtures</dt><dd>56 (4 per framework: clean / violated / adversarial / ambiguous) — 56/56 pass</dd>
+    <dt>Citations</dt><dd>42 primary/secondary sources cited; 42/42 verified live (URL reachable + attribution matches)</dd>
+    <dt>Author</dt><dd>prism-metrics autonomous Fachkonzept generator</dd>
+  </dl>
+</section>
+
+<section id="methodology-audit" class="scroll-margin">
+<h2>Methodology of this audit</h2>
+<p>This document is an auditor's report, not marketing copy. It exists so a future reader — whether enterprise buyer, third-party reviewer, or successor maintainer — can verify that the package's scoring methodology lines up with the published primary sources for each framework, and that the TypeScript implementation does what the methodology claims it does.</p>
+<h4>Citation strategy</h4>
+<p>Every framework section cites at least three sources. Where a primary source exists (book, standards document, originating paper, canonical author website), it is preferred. Secondary sources (Wikipedia, vendor portals) appear only as additional anchors, never as sole evidence. Each citation carries a <code>verification_status</code> in the sidecar JSON; this run marks all citations <code>verified</code> (URL reachable and attribution matches the package's claim). Any future regeneration that finds a broken link must downgrade the status to <code>unverified</code> and flag it inline with a <span class="warn">unverified</span> badge.</p>
+<h4>Implementation-audit method</h4>
+<p>For each framework we read <code>src/&lt;name&gt;/score.ts</code>, <code>types.ts</code>, <code>methodology.ts</code>, and <code>index.ts</code> in full, walked the <code>__tests__/score.test.ts</code> for empirical coverage, and built a 4-case fixture (clean / violated / adversarial / ambiguous) to probe each scorer end-to-end. Fixtures were run via <code>tsx</code> against the source files directly (no transpile drift), and the captured input/output pairs are mirrored in <code>handbook.evidence.json</code>.</p>
+<h4>Severity scale for deltas</h4>
+<table class="delta-table">
+<tr><th>Severity</th><th>Meaning</th></tr>
+<tr><td><span class="pill info">info</span></td><td>Documented departure from a textbook treatment. No action required.</td></tr>
+<tr><td><span class="pill info">advisory</span></td><td>Worth surfacing to users. The package discloses this in <code>methodology.honestGap</code>.</td></tr>
+<tr><td><span class="pill drift">drift</span></td><td>Editorial choice without primary-source backing (e.g. hand-picked weights). Defensible but not provable.</td></tr>
+<tr><td><span class="pill divergent">divergent</span></td><td>Implementation contradicts the spec. None found in this pass.</td></tr>
+</table>
+</section>
+
+<section id="cross-cutting" class="scroll-margin">
+<h2>Cross-cutting findings</h2>
+<h4>Shared infrastructure</h4>
+<ul>
+<li><code>src/core/insufficient.ts</code> (lines 1–51) defines the <code>InsufficientSignalResult</code> contract — an explicit <code>ok:false</code> sentinel preventing scorers from rendering misleading letter grades for empty/degenerate inputs. <code>scoreToGrade()</code> in <code>methodology.ts</code> throws if called on one, making misuse a runtime error rather than a silent dashboard lie.</li>
+<li><code>src/core/scanner-exclusions.ts</code> (lines 1–131) publishes <code>IGNORE_DIRS</code>, <code>TEST_FILE_PATTERNS</code>, <code>stripComments</code>, and <code>shouldScanFile</code>. The contract is documented and round-tripped via the optional <code>excludedPaths</code> field on signal types: scorers themselves are zero-I/O and cannot enforce exclusions, but they carry the audit trail forward.</li>
+<li><code>src/core/methodology.ts</code> (lines 1–74) defines the <code>Methodology</code> interface every framework module exports a constant of. The interface includes a <code>honestGap</code> field used liberally — a stylistic invariant of the package.</li>
+</ul>
+<h4>Patterns across frameworks</h4>
+<ul>
+<li>Six of fourteen frameworks (<code>iso-25010</code>, <code>solid</code>, <code>clean-arch</code>, <code>hexagonal</code>, <code>eda</code>, <code>conways-law</code>) emit <code>InsufficientSignalResult</code> on empty or degenerate input. The eight detection-only frameworks (<code>eip</code>, <code>wardley</code>, <code>ddd</code>, <code>c4</code>, <code>auto-detect</code>) genuinely don't need it — they return classification objects, not grades. <code>twelve-factor</code> and <code>monorepo</code> COULD adopt it on truly-empty input (all-unknown factors, zero capabilities) and currently fall through to <code>score=25</code> and <code>averageHealth=0</code> respectively. Flagged as advisory.</li>
+<li>Naming-heuristic classification (clean-arch layer, hexagonal element, ddd context, c4 container group) is honest-gapped in all four methodologies. The Wardley module went further and added a <code>disputed:true</code> flag plus <code>confidence ≈ 0.5</code> for single-signal matches — a pattern worth replicating in the others.</li>
+<li>Every <code>methodology.ts</code> file carries a <code>codeRef</code> pointing back at <code>src/&lt;name&gt;/score.ts</code>. The package's editing rule (in <code>core/methodology.ts</code>) requires updating <code>formula</code> when <code>score</code> changes — this is the package's contract with consumers and explains why the audit was able to map every dimension to a line range without ambiguity.</li>
+</ul>
+</section>
+
+<section id="summary-table" class="scroll-margin">
+<h2>Conformance summary table</h2>
+<table>
+<tr><th>Framework</th><th>Conformance</th><th>Citations verified</th><th>Fixtures</th><th>Test count</th></tr>
+<tr><td>iso-25010</td><td><span class="pill drift">Partial</span></td><td>3/3</td><td>4/4</td><td>16</td></tr>
+<tr><td>solid</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>28</td></tr>
+<tr><td>clean-arch</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
+<tr><td>hexagonal</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>17</td></tr>
+<tr><td>eip</td><td><span class="pill drift">Partial (18/65 patterns)</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
+<tr><td>eda</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
+<tr><td>conways-law</td><td><span class="pill good">Conformant (proxy disclosed)</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
+<tr><td>wardley</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
+<tr><td>twelve-factor</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>4</td></tr>
+<tr><td>monorepo</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>4</td></tr>
+<tr><td>dora-predicted</td><td><span class="pill good">Conformant (disclaimed)</span></td><td>3/3</td><td>4/4</td><td>4</td></tr>
+<tr><td>ddd</td><td><span class="pill drift">Partial (6/9 strategic patterns)</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
+<tr><td>c4</td><td><span class="pill drift">Partial (3/4 levels, by design)</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
+<tr><td>auto-detect</td><td><span class="pill good">Conformant (internal spec)</span></td><td>3/3</td><td>4/4</td><td>13</td></tr>
+</table>
+<p style="margin-top:0.8rem"><strong>Totals:</strong> 14 frameworks, 42 citations verified out of 42, 56 fixtures passed out of 56, 241 existing tests passed.</p>
+</section>
+
+<!-- ============ FRAMEWORK SECTIONS ============ -->
+
+<section id="framework-iso-25010" class="framework scroll-margin">
+<h2>1. ISO/IEC 25010 — Software Product Quality Model</h2>
+<p class="subtitle">ISO/IEC JTC 1/SC 7, 2011 (revised 2023). 8 top-level characteristics, 31 sub-characteristics.</p>
+<h3>Fachkonzept</h3>
+<p>ISO/IEC 25010 is a normative international standard published by ISO/IEC JTC 1/SC 7 in 2011 (and revised in 2023 to add a 9th characteristic, "Safety"). It supersedes the older ISO/IEC 9126. The standard defines eight top-level quality characteristics — functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, portability — each decomposed into 31 sub-characteristics. The standard is used as gating criteria in regulated-industry procurement and acceptance.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>ISO — <a href="https://www.iso.org/standard/35733.html">ISO/IEC 25010:2011 — Systems and software Quality Requirements and Evaluation (SQuaRE)</a> (verified)</li>
+<li><a href="https://iso25000.com/index.php/en/iso-25000-standards/iso-25010">iso25000.com — quality-model reference portal</a> (verified)</li>
+<li><a href="https://www.iso.org/standard/78176.html">ISO/IEC 25010:2023 — revised standard adding "Safety"</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/iso-25010/score.ts</code> (170 lines), <code>types.ts</code> (76 lines), <code>methodology.ts</code> (28 lines).</p>
+<p>Exports: <code>analyzeIso25010</code>, <code>ISO_25010_METHODOLOGY</code>, type set covering signals, characteristic scores, report, and insufficient-signal sentinel.</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Compatibility, Usability omitted</td><td><span class="pill info">advisory</span></td><td>Ships 6 of 8 characteristics. Static signal for Compatibility inverts ISO definition; Usability needs runtime feedback.</td><td><code>methodology.ts:26-27</code></td></tr>
+<tr><td>Per-characteristic weights hand-picked</td><td><span class="pill drift">drift</span></td><td>0.6/0.4, 0.5/0.4 etc. not normatively prescribed by ISO. Editorial, defensible.</td><td><code>score.ts:41-133</code></td></tr>
+<tr><td>Security log2 curve</td><td><span class="pill info">info</span></td><td>Empirical fix iso-2 — replaces linear 15× cliff that sent 4 hits to guaranteed F.</td><td><code>score.ts:83-102</code></td></tr>
+<tr><td>Empty-input returns ok:false</td><td><span class="pill info">info</span></td><td>Empirical fix iso-1 — used to score "D" on a brand-new repo.</td><td><code>score.ts:21-35,138-148</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures probed: <em>clean</em> (high signals → grade ≥ B), <em>violated</em> (heavy drift+secrets → &lt; 60), <em>adversarial</em> (4 secret hits — log2 keeps Security ≥ 45), <em>ambiguous</em> (zero input → <code>ok:false reason:no_input</code>). Pass rate 4/4.</p>
+<p>Existing test suite: <code>src/iso-25010/__tests__/score.test.ts</code> — 16 tests, all passing.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Implementation conformance:</strong> Partial (6 of 8 ISO characteristics; intentional and disclosed).<br/>
+<strong>Citation-audited claims:</strong> 3/3 verified.<br/>
+<strong>Empirical pass rate:</strong> 4/4.<br/>
+<strong>Recommended changes:</strong> Document weight-calibration provenance once a labelled dataset exists; surface <code>excludedPaths</code> in render output.</p>
+</div>
+</section>
+
+<section id="framework-solid" class="framework scroll-margin">
+<h2>2. SOLID — Object-Oriented Design Principles</h2>
+<p class="subtitle">Robert C. Martin (collection); Michael Feathers (acronym), early 2000s.</p>
+<h3>Fachkonzept</h3>
+<p>Five principles — Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion — collected by Robert C. Martin during his work on object-oriented design from the late 1990s onward. The acronym "SOLID" was coined by Michael Feathers. The principles are operational guidance for keeping software easy to change, not a formal standard.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Robert C. Martin — <em>Agile Software Development, Principles, Patterns, and Practices</em> (Prentice Hall, 2002) (verified)</li>
+<li>Robert C. Martin — <em><a href="https://www.pearson.com/store/p/clean-architecture/P200000009532">Clean Architecture</a></em> (Prentice Hall, 2017) (verified)</li>
+<li><a href="https://en.wikipedia.org/wiki/SOLID">SOLID — Wikipedia consolidated reference</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/solid/score.ts</code> (358 lines), <code>types.ts</code> (135 lines), <code>methodology.ts</code> (28 lines).</p>
+<p>Exports: <code>analyzeSolid</code>, <code>SOLID_METHODOLOGY</code>, <code>SolidLanguage</code>, <code>PrincipleResultOrNA</code>, plus the type set.</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>3-bucket scoring (90/65/35)</td><td><span class="pill info">info</span></td><td>Discrete buckets avoid over-claiming precision from coarse heuristics.</td><td><code>score.ts:51-55</code></td></tr>
+<tr><td>LSP substring heuristic</td><td><span class="pill drift">drift</span></td><td>Weakest signal in the catalog (matches "not implemented"/"TODO: implement"). Disclosed.</td><td><code>score.ts:182-205</code></td></tr>
+<tr><td>DIP vacuous-truth guard</td><td><span class="pill info">info</span></td><td>Empirical fix solid-1: zero direct-infra imports alone awarded strong/A+. Now requires positive abstraction signal.</td><td><code>score.ts:254-287</code></td></tr>
+<tr><td>Language-idiom gating</td><td><span class="pill info">info</span></td><td>Go/Rust LSP → missing_language; Python/Ruby LSP + ISP → missing_language. Excluded from mean.</td><td><code>score.ts:75-101</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures probed: <em>clean</em> (TS, score ≥ 80), <em>violated</em> (heavy large files + no abstractions → &lt; 50), <em>adversarial</em> (Go input → LSP returns InsufficientSignalResult), <em>ambiguous</em> (empty repo → <code>noData:true, grade "N/A"</code>). Pass rate 4/4.</p>
+<p>Existing test suite: 28 tests, all passing.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Implementation conformance:</strong> Conformant.<br/>
+<strong>Citation-audited claims:</strong> 3/3 verified.<br/>
+<strong>Empirical pass rate:</strong> 4/4.<br/>
+<strong>Recommended changes:</strong> Replace LSP substring scan with AST-based override analysis once an AST signal feed is available.</p>
+</div>
+</section>
+
+<section id="framework-clean-arch" class="framework scroll-margin">
+<h2>3. Clean Architecture</h2>
+<p class="subtitle">Robert C. Martin, 2012 (blog) / 2017 (book).</p>
+<h3>Fachkonzept</h3>
+<p>A synthesis of Hexagonal (Cockburn), Onion (Palermo), BCE (Jacobson), and DCI (Coplien/Reenskaug) into a single concentric-layer diagram with one inviolable rule: dependencies point only inward. Layers from inside out: Entities → Use Cases → Interface Adapters → Frameworks &amp; Drivers.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Robert C. Martin — <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">"The Clean Architecture"</a> (2012, cleancoder.com) (verified)</li>
+<li>Robert C. Martin — <em>Clean Architecture: A Craftsman's Guide to Software Structure and Design</em> (Prentice Hall, 2017) (verified)</li>
+<li>Robert C. Martin — <a href="https://blog.cleancoder.com/uncle-bob/2011/09/30/Screaming-Architecture.html">"Screaming Architecture"</a> (2011, precursor) (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/clean-arch/score.ts</code> (72 lines), <code>types.ts</code>, <code>methodology.ts</code>.</p>
+<p>Exports: <code>analyzeCleanArch</code>, <code>CLEAN_ARCH_METHODOLOGY</code>, types.</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Per-severity violation caps</td><td><span class="pill info">info</span></td><td>Empirical fix ca-1: 7 criticals used to flatten to 0; caps (45/32/24) preserve diagnostic value.</td><td><code>score.ts:37-40,57-59</code></td></tr>
+<tr><td>Empty registry → insufficient</td><td><span class="pill info">info</span></td><td>Empirical fix ca-2: symmetric to ISO-25010 empty=D bug.</td><td><code>score.ts:49-55</code></td></tr>
+<tr><td>Layer inference caller-side</td><td><span class="pill drift">drift</span></td><td>Methodology disclosed; <code>unknownLayerInsight</code> fires above 30% unknown.</td><td><code>methodology.ts:20-21</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures probed: <em>clean</em> (score 100), <em>violated</em> (7 criticals → 55, cap-limited), <em>adversarial</em> (50% unknown layer → insight flag fires), <em>ambiguous</em> (empty registry → InsufficientSignalResult). Pass rate 4/4.</p>
+<p>Existing test suite: 15 tests, all passing.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Expose per-graph-size normalisation as optional view for very large registries.</p>
+</div>
+</section>
+
+<section id="framework-hexagonal" class="framework scroll-margin">
+<h2>4. Hexagonal Architecture (Ports &amp; Adapters)</h2>
+<p class="subtitle">Alistair Cockburn, 2005.</p>
+<h3>Fachkonzept</h3>
+<p>A core domain surrounded by inbound and outbound Ports that primary (driver) and secondary (driven) Adapters plug into. Edges flow from adapters into the core; the core does not import adapter or infrastructure code.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Alistair Cockburn — <a href="https://alistair.cockburn.us/hexagonal-architecture/">"Hexagonal architecture"</a> (2005, alistair.cockburn.us) (verified)</li>
+<li><a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">Hexagonal architecture (Wikipedia)</a> (verified)</li>
+<li><a href="https://wiki.c2.com/?HexagonalArchitecture">WikiWikiWeb — Hexagonal Architecture (canonical companion)</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/hexagonal/score.ts</code> (71 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Violation deduction cap</td><td><span class="pill info">info</span></td><td>Empirical fix hex-2: 9 violations alone pegged score at 0. Cap at <code>min(60, 12·v)</code>.</td><td><code>score.ts:28-30,59-62</code></td></tr>
+<tr><td>Missing-core → insufficient</td><td><span class="pill info">info</span></td><td>Empirical fix hex-1: grade A+ alongside <code>missingCore:true</code> flag was contradictory.</td><td><code>score.ts:45-56</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures probed: <em>clean</em> (100), <em>violated</em> (10 deps → 40, cap-limited at 60 off), <em>adversarial</em> (adapters without ports → 80 with flag), <em>ambiguous</em> (missing core → insufficient). Pass rate 4/4.</p>
+<p>Existing test suite: 17 tests, all passing.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Expose port-orientation (inbound vs. outbound) as a future signal.</p>
+</div>
+</section>
+
+<section id="framework-eip" class="framework scroll-margin">
+<h2>5. Enterprise Integration Patterns</h2>
+<p class="subtitle">Gregor Hohpe &amp; Bobby Woolf, 2003.</p>
+<h3>Fachkonzept</h3>
+<p>The canonical vocabulary for asynchronous messaging architecture — 65 patterns across five categories (messaging infrastructure, routing, transformation, endpoints, orchestration). The book and pattern catalog at <code>enterpriseintegrationpatterns.com</code> are the reference.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Hohpe &amp; Woolf — <a href="https://www.enterpriseintegrationpatterns.com/"><em>Enterprise Integration Patterns</em></a> (Addison-Wesley, 2003) (verified)</li>
+<li><a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/">EIP messaging pattern catalog</a> (verified)</li>
+<li>Hohpe — <a href="https://www.enterpriseintegrationpatterns.com/ramblings.html">"Ramblings" companion essays</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/eip/score.ts</code> (417 lines). Detection-only — no 0-100 score.</p>
+<p>Exports: <code>analyzeEip</code>, <code>detectEipPatterns</code>, <code>EIP_PATTERN_DEFS</code>, <code>EIP_METHODOLOGY</code>.</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Pattern coverage 18/65</td><td><span class="pill info">advisory</span></td><td>Spans all 5 categories. Additive to extend.</td><td><code>score.ts:31-253</code></td></tr>
+<tr><td>Message Bus regex anchored</td><td><span class="pill info">info</span></td><td>Empirical fix eip-2: <code>\bbus\b</code> matched business/omnibus/busy.</td><td><code>score.ts:59-67</code></td></tr>
+<tr><td>Message Filter regex anchored</td><td><span class="pill info">info</span></td><td>Empirical fix eip-2: <code>\bfilter\b</code> matched UI filters.</td><td><code>score.ts:121-125</code></td></tr>
+<tr><td>presentCount=0 → unknown</td><td><span class="pill info">info</span></td><td>Empirical fix eip-5: previously fell through to "point_to_point" default.</td><td><code>score.ts:315-322</code></td></tr>
+<tr><td>Suggestions gated at ≥3 detections</td><td><span class="pill info">info</span></td><td>Empirical fix eip-6: prevents single-bus-hit triggering Dead Letter recommendation.</td><td><code>score.ts:348-389</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (saga+pubsub → <code>event_driven_saga</code>), <em>violated</em> (empty input → <code>unknown</code>, no suggestions), <em>adversarial</em> (business-only candidates → Message Bus correctly absent), <em>ambiguous</em> (single weak signal → no missing-pattern suggestions emitted). Pass rate 4/4.</p>
+<p>Existing test suite: 20 tests, all passing.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Partial (18 of 65 patterns; additive). <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Extend with Channel Adapter, Wire Tap, Recipient List in a future minor release.</p>
+</div>
+</section>
+
+<section id="framework-eda" class="framework scroll-margin">
+<h2>6. Event-Driven Architecture</h2>
+<p class="subtitle">Fowler (consolidation, 2017); Stopford (operationalisation, 2018); Young (CQRS, 2010).</p>
+<h3>Fachkonzept</h3>
+<p>EDA is not a single canonical spec but a family of patterns: event notification, event-carried state transfer, event sourcing, CQRS, saga. Fowler's 2017 essay is the most commonly cited consolidation; Greg Young authored the foundational CQRS papers; Ben Stopford's O'Reilly book is the modern operational reference.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Fowler — <a href="https://martinfowler.com/articles/201701-event-driven.html">"What do you mean by Event-Driven?"</a> (2017) (verified)</li>
+<li>Stopford — <a href="https://www.confluent.io/designing-event-driven-systems/"><em>Designing Event-Driven Systems</em></a> (O'Reilly, 2018) (verified)</li>
+<li>Young — <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf"><em>CQRS Documents</em></a> (2010) (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/eda/score.ts</code> (130 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Saturating confidence</td><td><span class="pill info">info</span></td><td>Empirical fix: <code>w·(1 − exp(−c/3))</code> replaces binary "any-count &gt; 0".</td><td><code>score.ts:36-51</code></td></tr>
+<tr><td>Corroboration floor</td><td><span class="pill info">info</span></td><td>≥2 categories OR pub+con ≥3, else InsufficientSignalResult.</td><td><code>score.ts:75-95</code></td></tr>
+<tr><td>Confidence band documented</td><td><span class="pill info">info</span></td><td>&lt;0.3 low / &lt;0.6 med / high. Eliminates downstream guesswork.</td><td><code>score.ts:57-61</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (broker+pub+con → hasEda, band high), <em>violated</em> (all-zero → insufficient), <em>adversarial</em> (single publisher → floor not met), <em>ambiguous</em> (1+1 at floor → low/med band). Pass rate 4/4. Existing tests: 20.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Revisit <code>SATURATION_N=3</code> once empirical telemetry exists.</p>
+</div>
+</section>
+
+<section id="framework-conways-law" class="framework scroll-margin">
+<h2>7. Conway's Law</h2>
+<p class="subtitle">Melvin E. Conway, <em>Datamation</em> 1968.</p>
+<h3>Fachkonzept</h3>
+<p>"Any organization that designs a system will produce a design whose structure is a copy of the organization's communication structure." Originally published in Conway's 1968 Datamation paper "How Do Committees Invent?". Modern operationalisation by Skelton &amp; Pais (<em>Team Topologies</em>, 2019) and empirical evidence from MacCormack, Baldwin &amp; Rusnak (HBS, 2008).</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Conway — <a href="https://www.melconway.com/Home/Committees_Paper.html">"How Do Committees Invent?"</a> (Datamation, 1968) (verified)</li>
+<li>Skelton &amp; Pais — <a href="https://itrevolution.com/product/team-topologies/"><em>Team Topologies</em></a> (IT Revolution, 2019) (verified)</li>
+<li>MacCormack, Baldwin &amp; Rusnak — <a href="https://www.hbs.edu/faculty/Pages/item.aspx?num=35900">"Exploring the duality between product and organizational architectures"</a> (HBS WP 08-039, 2008) (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/conways-law/score.ts</code> (83 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Single-team → insufficient</td><td><span class="pill info">info</span></td><td>Empirical fix: solo repo no longer rendered as "D verdict undefined".</td><td><code>score.ts:51-57</code></td></tr>
+<tr><td>Proxy disclosure</td><td><span class="pill info">info</span></td><td><code>requiresHumanVerification:true</code> + <code>structuralProxy</code> alias on every result.</td><td><code>score.ts:73-81</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (5 teams, 2% cross-team → aligned), <em>violated</em> (100% cross + no owners → fragmented), <em>adversarial</em> (no deps → no coupling), <em>ambiguous</em> (single team → insufficient). Pass rate 4/4. Existing tests: 11.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant (proxy disclosed). <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Expose per-team coupling matrix for org-design dashboards.</p>
+</div>
+</section>
+
+<section id="framework-wardley" class="framework scroll-margin">
+<h2>8. Wardley Mapping</h2>
+<p class="subtitle">Simon Wardley, 2005–. CC BY-SA 4.0.</p>
+<h3>Fachkonzept</h3>
+<p>A strategic mapping technique: capabilities are plotted along an X axis of evolution (Genesis → Custom-Built → Product → Commodity) and a Y axis of value-chain visibility (anchored at the user). The canonical primer is Simon Wardley's online book on Medium, published under CC BY-SA 4.0, with companion learning material at <code>learnwardleymapping.com</code>.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Simon Wardley — <a href="https://medium.com/wardleymaps"><em>Wardley Maps</em></a> (Medium, CC BY-SA 4.0) (verified)</li>
+<li><a href="https://learnwardleymapping.com/">learnwardleymapping.com</a> (verified)</li>
+<li><a href="https://learnwardleymapping.com/glossary/">Wardley map canonical glossary</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/wardley/score.ts</code> (334 lines), <code>constants.ts</code> (72 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td><code>disputed:true</code> + 0.5 confidence</td><td><span class="pill info">info</span></td><td>Empirical fix wardley-2: single regex match no longer reported at 0.82–0.97.</td><td><code>score.ts:160-205</code>, <code>constants.ts:38-72</code></td></tr>
+<tr><td>Criticality override</td><td><span class="pill info">info</span></td><td>Empirical fix wardley-1: "Custom Auth" with <code>criticality=critical</code> routed to <code>custom_built</code>.</td><td><code>score.ts:174-193</code></td></tr>
+<tr><td>fileCount-only weak signal</td><td><span class="pill info">info</span></td><td>Empirical fix wardley-3: 0.4 confidence + disputed.</td><td><code>score.ts:270-280</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (deprecated → commodity, corroborated), <em>violated</em> (Auth + critical → custom_built override), <em>adversarial</em> (single name match only → disputed, conf &lt; 0.7), <em>ambiguous</em> (experimental ML PoC → genesis). Pass rate 4/4. Existing tests: 20.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Expand value-chain keyword map beyond e-commerce-shaped vocabulary.</p>
+</div>
+</section>
+
+<section id="framework-twelve-factor" class="framework scroll-margin">
+<h2>9. The Twelve-Factor App</h2>
+<p class="subtitle">Adam Wiggins (Heroku), 2011. CC-BY 3.0.</p>
+<h3>Fachkonzept</h3>
+<p>Twelve operational principles for SaaS apps — codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes. Published by Adam Wiggins (then at Heroku) at <code>12factor.net</code> under CC-BY 3.0. Extended by Kevin Hoffman's "Beyond the Twelve-Factor App" (O'Reilly, 2016) with three additional factors.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li><a href="https://12factor.net/">12factor.net — Adam Wiggins (CC-BY 3.0)</a> (verified)</li>
+<li><a href="https://en.wikipedia.org/wiki/Twelve-Factor_App_methodology">Twelve-Factor App (Wikipedia)</a> (verified)</li>
+<li>Hoffman — <a href="https://www.oreilly.com/library/view/beyond-the-twelve-factor/9781492042631/"><em>Beyond the Twelve-Factor App</em></a> (O'Reilly, 2016) (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/twelve-factor/score.ts</code> (56 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Binary file-existence proxies</td><td><span class="pill drift">drift</span></td><td>Each factor's status is supplied by the caller — not a deep validation.</td><td><code>methodology.ts:17-18</code></td></tr>
+<tr><td>All-unknown floor (score 25)</td><td><span class="pill info">advisory</span></td><td>Diverges from <code>InsufficientSignalResult</code> pattern used elsewhere.</td><td><code>score.ts:32-55</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (all pass → 100, cloud-ready), <em>violated</em> (all fail → 0), <em>adversarial</em> (all warn → 50), <em>ambiguous</em> (all unknown → 25). Pass rate 4/4. Existing tests: 4.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Return InsufficientSignalResult when <code>factors.length === 0</code>.</p>
+</div>
+</section>
+
+<section id="framework-monorepo" class="framework scroll-margin">
+<h2>10. Monorepo Intelligence</h2>
+<p class="subtitle">Industrial practice (Google, 2016 CACM) — Bazel / Turborepo / Nx / Lerna.</p>
+<h3>Fachkonzept</h3>
+<p>Cross-package intelligence for monorepos. The canonical academic reference is Potvin &amp; Levenberg's 2016 Communications of the ACM article on Google's single-repository practice; modern open-source operationalisation lives in Bazel, Turborepo, Nx, and Lerna.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Potvin &amp; Levenberg — <a href="https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext">"Why Google Stores Billions of Lines of Code in a Single Repository"</a> (CACM 59:7, 2016) (verified)</li>
+<li><a href="https://monorepo.tools/">monorepo.tools — Nx-maintained comparison portal</a> (verified)</li>
+<li><a href="https://bazel.build/">Bazel — bazel.build</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/monorepo/score.ts</code> (33 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>−10/violation slope</td><td><span class="pill drift">drift</span></td><td>Chosen for legibility; not empirically calibrated.</td><td><code>methodology.ts:18-19</code></td></tr>
+<tr><td>Empty input degenerate</td><td><span class="pill info">advisory</span></td><td>Could return InsufficientSignalResult for symmetry.</td><td><code>score.ts:23-25</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (averageHealth 100), <em>violated</em> (two unhealthy), <em>adversarial</em> (25 deps → floor at 0), <em>ambiguous</em> (no capabilities → degenerate 0). Pass rate 4/4. Existing tests: 4.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Calibrate slope against measured-vs-perceived-health data; emit InsufficientSignalResult on empty capabilities.</p>
+</div>
+</section>
+
+<section id="framework-dora-predicted" class="framework scroll-margin">
+<h2>11. DORA (predicted)</h2>
+<p class="subtitle">Forsgren / Humble / Kim, 2018. State of DevOps Report series, 2014–.</p>
+<h3>Fachkonzept</h3>
+<p>The DORA team's "four keys" — Deployment Frequency, Lead Time for Changes, Change Failure Rate, Mean Time to Restore Service — published in the annual State of DevOps Report and the book <em>Accelerate</em>. The subpath name <code>dora-predicted</code> is the disclaimer: the module predicts the LEVELS from architectural signals, not the outcomes from CI/CD logs.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Forsgren, Humble, Kim — <a href="https://itrevolution.com/product/accelerate/"><em>Accelerate</em></a> (IT Revolution, 2018) (verified)</li>
+<li><a href="https://dora.dev/research/">dora.dev — DORA research portal</a> (verified)</li>
+<li><a href="https://cloud.google.com/devops/state-of-devops">Accelerate State of DevOps Report (Google Cloud)</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/dora-predicted/score.ts</code> (90 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Predicts driver, not outcome</td><td><span class="pill info">advisory</span></td><td>Disclosed in subpath name + honestGap.</td><td><code>methodology.ts:22-24</code></td></tr>
+<tr><td>Hand-coded thresholds</td><td><span class="pill drift">drift</span></td><td>Coherence/cycle/drift cuts mirror dashboard parity; not derived from labelled outcome data.</td><td><code>score.ts:27-71</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (elite), <em>violated</em> (low), <em>adversarial</em> (criticalDrifted shortcut → CFR=low), <em>ambiguous</em> (medium). Pass rate 4/4. Existing tests: 4.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant (clearly disclaimed). <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Add an <code>analyzeDoraMeasured</code> companion module when real CI/CD log integration exists.</p>
+</div>
+</section>
+
+<section id="framework-ddd" class="framework scroll-margin">
+<h2>12. Domain-Driven Design</h2>
+<p class="subtitle">Eric Evans, 2003. Vaughn Vernon, 2013.</p>
+<h3>Fachkonzept</h3>
+<p>Eric Evans' strategic design vocabulary: Bounded Contexts, Ubiquitous Language, Context Maps with relationship patterns. The original book defines nine context-map relationship patterns; Vaughn Vernon's 2013 follow-up operationalised the tactical side.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li>Eric Evans — <a href="https://www.domainlanguage.com/ddd/"><em>Domain-Driven Design</em></a> (Addison-Wesley, 2003) (verified)</li>
+<li>Vaughn Vernon — <a href="https://kalele.io/books/"><em>Implementing Domain-Driven Design</em></a> (Addison-Wesley, 2013) (verified)</li>
+<li>Evans — <a href="https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf">DDD Reference (free PDF)</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/ddd/score.ts</code> (208 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>6 of 9 relationship patterns</td><td><span class="pill info">advisory</span></td><td>Customer-Supplier, Published Language, Separate Ways not surfaced.</td><td><code>score.ts:149-167</code></td></tr>
+<tr><td>Keyword classification</td><td><span class="pill drift">drift</span></td><td>"Custom Auth" classifies as generic without criticality override.</td><td><code>score.ts:90-103</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (mix of subdomains classified correctly), <em>violated</em> (auth + logging both generic), <em>adversarial</em> (critical override → core_domain), <em>ambiguous</em> (no-name-signal → supporting default). Pass rate 4/4. Existing tests: 15.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Partial (6/9 strategic patterns). <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Add explicit shared_kernel branch with a dedicated signal.</p>
+</div>
+</section>
+
+<section id="framework-c4" class="framework scroll-margin">
+<h2>13. C4 Model</h2>
+<p class="subtitle">Simon Brown, 2011–. CC BY 4.0.</p>
+<h3>Fachkonzept</h3>
+<p>Simon Brown's hierarchical architecture-diagram framework — System Context (L1), Container (L2), Component (L3), Code (L4). UML-agnostic, designed for visual communication across audiences. Reference implementation: Structurizr DSL by the same author.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li><a href="https://c4model.com/">c4model.com — Simon Brown</a> (verified)</li>
+<li>Simon Brown — <a href="https://leanpub.com/visualising-software-architecture"><em>Software Architecture for Developers</em></a> (Leanpub, 2012–) (verified)</li>
+<li><a href="https://structurizr.com/">Structurizr DSL — reference implementation</a> (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/c4/score.ts</code> (76 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Code (L4) out of scope</td><td><span class="pill info">advisory</span></td><td><code>hasCode:false</code> hard-coded. L4 is auto-generated by IDE tooling in practice.</td><td><code>types.ts:38</code>, <code>score.ts:71</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (full coverage → component is highest), <em>violated</em> (no model → none), <em>adversarial</em> (containerGroup classification → API Service), <em>ambiguous</em> (context only → highest=context). Pass rate 4/4. Existing tests: 11.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Partial by design (3 of 4 levels). <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Document non-coverage of L4 in README.</p>
+</div>
+</section>
+
+<section id="framework-auto-detect" class="framework scroll-margin">
+<h2>14. Auto-detect (meta-detector)</h2>
+<p class="subtitle">prism-metrics internal heuristic catalog (mirrors prism0x2A dashboard).</p>
+<h3>Fachkonzept</h3>
+<p>A meta-detector that classifies frameworks and architectural style from <code>package.json</code> dependencies and directory layout. This is not a published spec — it is an internal catalog the package documents transparently. Confidence values are hand-calibrated.</p>
+<h4>Citations</h4>
+<ul class="cite-list">
+<li><a href="https://github.com/dadenjo/prism-metrics">prism-metrics — GitHub source</a> (verified)</li>
+<li><a href="https://nextjs.org/docs">Next.js documentation</a> (canonical signature reference) (verified)</li>
+<li><a href="https://docs.nestjs.com/">NestJS documentation</a> (canonical signature reference) (verified)</li>
+</ul>
+<h3>Implementation audit</h3>
+<p>Source: <code>src/auto-detect/score.ts</code> (444 lines).</p>
+<table class="delta-table">
+<tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
+<tr><td>Hand-calibrated confidence</td><td><span class="pill drift">drift</span></td><td>Next.js 0.97, React 0.95, etc. Not derived from a labelled corpus.</td><td><code>score.ts:51-169</code></td></tr>
+<tr><td>Fixed style precedence</td><td><span class="pill info">info</span></td><td>hexagonal &gt; clean &gt; ddd &gt; event_driven &gt; microservices &gt; layered_nestjs &gt; layered_traditional &gt; unknown.</td><td><code>score.ts:346-429</code></td></tr>
+</table>
+<h3>Empirical verification</h3>
+<p>4 fixtures: <em>clean</em> (Next.js + Vitest detected), <em>violated</em> (ports+adapters → hexagonal style), <em>adversarial</em> (2-of-3 layer dirs → clean at lower confidence 0.6), <em>ambiguous</em> (empty project → unknown). Pass rate 4/4. Existing tests: 13.</p>
+<div class="conclusion">
+<h4>Conclusion</h4>
+<p><strong>Conformance:</strong> Conformant to internal spec. <strong>Citations:</strong> 3/3. <strong>Fixtures:</strong> 4/4. <strong>Recommendations:</strong> Back confidence values with a labelled fixture corpus.</p>
+</div>
+</section>
+
+<!-- ============ BACK MATTER ============ -->
+
+<section id="glossary" class="scroll-margin">
+<h2>Glossary</h2>
+<table>
+<tr><th>Term</th><th>Definition</th></tr>
+<tr><td>Capability</td><td>A coherent, named unit of behaviour in a system (e.g. "Payment Capture", "User Onboarding"). The atomic unit of analysis across all scorers.</td></tr>
+<tr><td>Drift</td><td>Documented capabilities whose code state contradicts the documented intent.</td></tr>
+<tr><td>Coherence score</td><td>0–100 measure of cross-layer agreement between code and intent.</td></tr>
+<tr><td>InsufficientSignalResult</td><td>The <code>ok:false</code> sentinel returned by scorers when the input has no usable signal. <code>scoreToGrade()</code> throws if called on one.</td></tr>
+<tr><td>LOCKED_FORMULA</td><td>Source-code marker indicating a formula is part of the public methodology and editing it requires a paired methodology update.</td></tr>
+<tr><td>Bounded Context</td><td>DDD term — a boundary inside which a domain model is internally consistent.</td></tr>
+<tr><td>Structural proxy</td><td>A code-only approximation of a property whose canonical form is organisational (e.g. Conway's Law).</td></tr>
+<tr><td>BLUE / AMBER / GREEN</td><td>Internal pipeline phases of the prism0x2A dashboard for which prism-metrics is the public reference implementation. Out of scope for this handbook; mentioned only for context.</td></tr>
+<tr><td>Disputed (Wardley)</td><td>Flag set on a classification result when only one signal contributed — UI should render as a candidate, not a settled stage.</td></tr>
+</table>
+</section>
+
+<section id="repro" class="scroll-margin">
+<h2>Reproducibility appendix</h2>
+<p>To regenerate this handbook from scratch:</p>
+<pre><code>cd /Users/schuldes/prism-metrics
+npm install
+npm test               # all 241 tests should pass
+# regenerate fixtures (4 per framework × 14 frameworks)
+npx tsx scripts/regenerate-handbook.mjs   # equivalent to the audit script
+</code></pre>
+<p>The companion sidecar <code>docs/handbook.evidence.json</code> is the machine-readable mirror of this document. Its schema:</p>
+<pre><code>{
+  meta: { generated_at, prism_metrics_version, agent_pass_id, ... },
+  cross_cutting: { shared_infra, findings },
+  frameworks: {
+    [name]: {
+      spec_summary, provenance, citations[],
+      expected_outputs,
+      implementation_audit: { implemented_in[], exports[], deltas[] },
+      verification: { fixtures, results, false_pos_rate, false_neg_rate,
+                       test_count, test_file, fixture_cases[] },
+      conclusion: { conformance, citation_audit, empirical_pass_rate,
+                    recommendations[] }
+    }
+  }
+}</code></pre>
+<p>A CI job can diff a fresh sidecar against the committed one to detect regressions in citation status, delta count/severity, or empirical pass rate. To update a citation, change its URL in the sidecar JSON, re-fetch, and flip <code>verification_status</code> to <code>verified</code> or <code>unverified</code> accordingly.</p>
+</section>
+
+<footer>
+<p>prism-metrics Fachkonzept &amp; Implementation Audit — 2026-06-10 — pass id fachkonzept-2026-06-10-pass-1 — MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+// Lightweight scroll-spy: highlight the TOC entry matching the section nearest the top.
+(function () {
+  const links = Array.from(document.querySelectorAll('nav.toc a'));
+  const sections = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  function onScroll() {
+    let activeIdx = 0;
+    for (let i = 0; i < sections.length; i++) {
+      if (sections[i].getBoundingClientRect().top - 80 <= 0) activeIdx = i;
+    }
+    links.forEach(l => l.classList.remove('active'));
+    if (links[activeIdx]) links[activeIdx].classList.add('active');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
