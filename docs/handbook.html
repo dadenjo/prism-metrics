@@ -471,7 +471,7 @@ footer p { margin: 0.4rem 0; }
     <dt>License</dt><dd>MIT</dd>
     <dt>Audit pass</dt><dd>audit-2026-06-10 — reproducible per <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>.</dd>
     <dt>Frameworks audited</dt><dd>14 framework modules + core foundation (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect; plus core scanner-exclusions + InsufficientSignalResult primitives)</dd>
-    <dt>Existing test suite</dt><dd>286 tests across 17 test files — all passing at pass-2 completion (96.4 % line / 88.1 % branch coverage)</dd>
+    <dt>Existing test suite</dt><dd>340 tests across 17 test files — all passing (98.2 % line / 92.2 % branch coverage)</dd>
     <dt>Empirical fixtures</dt><dd>56 (4 per framework: clean / violated / adversarial / ambiguous) — 56/56 pass</dd>
     <dt>Citations</dt><dd>42 primary/secondary sources cited; 38/42 verified live during pass-2 (4 returned HTTP 403 / TLS-expired to non-browser fetchers but content cross-confirmed via Wikipedia — see <a href="#pass-2-summary">pass-2 summary</a>)</dd>
     <dt>Findings status (pass-2)</dt><dd><strong>54 of 59 findings closed</strong> across both audit passes. 5 LOW items remain acknowledged in each framework's <code>honestGap</code>.</dd>
@@ -522,11 +522,11 @@ footer p { margin: 0.4rem 0; }
 <tr><td>hexagonal</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>17</td></tr>
 <tr><td>eip</td><td><span class="pill drift">Partial (18/65 patterns)</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
 <tr><td>eda</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
-<tr><td>conways-law</td><td><span class="pill good">Conformant (proxy disclosed)</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
+<tr><td>conways-law</td><td><span class="pill good">Conformant (proxy disclosed)</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
 <tr><td>wardley</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>20</td></tr>
 <tr><td>twelve-factor</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>11</td></tr>
 <tr><td>monorepo</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>10</td></tr>
-<tr><td>dora-predicted</td><td><span class="pill good">Conformant (disclaimed)</span></td><td>3/3</td><td>4/4</td><td>12</td></tr>
+<tr><td>dora-predicted</td><td><span class="pill good">Conformant (disclaimed)</span></td><td>3/3</td><td>4/4</td><td>22</td></tr>
 <tr><td>ddd</td><td><span class="pill drift">Partial (6/9 strategic patterns)</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
 <tr><td>c4</td><td><span class="pill drift">Partial (3/4 levels, by design)</span></td><td>3/3</td><td>4/4</td><td>17</td></tr>
 <tr><td>auto-detect</td><td><span class="pill good">Conformant (internal spec)</span></td><td>3/3</td><td>4/4</td><td>13</td></tr>
@@ -949,7 +949,7 @@ footer p { margin: 0.4rem 0; }
 <pre><code>git clone https://github.com/dadenjo/prism-metrics.git
 cd prism-metrics
 npm install
-npm test               # all 286 tests should pass
+npm test               # all 340 tests should pass
 # regenerate fixtures (4 per framework × 14 frameworks)
 npx tsx scripts/regenerate-handbook.mjs   # equivalent to the audit script
 </code></pre>
@@ -996,16 +996,16 @@ npx vitest run --coverage</code></pre>
     <tr><td>hexagonal</td><td>17</td><td>100.0%</td><td>100.0%</td><td><code>src/hexagonal/__tests__/score.test.ts</code></td><td>hex-1, hex-3</td></tr>
     <tr><td>eip</td><td>20</td><td>100.0%</td><td>99.1%</td><td><code>src/eip/__tests__/score.test.ts</code></td><td>eip-1 through eip-6</td></tr>
     <tr><td>eda</td><td>22</td><td>100.0%</td><td>97.7%</td><td><code>src/eda/__tests__/score.test.ts</code></td><td>eda-1, eda-2, eda-3, eda-4, eda-6 (closed in 0.8.0)</td></tr>
-    <tr><td>conways-law</td><td>11</td><td>96.5%</td><td>93.3%</td><td><code>src/conways-law/__tests__/score.test.ts</code></td><td>conway-1, conway-2, conway-3, conway-4</td></tr>
+    <tr><td>conways-law</td><td>15</td><td>93.8%</td><td>81.3%</td><td><code>src/conways-law/__tests__/score.test.ts</code></td><td>conway-1, conway-2, conway-3, conway-4</td></tr>
     <tr><td>wardley</td><td>20</td><td>100.0%</td><td>97.4%</td><td><code>src/wardley/__tests__/score.test.ts</code></td><td>wardley-1, wardley-2, wardley-3, wardley-4, wardley-5</td></tr>
     <tr><td>twelve-factor</td><td>11</td><td>97.0%</td><td>98.3%</td><td><code>src/twelve-factor/__tests__/score.test.ts</code></td><td>tf-1, tf-2, tf-4</td></tr>
     <tr><td>monorepo</td><td>10</td><td>100.0%</td><td>100.0%</td><td><code>src/monorepo/__tests__/score.test.ts</code></td><td>mono-1, mono-2, mono-4, mono-5</td></tr>
-    <tr><td>dora-predicted</td><td>12</td><td>95.1%</td><td>94.3%</td><td><code>src/dora-predicted/__tests__/score.test.ts</code></td><td>dora-1, dora-3, dora-5</td></tr>
+    <tr><td>dora-predicted</td><td>22</td><td>97.2%</td><td>96.6%</td><td><code>src/dora-predicted/__tests__/score.test.ts</code></td><td>dora-1, dora-3, dora-5, dora-7 (closed in 0.8.0 coverage wave)</td></tr>
     <tr><td>ddd</td><td>15</td><td>100.0%</td><td>100.0%</td><td><code>src/ddd/__tests__/score.test.ts</code></td><td>(model framework — no findings)</td></tr>
     <tr><td>c4</td><td>17</td><td>99.0%</td><td>97.6%</td><td><code>src/c4/__tests__/score.test.ts</code></td><td>c4-1, c4-2</td></tr>
-    <tr><td>auto-detect</td><td>13</td><td>88.9%</td><td>84.1%</td><td><code>src/auto-detect/__tests__/score.test.ts</code></td><td>auto-4 (closed in 0.8.0)</td></tr>
+    <tr><td>auto-detect</td><td>26</td><td>97.2%</td><td>94.3%</td><td><code>src/auto-detect/__tests__/score.test.ts</code></td><td>auto-1, auto-4, auto-6 (all closed)</td></tr>
     <tr><td><strong>core</strong> (foundation)</td><td>43</td><td>100.0%</td><td>95.8%</td><td>3 test files</td><td>Item 0.1, Item 0.2</td></tr>
-    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>96.4%</strong></td><td><strong>88.1%</strong></td><td>17 test files · 286 tests</td><td><strong>54 of 59 findings closed</strong></td></tr>
+    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>98.2%</strong></td><td><strong>92.2%</strong></td><td>17 test files · 340 tests</td><td><strong>54 of 59 findings closed</strong></td></tr>
   </tbody>
 </table>
 
