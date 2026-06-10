@@ -19,11 +19,15 @@ code { background: #f4f1ea; padding: 0.15em 0.4em; border-radius: 3px; font-size
 <p>Redirecting to the <a href="./handbook.html">Specification &amp; Implementation Audit handbook</a>…</p>
 <p>If the redirect doesn't fire automatically:</p>
 <ul>
-  <li><a href="./handbook.html">Read the handbook</a></li>
+  <li><a href="./handbook.html"><strong>Latest audit</strong> — always points to the current release</a></li>
+  <li><a href="./handbook-0.8.html">Audit against prism-metrics 0.8.0</a> (versioned snapshot — immutable, citation-safe)</li>
   <li><a href="https://github.com/dadenjo/prism-metrics">Source code on GitHub</a></li>
   <li><a href="https://www.npmjs.com/package/prism-metrics"><code>npm install prism-metrics</code></a></li>
   <li><a href="./coverage-summary.json">Coverage summary (machine-readable)</a></li>
   <li><a href="./scanner-exclusions.md">Scanner exclusions methodology</a></li>
 </ul>
+<p style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; font-size: 0.85em; color: #666;">
+  The handbook is versioned with the package — each audit run produces a <code>handbook-X.Y.html</code> snapshot that is never edited again. <code>handbook.html</code> tracks the latest. External citations should link to the versioned URL.
+</p>
 </body>
 </html>
