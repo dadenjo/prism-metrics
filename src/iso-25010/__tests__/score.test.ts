@@ -130,6 +130,61 @@ describe("iso-2 — security curve is log2, not linear", () => {
   });
 });
 
+describe("iso-3 — performance density curve is continuous (no step cliff at 10/20)", () => {
+  // Pre-fix the formula used 50/70/85 step buckets that swung 20 points
+  // across density 10.0 vs 10.1 and 20.0 vs 20.1. The continuous curve
+  // clamp(95 - 2*max(0, density-5), 50, 95) should be monotonic with
+  // small deltas near the old cliffs.
+  const baseSig: any = {
+    coherenceScore: 70, driftRatio: 0.1, averageTestCoverage: 60,
+    hardcodedSecretHits: 0, hardcodedConfigHits: 0, averageChurn: 0,
+    orphanCapabilities: 0, totalFiles: 100,
+    hasDockerfile: false, hasK8sManifests: false, hasEnvExample: false,
+  };
+  function perfOf(fileDensity: number): number {
+    const r = analyzeIso25010({ ...baseSig, fileDensity });
+    if (!r.ok) throw new Error("expected ok");
+    const perf = r.characteristics.find((c) => c.id === "performance_efficiency");
+    return perf!.score;
+  }
+  it("density 19.9 vs 20.1 differ by < 2 points (no cliff)", () => {
+    const diff = Math.abs(perfOf(20.1) - perfOf(19.9));
+    expect(diff).toBeLessThan(2);
+  });
+  it("density 9.9 vs 10.1 differ by < 2 points (no cliff)", () => {
+    const diff = Math.abs(perfOf(10.1) - perfOf(9.9));
+    expect(diff).toBeLessThan(2);
+  });
+  it("density 30 hits the floor at 50", () => {
+    // formula: clamp(95 - 2*(30-5), 50, 95) = clamp(45, 50, 95) = 50
+    expect(perfOf(30)).toBe(50);
+  });
+  it("density 5 (no penalty) tops at 95", () => {
+    expect(perfOf(5)).toBe(95);
+  });
+});
+
+describe("iso-4 — churn penalty capped at 20 (not 50)", () => {
+  const baseSig: any = {
+    coherenceScore: 70, driftRatio: 0.1, averageTestCoverage: 60,
+    hardcodedSecretHits: 0, hardcodedConfigHits: 0,
+    orphanCapabilities: 0, totalFiles: 100, fileDensity: 5,
+    hasDockerfile: false, hasK8sManifests: false, hasEnvExample: false,
+  };
+  function perfOf(averageChurn: number): number {
+    const r = analyzeIso25010({ ...baseSig, averageChurn });
+    if (!r.ok) throw new Error("expected ok");
+    return r.characteristics.find((c) => c.id === "performance_efficiency")!.score;
+  }
+  it("churn=25 vs churn=100 produces the same perf score (cap binding)", () => {
+    expect(perfOf(25)).toBe(perfOf(100));
+  });
+  it("perf score with high churn stays >= densityScore - 20", () => {
+    // densityScore at fileDensity=5 is 95. Cap is 20. Floor is 75.
+    expect(perfOf(100)).toBeGreaterThanOrEqual(75);
+  });
+});
+
 describe("iso-2 — excludedPaths round-trip", () => {
   it("echoes excludedPaths on a normal report", () => {
     const r = analyzeIso25010({
