@@ -1,7 +1,7 @@
 # prism-metrics
 
 [![npm version](https://img.shields.io/npm/v/prism-metrics.svg)](https://www.npmjs.com/package/prism-metrics)
-[![tests](https://img.shields.io/badge/tests-286%20passing-brightgreen.svg)](#test-coverage)
+[![tests](https://img.shields.io/badge/tests-340%20passing-brightgreen.svg)](#test-coverage)
 [![coverage](docs/badges/coverage.svg)](#test-coverage)
 [![audit](https://img.shields.io/badge/audit%20findings-54%20of%2059%20closed-brightgreen.svg)](#audit--verification)
 [![license](https://img.shields.io/npm/l/prism-metrics.svg)](LICENSE)
@@ -70,7 +70,7 @@ See `src/<framework>/methodology.ts` for the human-readable specs.
 | `prism-metrics/auto-detect` | Framework auto-detection from manifest signals | 13 | 94.3% lines |
 | **core** (foundation) | InsufficientSignalResult + scanner-exclusions primitives | 43 | **100%** |
 
-**Totals**: 286 tests passing · 96.4% line coverage · 88.1% branch coverage.
+**Totals**: 340 tests passing · 98.2% line coverage · 92.2% branch coverage.
 
 ## Audit &amp; Verification
 
@@ -164,7 +164,7 @@ and surfaced in the handbook's Verification box per framework.
 | twelve-factor | 97.0% | 98.3% | 94% |
 | conways-law | 96.5% | 93.3% | 93% |
 | dora-predicted · auto-detect | 94–95% | 92–94% | 89–90% |
-| **TOTAL** | **96.4%** | **88.1%** | |
+| **TOTAL** |  **98.2%** |  **92.2%** | |
 
 ## Honest gaps
 

@@ -137,6 +137,70 @@ describe("analyzeConwaysLaw", () => {
   });
 });
 
+// ── conway-5 (pass-2) — CODEOWNERS bonus arithmetic on worst-case ──
+describe("conway-5 — CODEOWNERS bonus is additive after deduction caps", () => {
+  it("worst-case (100% coupling + 100% unowned) without CODEOWNERS = 35 (F)", () => {
+    const r = analyzeConwaysLaw({
+      totalTeams: 5,
+      totalCapabilities: 10,
+      unownedCapabilities: 10,
+      crossTeamDependencies: 100,
+      totalDependencies: 100,
+      hasCodeowners: false,
+    });
+    if (!("score" in r)) throw new Error("expected score result");
+    expect(r.score).toBe(35);
+    expect(r.grade).toBe("F");
+  });
+  it("worst-case + CODEOWNERS = 40 (still F, +5 bonus pinned)", () => {
+    const r = analyzeConwaysLaw({
+      totalTeams: 5,
+      totalCapabilities: 10,
+      unownedCapabilities: 10,
+      crossTeamDependencies: 100,
+      totalDependencies: 100,
+      hasCodeowners: true,
+    });
+    if (!("score" in r)) throw new Error("expected score result");
+    expect(r.score).toBe(40);
+    expect(r.grade).toBe("F");  // 40 < 50 threshold
+  });
+});
+
+// ── conway — branch coverage for partially_aligned + misaligned bands ──
+describe("conway — verdict band coverage (aligned / partial / misaligned)", () => {
+  it("partially_aligned verdict band (score in [50, 75))", () => {
+    // coupling 50% (deduction 17.5) + 40% unowned (deduction 12) = 100 - 17.5 - 12 = 70.5 → 71 → partially_aligned
+    const r = analyzeConwaysLaw({
+      totalTeams: 3,
+      totalCapabilities: 10,
+      unownedCapabilities: 4,
+      crossTeamDependencies: 50,
+      totalDependencies: 100,
+      hasCodeowners: false,
+    });
+    if (!("score" in r)) throw new Error("expected score result");
+    expect(r.score).toBeGreaterThanOrEqual(50);
+    expect(r.score).toBeLessThan(75);
+    expect(r.verdict).toBe("partially_aligned");
+  });
+  it("misaligned verdict band (score in [25, 50))", () => {
+    // coupling 90% (deduction 31.5) + 80% unowned (deduction 24) = 100 - 31.5 - 24 = 44.5 → 45 → misaligned
+    const r = analyzeConwaysLaw({
+      totalTeams: 5,
+      totalCapabilities: 10,
+      unownedCapabilities: 8,
+      crossTeamDependencies: 90,
+      totalDependencies: 100,
+      hasCodeowners: false,
+    });
+    if (!("score" in r)) throw new Error("expected score result");
+    expect(r.score).toBeGreaterThanOrEqual(25);
+    expect(r.score).toBeLessThan(50);
+    expect(r.verdict).toBe("misaligned");
+  });
+});
+
 describe("CONWAYS_LAW_METHODOLOGY", () => {
   it("references the score file", () => {
     expect(CONWAYS_LAW_METHODOLOGY.formula.codeRef).toContain("score.ts");
