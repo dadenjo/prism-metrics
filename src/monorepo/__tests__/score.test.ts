@@ -8,6 +8,10 @@ import tangledIn from "./__fixtures__/tangled-bazel.input.json";
 import tangledOut from "./__fixtures__/tangled-bazel.expected.json";
 import emptyIn from "./__fixtures__/empty.input.json";
 import emptyOut from "./__fixtures__/empty.expected.json";
+import goIn from "./__fixtures__/go-workspaces.input.json";
+import goOut from "./__fixtures__/go-workspaces.expected.json";
+import unkIn from "./__fixtures__/unknown.input.json";
+import unkOut from "./__fixtures__/unknown.expected.json";
 
 describe("analyzeMonorepo", () => {
   it("matches healthy turborepo fixture", () => {
@@ -16,8 +20,14 @@ describe("analyzeMonorepo", () => {
   it("matches tangled bazel fixture", () => {
     expect(analyzeMonorepo(tangledIn)).toEqual(tangledOut);
   });
-  it("handles empty capabilities", () => {
+  it("mono-1: empty caps + 'none' → noData=true, averageHealth=null", () => {
     expect(analyzeMonorepo(emptyIn)).toEqual(emptyOut);
+  });
+  it("mono-2: go-workspaces is now a first-class build system", () => {
+    expect(analyzeMonorepo(goIn)).toEqual(goOut);
+  });
+  it("mono-1/2: 'unknown' build system → noData=true even with capabilities", () => {
+    expect(analyzeMonorepo(unkIn)).toEqual(unkOut);
   });
 });
 

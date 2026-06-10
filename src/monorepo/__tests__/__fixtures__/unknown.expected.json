@@ -1,0 +1,9 @@
+{
+  "buildSystem": "unknown",
+  "capabilities": [
+    { "id": "x", "healthScore": 100, "crossTargetDeps": 0 }
+  ],
+  "averageHealth": null,
+  "unhealthyCount": 0,
+  "noData": true
+}
