@@ -10,7 +10,7 @@ Open methodology and pure scoring implementations for the architecture
 frameworks used by **prism0x2A**. Every scorer is a pure TypeScript
 function: same input, same output, no I/O, no side effects.
 
-📖 **[Read the Fachkonzept &amp; implementation audit handbook](https://dadenjo.github.io/prism-metrics/)** — every framework's definition, scoring formula, and audit findings in one document (also at [`docs/handbook.html`](docs/handbook.html)).
+📖 **[Read the Specification &amp; Implementation Audit handbook](https://dadenjo.github.io/prism-metrics/)** — every framework's definition, scoring formula, and audit findings in one document (also at [`docs/handbook.html`](docs/handbook.html)).
 
 ## Install
 
@@ -79,7 +79,7 @@ its published methodology. **52 of 57 findings are closed** as of
 0.7.0; the remaining 5 are LOW-severity items documented in each
 framework's `honestGap`.
 
-The complete audit — Fachkonzept, expected results, implementation
+The complete audit — concept summary, expected results, implementation
 review per framework, plus empirical verification — lives in:
 
 - 📖 [**docs/handbook.html**](docs/handbook.html) — single-file HTML handbook (629 LOC)

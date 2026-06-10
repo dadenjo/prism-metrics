@@ -66,7 +66,7 @@ For each input source, log:
 
 Output sections (use these exact headings):
 
-### 1. Fachkonzept summary
+### 1. Concept summary
 
 3-5 paragraphs. What is the framework, who published it, what does
 it claim to measure, what are its known limitations. Cite at least
@@ -187,5 +187,5 @@ A new audit pass is justified when:
   that the handbook needs to address whatever they hit)
 
 The previous audit's pass-id is recorded in the handbook cover
-(`fachkonzept-2026-06-10-pass-1`). The next pass increments to
+(`audit-2026-06-10-pass-1`). The next pass increments to
 `pass-2`.

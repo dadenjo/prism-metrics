@@ -2,13 +2,13 @@
   "meta": {
     "generated_at": "2026-06-10",
     "prism_metrics_version": "0.3.1",
-    "agent_pass_id": "fachkonzept-2026-06-10-pass-1",
+    "agent_pass_id": "audit-2026-06-10-pass-1",
     "frameworks_audited": 14,
     "total_tests_in_suite": 241,
     "total_fixtures": 56,
     "empirical_pass_rate": "56/56",
     "license": "MIT",
-    "author": "prism-metrics autonomous Fachkonzept generator"
+    "author": "prism-metrics autonomous specification generator"
   },
   "cross_cutting": {
     "shared_infra": {

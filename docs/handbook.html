@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>prism-metrics Fachkonzept &amp; Implementation Audit</title>
+<title>prism-metrics Specification &amp; Implementation Audit</title>
 <link rel="preconnect" href="https://rsms.me/">
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 <style>
@@ -463,19 +463,19 @@ footer p { margin: 0.4rem 0; }
 <main>
 
 <section id="cover" class="cover scroll-margin">
-  <h1>prism-metrics Fachkonzept &amp; Implementation Audit</h1>
+  <h1>prism-metrics Specification &amp; Implementation Audit</h1>
   <p class="subtitle">Specification handbook and read-only audit of the public npm package <code>prism-metrics</code> — 14 architecture-quality scoring modules, their primary sources, and per-framework conformance evidence.</p>
   <dl class="meta">
     <dt>Version audited</dt><dd>prism-metrics 0.3.1 (published) / 0.4.0 (in-tree) — the state at pass-1 time on 2026-06-09</dd>
     <dt>Latest published</dt><dd>prism-metrics <strong>0.7.0</strong> — for what changed since pass-1 + which regression tests now cover each closed finding see the <a href="#post-audit-delta">Pass-1 → 0.7.0 finding-closure log</a> at the end. <em>A fresh pass-2 has not yet been run; this document remains the pass-1 record annotated with closure evidence.</em></dd>
     <dt>Date (pass-1)</dt><dd>2026-06-09 (audit) / 2026-06-10 (initial publish + closure-log refresh)</dd>
     <dt>License</dt><dd>MIT</dd>
-    <dt>Audit pass</dt><dd>fachkonzept-2026-06-09-pass-1 (next: pass-2 against 0.7.0 — see <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>)</dd>
+    <dt>Audit pass</dt><dd>audit-2026-06-09-pass-1 (next: pass-2 against 0.7.0 — see <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>)</dd>
     <dt>Frameworks audited</dt><dd>14 (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect)</dd>
     <dt>Test suite at pass-1</dt><dd>241 tests across 17 test files — all passing at audit start. <strong>Current state (0.7.0): 278 tests, 96.4 % line / 88.1 % branch coverage.</strong></dd>
     <dt>Empirical fixtures</dt><dd>56 (4 per framework: clean / violated / adversarial / ambiguous) — 56/56 pass</dd>
     <dt>Citations</dt><dd>42 primary/secondary sources cited; 42/42 verified live (URL reachable + attribution matches)</dd>
-    <dt>Author</dt><dd>prism-metrics autonomous Fachkonzept generator</dd>
+    <dt>Author</dt><dd>prism-metrics autonomous specification generator</dd>
   </dl>
 </section>
 
@@ -540,7 +540,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-iso-25010" class="framework scroll-margin">
 <h2>1. ISO/IEC 25010 — Software Product Quality Model</h2>
 <p class="subtitle">ISO/IEC JTC 1/SC 7, 2011 (revised 2023). 8 top-level characteristics, 31 sub-characteristics.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>ISO/IEC 25010 is a normative international standard published by ISO/IEC JTC 1/SC 7 in 2011 (and revised in 2023 to add a 9th characteristic, "Safety"). It supersedes the older ISO/IEC 9126. The standard defines eight top-level quality characteristics — functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, portability — each decomposed into 31 sub-characteristics. The standard is used as gating criteria in regulated-industry procurement and acceptance.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -573,7 +573,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-solid" class="framework scroll-margin">
 <h2>2. SOLID — Object-Oriented Design Principles</h2>
 <p class="subtitle">Robert C. Martin (collection); Michael Feathers (acronym), early 2000s.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>Five principles — Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion — collected by Robert C. Martin during his work on object-oriented design from the late 1990s onward. The acronym "SOLID" was coined by Michael Feathers. The principles are operational guidance for keeping software easy to change, not a formal standard.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -606,7 +606,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-clean-arch" class="framework scroll-margin">
 <h2>3. Clean Architecture</h2>
 <p class="subtitle">Robert C. Martin, 2012 (blog) / 2017 (book).</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>A synthesis of Hexagonal (Cockburn), Onion (Palermo), BCE (Jacobson), and DCI (Coplien/Reenskaug) into a single concentric-layer diagram with one inviolable rule: dependencies point only inward. Layers from inside out: Entities → Use Cases → Interface Adapters → Frameworks &amp; Drivers.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -635,7 +635,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-hexagonal" class="framework scroll-margin">
 <h2>4. Hexagonal Architecture (Ports &amp; Adapters)</h2>
 <p class="subtitle">Alistair Cockburn, 2005.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>A core domain surrounded by inbound and outbound Ports that primary (driver) and secondary (driven) Adapters plug into. Edges flow from adapters into the core; the core does not import adapter or infrastructure code.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -662,7 +662,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-eip" class="framework scroll-margin">
 <h2>5. Enterprise Integration Patterns</h2>
 <p class="subtitle">Gregor Hohpe &amp; Bobby Woolf, 2003.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>The canonical vocabulary for asynchronous messaging architecture — 65 patterns across five categories (messaging infrastructure, routing, transformation, endpoints, orchestration). The book and pattern catalog at <code>enterpriseintegrationpatterns.com</code> are the reference.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -693,7 +693,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-eda" class="framework scroll-margin">
 <h2>6. Event-Driven Architecture</h2>
 <p class="subtitle">Fowler (consolidation, 2017); Stopford (operationalisation, 2018); Young (CQRS, 2010).</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>EDA is not a single canonical spec but a family of patterns: event notification, event-carried state transfer, event sourcing, CQRS, saga. Fowler's 2017 essay is the most commonly cited consolidation; Greg Young authored the foundational CQRS papers; Ben Stopford's O'Reilly book is the modern operational reference.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -720,7 +720,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-conways-law" class="framework scroll-margin">
 <h2>7. Conway's Law</h2>
 <p class="subtitle">Melvin E. Conway, <em>Datamation</em> 1968.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>"Any organization that designs a system will produce a design whose structure is a copy of the organization's communication structure." Originally published in Conway's 1968 Datamation paper "How Do Committees Invent?". Modern operationalisation by Skelton &amp; Pais (<em>Team Topologies</em>, 2019) and empirical evidence from MacCormack, Baldwin &amp; Rusnak (HBS, 2008).</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -746,7 +746,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-wardley" class="framework scroll-margin">
 <h2>8. Wardley Mapping</h2>
 <p class="subtitle">Simon Wardley, 2005–. CC BY-SA 4.0.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>A strategic mapping technique: capabilities are plotted along an X axis of evolution (Genesis → Custom-Built → Product → Commodity) and a Y axis of value-chain visibility (anchored at the user). The canonical primer is Simon Wardley's online book on Medium, published under CC BY-SA 4.0, with companion learning material at <code>learnwardleymapping.com</code>.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -773,7 +773,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-twelve-factor" class="framework scroll-margin">
 <h2>9. The Twelve-Factor App</h2>
 <p class="subtitle">Adam Wiggins (Heroku), 2011. CC-BY 3.0.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>Twelve operational principles for SaaS apps — codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes. Published by Adam Wiggins (then at Heroku) at <code>12factor.net</code> under CC-BY 3.0. Extended by Kevin Hoffman's "Beyond the Twelve-Factor App" (O'Reilly, 2016) with three additional factors.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -799,7 +799,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-monorepo" class="framework scroll-margin">
 <h2>10. Monorepo Intelligence</h2>
 <p class="subtitle">Industrial practice (Google, 2016 CACM) — Bazel / Turborepo / Nx / Lerna.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>Cross-package intelligence for monorepos. The canonical academic reference is Potvin &amp; Levenberg's 2016 Communications of the ACM article on Google's single-repository practice; modern open-source operationalisation lives in Bazel, Turborepo, Nx, and Lerna.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -825,7 +825,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-dora-predicted" class="framework scroll-margin">
 <h2>11. DORA (predicted)</h2>
 <p class="subtitle">Forsgren / Humble / Kim, 2018. State of DevOps Report series, 2014–.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>The DORA team's "four keys" — Deployment Frequency, Lead Time for Changes, Change Failure Rate, Mean Time to Restore Service — published in the annual State of DevOps Report and the book <em>Accelerate</em>. The subpath name <code>dora-predicted</code> is the disclaimer: the module predicts the LEVELS from architectural signals, not the outcomes from CI/CD logs.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -851,7 +851,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-ddd" class="framework scroll-margin">
 <h2>12. Domain-Driven Design</h2>
 <p class="subtitle">Eric Evans, 2003. Vaughn Vernon, 2013.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>Eric Evans' strategic design vocabulary: Bounded Contexts, Ubiquitous Language, Context Maps with relationship patterns. The original book defines nine context-map relationship patterns; Vaughn Vernon's 2013 follow-up operationalised the tactical side.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -877,7 +877,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-c4" class="framework scroll-margin">
 <h2>13. C4 Model</h2>
 <p class="subtitle">Simon Brown, 2011–. CC BY 4.0.</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>Simon Brown's hierarchical architecture-diagram framework — System Context (L1), Container (L2), Component (L3), Code (L4). UML-agnostic, designed for visual communication across audiences. Reference implementation: Structurizr DSL by the same author.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -902,7 +902,7 @@ footer p { margin: 0.4rem 0; }
 <section id="framework-auto-detect" class="framework scroll-margin">
 <h2>14. Auto-detect (meta-detector)</h2>
 <p class="subtitle">prism-metrics internal heuristic catalog (mirrors prism0x2A dashboard).</p>
-<h3>Fachkonzept</h3>
+<h3>Concept</h3>
 <p>A meta-detector that classifies frameworks and architectural style from <code>package.json</code> dependencies and directory layout. This is not a published spec — it is an internal catalog the package documents transparently. Confidence values are hand-calibrated.</p>
 <h4>Citations</h4>
 <ul class="cite-list">
@@ -1090,7 +1090,7 @@ npx vitest run --coverage</code></pre>
 </section>
 
 <footer>
-<p>prism-metrics Fachkonzept &amp; Implementation Audit — pass-1 — audit performed 2026-06-09 against <strong>0.3.1 published / 0.4.0 in-tree</strong> — handbook refreshed 2026-06-10 with closure log + current trust numbers. Latest released version: 0.7.0. MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
+<p>prism-metrics Specification &amp; Implementation Audit — pass-1 — audit performed 2026-06-09 against <strong>0.3.1 published / 0.4.0 in-tree</strong> — handbook refreshed 2026-06-10 with closure log + current trust numbers. Latest released version: 0.7.0. MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
 <p>Trust &amp; Verification table generated from <code>npx vitest run --coverage</code> on prism-metrics <code>0.7.0</code>. The closure log above is auditable from <a href="https://github.com/dadenjo/prism-metrics/pulls?q=is%3Aclosed">the merged-PR history</a>; re-run the tests locally with <code>npm test</code> to verify the cited regression tests still pass.</p>
 </footer>
 
