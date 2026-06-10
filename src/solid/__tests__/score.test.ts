@@ -408,6 +408,58 @@ describe("solid-5: cliff boundary tests", () => {
   });
 });
 
+describe("solid-lsp-ast: AST-confirmed signal tier", () => {
+  // When confirmedLspViolations is provided, the scorer prefers it
+  // over the substring-based narrowingStubFiles AND lifts the
+  // principle's confidence from 0.65 to 0.85.
+  const baseSig: any = {
+    analyzedFiles: 100,
+    largeFiles: 0,
+    complexFiles: 0, switchHeavyFiles: 0, ifChainFiles: 0,
+    inheritanceFiles: 20,
+    narrowingStubFiles: 5,          // would otherwise be ratio 0.25 → needs_work
+    totalInterfaces: 5, fatInterfaces: 0,
+    hasDiContainer: false, abstractionPatternFiles: 1,
+    directInfraImportFiles: 0,
+  };
+  it("strong signal with 0 confirmed violations → strong + confidence 0.85", () => {
+    const r = analyzeSolid({ ...baseSig, confirmedLspViolations: 0 });
+    const lsp = findPrinciple(r.principles, "L");
+    expect(lsp.strength).toBe("strong");
+    expect(lsp.confidence).toBe(0.85);
+  });
+  it("strong signal with 1 of 20 inheriting files (ratio 0.05) → needs_work", () => {
+    const r = analyzeSolid({ ...baseSig, confirmedLspViolations: 1 });
+    const lsp = findPrinciple(r.principles, "L");
+    expect(lsp.confidence).toBe(0.85);
+  });
+  it("weak signal only (no confirmedLspViolations) → confidence 0.65", () => {
+    const r = analyzeSolid(baseSig);
+    const lsp = findPrinciple(r.principles, "L");
+    expect(lsp.confidence).toBe(0.65);
+    // 5/20 = 0.25 ratio → needs_work
+    expect(lsp.strength).toBe("needs_work");
+  });
+  it("recommendation mentions parser-confirmed when strong signal used", () => {
+    const r = analyzeSolid({ ...baseSig, confirmedLspViolations: 3 });
+    const lsp = findPrinciple(r.principles, "L");
+    expect(lsp.recommendation).toMatch(/parser-confirmed/);
+  });
+  it("recommendation mentions substring + upgrade hint when only weak signal", () => {
+    const r = analyzeSolid({ ...baseSig, narrowingStubFiles: 2 });
+    const lsp = findPrinciple(r.principles, "L");
+    expect(lsp.recommendation).toMatch(/substring-based|substring/);
+    expect(lsp.recommendation).toMatch(/confirmedLspViolations/);
+  });
+  it("strong signal at 0 OVERRIDES weak signal that would otherwise fail", () => {
+    // Suppose narrowingStubFiles=20 (would be needs_work at ratio 1.0)
+    // but the AST analyser confirms 0 violations. Strong signal wins.
+    const r = analyzeSolid({ ...baseSig, narrowingStubFiles: 20, confirmedLspViolations: 0 });
+    const lsp = findPrinciple(r.principles, "L");
+    expect(lsp.strength).toBe("strong");
+  });
+});
+
 describe("SOLID_METHODOLOGY", () => {
   it("declares all five principles in its formula text or signals", () => {
     expect(SOLID_METHODOLOGY.referenceUrl).toMatch(/^https:/);

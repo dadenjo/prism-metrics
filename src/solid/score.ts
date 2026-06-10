@@ -181,25 +181,45 @@ function scoreOcp(sig: SolidSignals): PrincipleResult {
  */
 function scoreLsp(sig: SolidSignals): PrincipleResult {
   let strength: PrincipleStrength;
+  // solid-lsp-ast (2026-06-10 handbook drift): prefer the STRONG
+  // signal when the caller provided one. `confirmedLspViolations`
+  // is parser/AST-confirmed (precondition strengthening,
+  // contravariant params, return-type narrowing). When present, this
+  // drives the bucket AND lifts confidence to 0.85. Otherwise fall
+  // back to the weak substring-based signal at confidence 0.65.
+  const usingStrong = sig.confirmedLspViolations !== undefined;
   if (sig.inheritanceFiles === 0) {
     strength = "moderate";
+  } else if (usingStrong) {
+    const v = sig.confirmedLspViolations!;
+    const ratio = v / sig.inheritanceFiles;
+    if (v === 0)            strength = "strong";
+    else if (ratio < 0.05)  strength = "moderate";
+    else                    strength = "needs_work";
   } else {
     const ratio = sig.narrowingStubFiles / sig.inheritanceFiles;
-    if (ratio < 0.05) strength = "strong";
-    else if (ratio < 0.20) strength = "moderate";
-    else strength = "needs_work";
+    if (ratio < 0.05)       strength = "strong";
+    else if (ratio < 0.20)  strength = "moderate";
+    else                    strength = "needs_work";
   }
-  const recommendation = sig.narrowingStubFiles > 0
-    ? `Audit ${sig.narrowingStubFiles} narrowing stubs ("not implemented" / "TODO: implement") — subclasses must honour their parent's contract.`
-    : sig.inheritanceFiles === 0
-      ? "No inheritance hierarchies present — LSP is not actively tested."
-      : "Subtypes appear to honour their base contracts. Keep an eye on optional/null narrowing in overrides.";
+  const recommendation =
+    usingStrong && (sig.confirmedLspViolations ?? 0) > 0
+      ? `Audit ${sig.confirmedLspViolations} parser-confirmed LSP violations — subclass methods that throw unconditionally, narrow parameter types, or return less general values than the parent declared.`
+      : sig.narrowingStubFiles > 0
+        ? `Audit ${sig.narrowingStubFiles} narrowing stubs ("not implemented" / "TODO: implement") — subclasses must honour their parent's contract. Note: substring-based; supply confirmedLspViolations from an AST analyser for a stronger verdict.`
+        : sig.inheritanceFiles === 0
+          ? "No inheritance hierarchies present — LSP is not actively tested."
+          : "Subtypes appear to honour their base contracts. Keep an eye on optional/null narrowing in overrides.";
+  const confidence =
+    sig.inheritanceFiles === 0 ? 0.5 :
+    usingStrong              ? 0.85 :
+    0.65;
   return {
     principle: "L",
     name: PRINCIPLE_NAMES.L,
     strength,
     score: strengthToScore(strength),
-    confidence: sig.inheritanceFiles > 0 ? 0.65 : 0.5,
+    confidence,
     recommendation,
   };
 }
