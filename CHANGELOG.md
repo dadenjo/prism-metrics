@@ -1,5 +1,27 @@
 # prism-metrics changelog
 
+## 0.8.0
+
+Audit **pass-2** (2026-06-10) — fresh re-audit against 0.7.0 in-tree, replacing the pass-1 "preview" audit (which ran against 0.3.1/0.4.0). Pass-2 confirms every pass-1 closure with named regression tests, finds two real bugs that pass-1 missed, and surfaces ~30 LOW-severity polish items documented in the handbook.
+
+### Real bug fixes from pass-2
+
+- **eda-6** — `event_carried_state_transfer` was emitted from the `hasStateCarryingEvent` flag alone, without checking `publisherFiles > 0`. A caller passing `{brokerFiles:1, cqrsFiles:1, hasStateCarryingEvent:true, publisherFiles:0}` would get the pattern with no publisher to ship it. Guard added at `src/eda/score.ts:113-120`. 2 regression tests pin the new behaviour.
+- **auto-4** — Architecture-style precedence gate used `confidence >= 0.7` but the catalogue emits Clean Architecture at `0.6` for 2-of-3 layer matches. Result: a project with `domain/` + `application/` but no `infrastructure/` got `clean_architecture` in detections AND `architectureStyle.primary = "layered_traditional"`. Gate lowered to `0.6` to match the catalogue.
+
+### Regression-test hardening (closures that worked but weren't pinned)
+
+- **iso-3 / iso-4** — Continuous perf curve + churn cap shipped in 0.6.0 but had no dedicated tests. New blocks add 4 + 2 boundary assertions.
+- **eda-6** — 2 new tests cover the publisher-required guard.
+
+### Handbook refreshed for pass-2
+
+- Pass-id incremented to `fachkonzept-2026-06-10-pass-2`
+- `solid-3` and `solid-4` moved from "still open" to CLOSED — pass-2 confirmed both shipped earlier (handbook had stale text)
+- All new pass-2 findings documented per framework (most LOW/info; 2 closed in this release)
+- `auto-detect` coverage corrected from claimed 94.3 % → actual 88.86 %
+- 286 tests passing (was 278)
+
 ## 0.7.0
 
 Closes the last open audit-table item flagged as `drift` in

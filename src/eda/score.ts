@@ -115,7 +115,13 @@ export function analyzeEda(
   if (sig.eventStoreFiles > 0) patternsDetected.push("event_sourcing");
   if (sig.cqrsFiles > 0) patternsDetected.push("cqrs");
   if (sig.sagaFiles > 0) patternsDetected.push("saga");
-  if (sig.hasStateCarryingEvent) {
+  // eda-6 (pass-2): event_carried_state_transfer is a flag MODIFIER
+  // on top of producer activity, not a standalone floor signal. Without
+  // the `publisherFiles > 0` guard, a caller could pass
+  // { brokerFiles:1, cqrsFiles:1, hasStateCarryingEvent:true } and the
+  // pattern would emit even though there are no publishers shipping
+  // state-carrying events.
+  if (sig.hasStateCarryingEvent && sig.publisherFiles > 0) {
     patternsDetected.push("event_carried_state_transfer");
   }
 

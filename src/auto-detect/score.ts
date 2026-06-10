@@ -344,11 +344,17 @@ export function detectFrameworks(
   }
 
   // 3. Architecture style determination — precedence matches dashboard.
+  // auto-4 (pass-2): gate lowered from 0.7 to 0.6 so that partial
+  // detections (Hexagonal partial = 0.55 stays out; Clean 2-of-3 = 0.60
+  // now passes) are consistent with the detection catalogue. Pre-fix
+  // a 2-of-3 clean-layer project emitted clean_architecture at
+  // confidence 0.6 but architectureStyle.primary fell to
+  // layered_traditional/unknown because the gate demanded 0.7.
   const hasHexagonal = frameworks.some(
-    (f) => f.name.startsWith("Hexagonal") && f.confidence >= 0.7,
+    (f) => f.name.startsWith("Hexagonal") && f.confidence >= 0.6,
   );
   const hasClean = frameworks.some(
-    (f) => f.name === "Clean Architecture" && f.confidence >= 0.7,
+    (f) => f.name === "Clean Architecture" && f.confidence >= 0.6,
   );
   const hasDDD = frameworks.some((f) => f.name === "Domain-Driven Design");
   const hasEDA = frameworks.some((f) =>

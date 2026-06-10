@@ -190,6 +190,40 @@ describe("eda-3: exclusion contract documented in methodology", () => {
   });
 });
 
+describe("eda-6 (pass-2): event_carried_state_transfer requires publishers", () => {
+  // The hasStateCarryingEvent flag is a MODIFIER on top of producer
+  // activity, not a standalone floor signal. Without publishers it
+  // shouldn't emit even when the floor is met via other categories.
+  it("does NOT emit event_carried_state_transfer when publisherFiles=0", () => {
+    const r = analyzeEda({
+      publisherFiles: 0,
+      consumerFiles: 0,
+      brokerFiles: 1,
+      eventStoreFiles: 0,
+      cqrsFiles: 1,
+      sagaFiles: 0,
+      hasStateCarryingEvent: true,
+      couplingIssueCount: 0,
+    });
+    if (isInsufficient(r)) throw new Error("expected ok");
+    expect(r.patternsDetected).not.toContain("event_carried_state_transfer");
+  });
+  it("DOES emit event_carried_state_transfer when publisherFiles>0 + flag", () => {
+    const r = analyzeEda({
+      publisherFiles: 2,
+      consumerFiles: 1,
+      brokerFiles: 1,
+      eventStoreFiles: 0,
+      cqrsFiles: 0,
+      sagaFiles: 0,
+      hasStateCarryingEvent: true,
+      couplingIssueCount: 0,
+    });
+    if (isInsufficient(r)) throw new Error("expected ok");
+    expect(r.patternsDetected).toContain("event_carried_state_transfer");
+  });
+});
+
 describe("EDA_METHODOLOGY", () => {
   it("references the score file", () => {
     expect(EDA_METHODOLOGY.formula.codeRef).toContain("score.ts");
