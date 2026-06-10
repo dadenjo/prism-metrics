@@ -16,7 +16,7 @@ Audit **pass-2** (2026-06-10) — fresh re-audit against 0.7.0 in-tree, replacin
 
 ### Handbook refreshed for pass-2
 
-- Pass-id incremented to `fachkonzept-2026-06-10-pass-2`
+- Pass-id incremented to `audit-2026-06-10-pass-2`
 - `solid-3` and `solid-4` moved from "still open" to CLOSED — pass-2 confirmed both shipped earlier (handbook had stale text)
 - All new pass-2 findings documented per framework (most LOW/info; 2 closed in this release)
 - `auto-detect` coverage corrected from claimed 94.3 % → actual 88.86 %
@@ -129,7 +129,7 @@ methodology limitations that are documented in honestGap).
 
 Audit follow-ups from the 2026-06-09 multi-agent review across all
 14 frameworks. Closes 6 cross-cutting bugs and ships the long-form
-Fachkonzept + audit handbook.
+specification + audit handbook.
 
 ### twelve-factor (`src/twelve-factor/score.ts` + `types.ts`)
 
@@ -173,7 +173,7 @@ Fachkonzept + audit handbook.
 
 ### docs
 
-- **New `docs/handbook.html` + `docs/handbook.evidence.json`** — Fachkonzept
+- **New `docs/handbook.html` + `docs/handbook.evidence.json`** — specification
   + implementation audit covering all 14 frameworks. Every claim
   sourced; navigable single-page HTML.
 
