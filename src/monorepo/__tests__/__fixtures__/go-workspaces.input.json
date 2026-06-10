@@ -1,0 +1,8 @@
+{
+  "buildSystem": "go-workspaces",
+  "capabilities": [
+    { "id": "cmd-server", "crossTargetDeps": 1 },
+    { "id": "pkg-auth", "crossTargetDeps": 0 },
+    { "id": "pkg-store", "crossTargetDeps": 2 }
+  ]
+}

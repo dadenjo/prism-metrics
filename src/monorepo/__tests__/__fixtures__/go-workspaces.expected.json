@@ -1,0 +1,11 @@
+{
+  "buildSystem": "go-workspaces",
+  "capabilities": [
+    { "id": "cmd-server", "healthScore": 90, "crossTargetDeps": 1 },
+    { "id": "pkg-auth", "healthScore": 100, "crossTargetDeps": 0 },
+    { "id": "pkg-store", "healthScore": 80, "crossTargetDeps": 2 }
+  ],
+  "averageHealth": 90,
+  "unhealthyCount": 0,
+  "noData": false
+}

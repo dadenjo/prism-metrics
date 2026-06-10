@@ -1,0 +1,6 @@
+{
+  "buildSystem": "unknown",
+  "capabilities": [
+    { "id": "x", "crossTargetDeps": 0 }
+  ]
+}

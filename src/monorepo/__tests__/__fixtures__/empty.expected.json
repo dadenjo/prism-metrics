@@ -1,1 +1,1 @@
-{ "buildSystem": "none", "capabilities": [], "averageHealth": 0, "unhealthyCount": 0 }
+{ "buildSystem": "none", "capabilities": [], "averageHealth": null, "unhealthyCount": 0, "noData": true }
