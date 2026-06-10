@@ -31,6 +31,27 @@ describe("analyzeMonorepo", () => {
   });
 });
 
+describe("mono-5: crossTargetDeps boundary cases", () => {
+  it("crossTargetDeps 5 = unhealthy threshold (healthScore 50, just unhealthy)", () => {
+    const r = analyzeMonorepo({ buildSystem: "turborepo", capabilities: [{ id: "a", crossTargetDeps: 5 }] });
+    expect(r.capabilities[0].healthScore).toBe(50);
+    expect(r.unhealthyCount).toBe(0); // 50 is NOT < 50 — boundary is strict-less-than
+  });
+  it("crossTargetDeps 6 → unhealthy (40 < 50)", () => {
+    const r = analyzeMonorepo({ buildSystem: "turborepo", capabilities: [{ id: "a", crossTargetDeps: 6 }] });
+    expect(r.capabilities[0].healthScore).toBe(40);
+    expect(r.unhealthyCount).toBe(1);
+  });
+  it("crossTargetDeps very large (100) → floor at 0", () => {
+    const r = analyzeMonorepo({ buildSystem: "turborepo", capabilities: [{ id: "a", crossTargetDeps: 100 }] });
+    expect(r.capabilities[0].healthScore).toBe(0);
+  });
+  it("crossTargetDeps 0 → perfect (100)", () => {
+    const r = analyzeMonorepo({ buildSystem: "turborepo", capabilities: [{ id: "a", crossTargetDeps: 0 }] });
+    expect(r.capabilities[0].healthScore).toBe(100);
+  });
+});
+
 describe("MONOREPO_METHODOLOGY", () => {
   it("references the score file", () => {
     expect(MONOREPO_METHODOLOGY.formula.codeRef).toContain("score.ts");

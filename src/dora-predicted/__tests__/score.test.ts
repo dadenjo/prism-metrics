@@ -51,6 +51,44 @@ describe("analyzeDoraPredicted", () => {
   });
 });
 
+describe("dora-5: cliff boundary tests", () => {
+  // Coherence 80 boundary in deploymentFrequency: >80 + cycles=0 → elite
+  // Coherence ≥60 + cycles≤2 → high; exactly 80 → high (not elite)
+  it("coherenceScore exactly 80 (boundary) → high, not elite", () => {
+    const r = analyzeDoraPredicted({
+      coherenceScore: 80, importCycles: 0, driftCount: 0,
+      criticalDrifted: false, averageCognitiveLoad: 20,
+      highCogLoadCapabilities: 0,
+    });
+    expect(r.predictedDeploymentFrequency).toBe("high");
+  });
+  it("coherenceScore 81 (just over) → elite", () => {
+    const r = analyzeDoraPredicted({
+      coherenceScore: 81, importCycles: 0, driftCount: 0,
+      criticalDrifted: false, averageCognitiveLoad: 20,
+      highCogLoadCapabilities: 0,
+    });
+    expect(r.predictedDeploymentFrequency).toBe("elite");
+  });
+  it("cog 30 exactly + drift 0 → elite (cog<30 fails strict less-than)", () => {
+    const r = analyzeDoraPredicted({
+      coherenceScore: 50, importCycles: 0, driftCount: 0,
+      criticalDrifted: false, averageCognitiveLoad: 30,
+      highCogLoadCapabilities: 0,
+    });
+    // cog<30 means cog=30 is NOT elite → falls to high
+    expect(r.predictedLeadTimeForChanges).toBe("high");
+  });
+  it("driftCount exactly 3 (boundary) → driftRiskLevel = 1 → high (≤1)", () => {
+    const r = analyzeDoraPredicted({
+      coherenceScore: 70, importCycles: 0, driftCount: 3,
+      criticalDrifted: false, averageCognitiveLoad: 45,
+      highCogLoadCapabilities: 0,
+    });
+    expect(r.predictedLeadTimeForChanges).toBe("high");
+  });
+});
+
 describe("DORA_PREDICTED_METHODOLOGY", () => {
   it("calls out predicted-not-measured", () => {
     expect(DORA_PREDICTED_METHODOLOGY.honestGap).toMatch(/predict/i);
