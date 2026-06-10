@@ -25,14 +25,21 @@ export function containerGroup(
   if (/\b(api|service|endpoint|rest|graphql|grpc|rpc)\b/.test(s)) {
     return "API Service";
   }
+  // c4-1 fix: `queue` no longer matches Database. Queues are backing
+  // infrastructure for Background Worker capabilities, not databases.
+  // Pre-fix the first-match-wins ordering labelled queues as
+  // "Database" silently → mislabeled the whole architectural picture
+  // for event-driven systems.
   if (
-    /\b(db|data|store|storage|database|postgres|mysql|mongo|redis|cache|queue)\b/.test(
+    /\b(db|data|store|storage|database|postgres|mysql|mongo|redis|cache)\b/.test(
       s,
     )
   ) {
     return "Database";
   }
-  if (/\b(ui|frontend|web|client|react|next|vue|browser|page)\b/.test(s)) {
+  // c4-2 fix: `client` no longer matches Web App. 'Stripe client' /
+  // 'API client' / 'Email client' are SDK integrations, not UIs.
+  if (/\b(ui|frontend|web|react|next|vue|browser|page)\b/.test(s)) {
     return "Web App";
   }
   if (/\b(worker|job|queue|cron|scheduler|processor|consumer)\b/.test(s)) {
@@ -43,13 +50,15 @@ export function containerGroup(
 
 /**
  * True when a capability name contains person/actor hints
- * (user, customer, admin, client, operator, viewer, member, guest).
- * Matches dashboard's `isPersonCap`.
+ * (user, customer, admin, operator, viewer, member, guest). Matches
+ * dashboard's `isPersonCap`.
+ *
+ * c4-2 fix: removed `client` — too many false positives ('Stripe
+ * client', 'API client', 'Email client'). The remaining tokens still
+ * cover the genuine actor cases.
  */
 export function isPersonCap(name: string): boolean {
-  return /\b(user|customer|admin|client|operator|viewer|member|guest)\b/i.test(
-    name,
-  );
+  return /\b(user|customer|admin|operator|viewer|member|guest)\b/i.test(name);
 }
 
 export function analyzeC4(sig: C4Signals): C4CoverageResult {
