@@ -55,8 +55,33 @@ export interface SolidSignals {
   // LSP signals
   /** Files using `extends` or `implements`. */
   inheritanceFiles: number;
-  /** Inheriting files containing "not implemented" / "TODO: implement" stubs. */
+  /**
+   * Inheriting files containing "not implemented" / "TODO: implement"
+   * stubs. WEAK signal — substring-based. The 2026-06-10 audit flagged
+   * this as drift because the match is too broad (a `// TODO:
+   * implement payment retry` comment doesn't necessarily mean the
+   * surrounding class violates LSP).
+   */
   narrowingStubFiles: number;
+  /**
+   * STRONG signal — parser/AST-confirmed LSP violations (solid-lsp-ast).
+   * When provided, the scorer prefers this over `narrowingStubFiles`
+   * and lifts the principle's confidence from 0.65 to 0.85.
+   *
+   * What qualifies:
+   * - A subclass method that THROWS unconditionally on entry (precondition
+   *   strengthening — child rejects inputs the parent accepts)
+   * - A subclass method whose parameter type narrows the parent's
+   *   (contravariant violation)
+   * - A subclass method that returns a value LESS general than the
+   *   parent's declared return (postcondition weakening on the
+   *   wrong side)
+   *
+   * Callers without an AST signal source should LEAVE THIS UNDEFINED —
+   * the scorer falls back to the weak signal. Passing 0 is a positive
+   * assertion ("we ran the analysis and found none").
+   */
+  confirmedLspViolations?: number;
 
   // ISP signals
   totalInterfaces: number;

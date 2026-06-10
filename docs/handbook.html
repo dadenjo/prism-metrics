@@ -584,7 +584,7 @@ footer p { margin: 0.4rem 0; }
 <table class="delta-table">
 <tr><th>Delta</th><th>Severity</th><th>Detail</th><th>File ref</th></tr>
 <tr><td>3-bucket scoring (90/65/35)</td><td><span class="pill info">info</span></td><td>Discrete buckets avoid over-claiming precision from coarse heuristics.</td><td><code>score.ts:51-55</code></td></tr>
-<tr><td>LSP substring heuristic</td><td><span class="pill drift">drift</span></td><td>Weakest signal in the catalog (matches "not implemented"/"TODO: implement"). Disclosed.</td><td><code>score.ts:182-205</code></td></tr>
+<tr><td>LSP tiered signal (solid-lsp-ast)</td><td><span class="pill info">info</span></td><td>Two-tier: <strong>strong</strong> <code>confirmedLspViolations</code> (parser/AST-confirmed contract violations, confidence 0.85) when the caller supplies one, else <strong>weak</strong> substring scan (confidence 0.65). Closed handbook drift 2026-06-10.</td><td><code>score.ts:182-220</code></td></tr>
 <tr><td>DIP vacuous-truth guard</td><td><span class="pill info">info</span></td><td>Empirical fix solid-1: zero direct-infra imports alone awarded strong/A+. Now requires positive abstraction signal.</td><td><code>score.ts:254-287</code></td></tr>
 <tr><td>Language-idiom gating</td><td><span class="pill info">info</span></td><td>Go/Rust LSP → missing_language; Python/Ruby LSP + ISP → missing_language. Excluded from mean.</td><td><code>score.ts:75-101</code></td></tr>
 </table>
@@ -596,7 +596,7 @@ footer p { margin: 0.4rem 0; }
 <p><strong>Implementation conformance:</strong> Conformant.<br/>
 <strong>Citation-audited claims:</strong> 3/3 verified.<br/>
 <strong>Empirical pass rate:</strong> 4/4.<br/>
-<strong>Recommended changes:</strong> Replace LSP substring scan with AST-based override analysis once an AST signal feed is available.</p>
+<strong>Recommended changes:</strong> <em>Closed 2026-06-10.</em> The LSP signal is now a two-tier contract — callers with an AST analyser supply <code>confirmedLspViolations</code> for confidence 0.85; callers without keep using the substring-based <code>narrowingStubFiles</code> at confidence 0.65. The scorer picks the strong signal when present, leaves the audit table item at <span class="pill info">info</span>.</p>
 </div>
 </section>
 
