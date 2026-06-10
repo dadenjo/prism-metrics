@@ -457,6 +457,7 @@ footer p { margin: 0.4rem 0; }
   <a href="#glossary">Glossary</a>
   <a href="#repro">Reproducibility</a>
   <a href="#trust-verification">Trust &amp; Verification</a>
+  <a href="#post-audit-delta">Pass-1 → 0.7.0 closure log</a>
 </nav>
 
 <main>
@@ -465,12 +466,13 @@ footer p { margin: 0.4rem 0; }
   <h1>prism-metrics Fachkonzept &amp; Implementation Audit</h1>
   <p class="subtitle">Specification handbook and read-only audit of the public npm package <code>prism-metrics</code> — 14 architecture-quality scoring modules, their primary sources, and per-framework conformance evidence.</p>
   <dl class="meta">
-    <dt>Version audited</dt><dd>prism-metrics 0.6.0 / 0.7.0 in-tree (post-solid-lsp-ast tier upgrade)</dd>
-    <dt>Date</dt><dd>2026-06-10</dd>
+    <dt>Version audited</dt><dd>prism-metrics 0.3.1 (published) / 0.4.0 (in-tree) — the state at pass-1 time on 2026-06-09</dd>
+    <dt>Latest published</dt><dd>prism-metrics <strong>0.7.0</strong> — for what changed since pass-1 + which regression tests now cover each closed finding see the <a href="#post-audit-delta">Pass-1 → 0.7.0 finding-closure log</a> at the end. <em>A fresh pass-2 has not yet been run; this document remains the pass-1 record annotated with closure evidence.</em></dd>
+    <dt>Date (pass-1)</dt><dd>2026-06-09 (audit) / 2026-06-10 (initial publish + closure-log refresh)</dd>
     <dt>License</dt><dd>MIT</dd>
-    <dt>Audit pass</dt><dd>fachkonzept-2026-06-10-pass-1 · refresh 2026-06-10 (solid-lsp-ast closed, numbers brought up to 0.7.0)</dd>
+    <dt>Audit pass</dt><dd>fachkonzept-2026-06-09-pass-1 (next: pass-2 against 0.7.0 — see <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>)</dd>
     <dt>Frameworks audited</dt><dd>14 (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect)</dd>
-    <dt>Existing test suite</dt><dd>278 tests across 17 test files — all passing (96.4 % line / 88.1 % branch coverage)</dd>
+    <dt>Test suite at pass-1</dt><dd>241 tests across 17 test files — all passing at audit start. <strong>Current state (0.7.0): 278 tests, 96.4 % line / 88.1 % branch coverage.</strong></dd>
     <dt>Empirical fixtures</dt><dd>56 (4 per framework: clean / violated / adversarial / ambiguous) — 56/56 pass</dd>
     <dt>Citations</dt><dd>42 primary/secondary sources cited; 42/42 verified live (URL reachable + attribution matches)</dd>
     <dt>Author</dt><dd>prism-metrics autonomous Fachkonzept generator</dd>
@@ -530,7 +532,7 @@ footer p { margin: 0.4rem 0; }
 <tr><td>auto-detect</td><td><span class="pill good">Conformant (internal spec)</span></td><td>3/3</td><td>4/4</td><td>13</td></tr>
 <tr><td><strong>core</strong> (foundation)</td><td><span class="pill good">Conformant</span></td><td>n/a</td><td>n/a</td><td>43</td></tr>
 </table>
-<p style="margin-top:0.8rem"><strong>Totals (as of 0.7.0):</strong> 14 frameworks + core foundation · 42/42 citations verified · 56/56 fixtures passed · <strong>278 tests passing</strong> · 96.4 % line / 88.1 % branch coverage · <strong>52 of 57 audit findings closed</strong> (5 LOW open, acknowledged in <code>honestGap</code>).</p>
+<p style="margin-top:0.8rem"><strong>Conformance verdicts above:</strong> recorded at pass-1 (2026-06-09 against 0.3.1 / 0.4.0). Citations + fixtures are the pass-1 numbers (42/42, 56/56). <strong>Test counts in the rightmost column are the CURRENT 0.7.0 state</strong> — they grew from 241 at pass-1 to 278 now via the regression tests cited in the <a href="#post-audit-delta">closure log</a>. <strong>52 of 57 pass-1 findings closed</strong> (5 LOW open, acknowledged in each framework's <code>honestGap</code>). A pass-2 audit against 0.7.0 has <em>not</em> been run; the closure log is the bridge.</p>
 </section>
 
 <!-- ============ FRAMEWORK SECTIONS ============ -->
@@ -973,7 +975,7 @@ npx tsx scripts/regenerate-handbook.mjs   # equivalent to the audit script
 <a id="trust-verification" aria-hidden="true"></a>
 <h2>Trust &amp; Verification</h2>
 
-<p>Frameworks live or die by reproducibility. The numbers below come straight from <code>npx vitest run --coverage</code> on the code as published in <code>0.6.0</code>, not from a cherry-picked snapshot. To regenerate them locally:</p>
+<p>Frameworks live or die by reproducibility. The numbers below come straight from <code>npx vitest run --coverage</code> on the code as published in <code>0.7.0</code>, not from a cherry-picked snapshot. These are the CURRENT live numbers, not the pass-1 ones — to see how the suite grew since the audit, read the <a href="#post-audit-delta">closure log</a>. To regenerate locally:</p>
 
 <pre><code>git clone https://github.com/dadenjo/prism-metrics
 cd prism-metrics
@@ -1033,12 +1035,63 @@ npx vitest run --coverage</code></pre>
 
 <h3>Reproducing the audit</h3>
 
-<p>The audit itself is reproducible. The prompt template lives at <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a> — spawn one agent per framework, point it at <code>src/&lt;framework&gt;/</code> plus the primary methodology source, and collect the findings. The diff against the published handbook is the next audit's input. Per-framework agent runs are independent and parallelisable; the previous (2026-06-10) full pass cost approximately <span class="pill info">$3-5</span> at Claude Sonnet 4.6 rates and ~1.5 h wall-clock with parallelisation.</p>
+<p>The audit itself is reproducible. The prompt template lives at <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a> — spawn one agent per framework, point it at <code>src/&lt;framework&gt;/</code> plus the primary methodology source, and collect the findings. The diff against the published handbook is the next audit's input. Per-framework agent runs are independent and parallelisable; the previous (2026-06-09) full pass cost approximately <span class="pill info">$3-5</span> at Claude Sonnet 4.6 rates and ~1.5 h wall-clock with parallelisation.</p>
+</section>
+
+<section>
+<a id="post-audit-delta" aria-hidden="true"></a>
+<h2>Pass-1 → 0.7.0 finding-closure log</h2>
+
+<p><strong>This handbook documents the 2026-06-09 audit (pass-1) against prism-metrics 0.3.1 published / 0.4.0 in-tree.</strong> Since then, the code shipped 7 patch + minor releases and the test suite grew from 241 to 278 assertions. None of those PRs constitute a new audit — they are <em>closures</em> against pass-1 findings, each with a regression test that pins the new behaviour in place. The git history is the auditable trace.</p>
+
+<p>To verify a closed finding hasn't regressed in 0.7.0:</p>
+
+<ol>
+  <li>Look up the finding's ID below (e.g. <code>iso-2</code>)</li>
+  <li>Read the cited regression test in <code>src/&lt;framework&gt;/__tests__/</code></li>
+  <li>Run <code>npx vitest run src/&lt;framework&gt;</code> — if green, the closure holds</li>
+</ol>
+
+<h3>Released since pass-1</h3>
+
+<table>
+  <thead><tr><th>Version</th><th>PRs</th><th>Audit findings closed</th><th>What changed in code</th></tr></thead>
+  <tbody>
+    <tr><td><strong>0.4.0</strong></td><td>#1, #2</td><td>Item 0.1, Item 0.2, iso-1, iso-2</td><td><code>core/InsufficientSignalResult</code> + <code>core/scanner-exclusions</code> module; iso-25010 returns <code>{ok:false}</code> on empty input; security penalty curve softened from linear <code>15 × hits</code> to <code>15 × log2(1+hits)</code></td></tr>
+    <tr><td><strong>0.4.x</strong></td><td>#3, #4, #5</td><td>12 SOLID/CleanArch/Hex findings · 11 EIP/EDA findings · 9 Conway/Wardley findings</td><td>Per-principle DIP vacuous-truth guard; LSP/ISP normalised cliffs; clean-arch + hexagonal noData states; EIP/EDA exclusion contract + signal floors; Conway proxy flag + N/A for single-team; Wardley confidence + disputed flag</td></tr>
+    <tr><td><strong>0.5.0</strong></td><td>#7, #8, #9, #10</td><td>tf-1, tf-2, mono-1, mono-2, dora-1, dora-3</td><td>Twelve-Factor 'n/a' status + honest 'unknown'; Monorepo noData + polyglot BuildSystem; DORA insufficient guard + <code>predicted*</code> field renames + predictionConfidence</td></tr>
+    <tr><td><strong>0.6.0</strong></td><td>#11, #12, #13, #14, #15</td><td>c4-1, c4-2, iso-3, iso-4, tf-4, mono-4, mono-5, dora-5, solid-5</td><td>C4 queue + client classifier collisions; ISO performance continuous curve + churn double-count fix; 9 boundary/regression tests</td></tr>
+    <tr><td><strong>0.7.0</strong></td><td>#20, #21</td><td>solid-lsp-ast</td><td>SOLID LSP tiered signal: optional <code>confirmedLspViolations</code> (AST-confirmed, confidence 0.85) with substring fallback (existing, 0.65). Non-breaking</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Tally:</strong> 52 of 57 pass-1 findings closed via the PRs above. The 5 still open are all LOW severity and are acknowledged in the respective framework's <code>honestGap</code> field (no silent debt):</p>
+
+<ul>
+  <li><strong>Item 0.3</strong> — <code>InputQuality</code> cross-cutting field on every <code>*Signals</code> type. ~3 h work, touches all 14 scorers; needs an API-design decision before implementation.</li>
+  <li><strong>dora-2</strong> — Magic thresholds in DORA-predicted (coherence 80/60/40, drift 3/8) need an empirical study citation OR a sigmoid replacement with documented midpoint. Methodology, not bug.</li>
+  <li><strong>solid-3, solid-4</strong> — ISP/LSP normalised by <code>analyzedFiles</code> + <code>skippedPaths</code> API. Both need API-design decision before implementation.</li>
+  <li><strong>mono-3</strong> — Sublinear slope <code>100 - 10·√deps</code> instead of <code>100 - 10·deps</code>. Methodology change; documented in <code>honestGap</code> as 'not derived from empirical data'.</li>
+  <li><strong>ddd-1, ddd-2</strong> — Classification keyword false-positives. Already acknowledged in DDD's <code>honestGap</code>.</li>
+</ul>
+
+<h3>When pass-2 should run</h3>
+
+<p>Pass-1 evidence will go stale if any of the following ship without a fresh audit:</p>
+
+<ul>
+  <li>A new methodology source publishes (e.g. ISO 25010:2023 adds 'Safety' as the 9th characteristic — that triggers a new audit of iso-25010)</li>
+  <li>One of the 5 open findings above is implemented (the new behaviour needs an empirical-fixture row in the conformance table)</li>
+  <li>A consumer reports a result that doesn't match their reading of the methodology — the 'Should I trust this?' ticket is itself a signal that the handbook needs an update</li>
+  <li>12+ months elapsed since pass-1 even without any of the above (citation rot, primary-source URL drift)</li>
+</ul>
+
+<p>None of those triggers fire as of 2026-06-10. When one does, run <code>docs/audit-prompt.md</code> end-to-end and produce a pass-2 document; the diff against this one is the input.</p>
 </section>
 
 <footer>
-<p>prism-metrics Fachkonzept &amp; Implementation Audit — 2026-06-10 — pass id fachkonzept-2026-06-10-pass-1 — MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
-<p>Trust &amp; Verification table generated from <code>npx vitest run --coverage</code> on prism-metrics <code>0.6.0</code>. Re-run locally to verify.</p>
+<p>prism-metrics Fachkonzept &amp; Implementation Audit — pass-1 — audit performed 2026-06-09 against <strong>0.3.1 published / 0.4.0 in-tree</strong> — handbook refreshed 2026-06-10 with closure log + current trust numbers. Latest released version: 0.7.0. MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
+<p>Trust &amp; Verification table generated from <code>npx vitest run --coverage</code> on prism-metrics <code>0.7.0</code>. The closure log above is auditable from <a href="https://github.com/dadenjo/prism-metrics/pulls?q=is%3Aclosed">the merged-PR history</a>; re-run the tests locally with <code>npm test</code> to verify the cited regression tests still pass.</p>
 </footer>
 
 </main>
