@@ -9,6 +9,38 @@ import ctxOut from "./__fixtures__/context-only.expected.json";
 import emptyIn from "./__fixtures__/empty.input.json";
 import emptyOut from "./__fixtures__/empty.expected.json";
 
+describe("c4-1 / c4-2 collisions (W11-audit follow-up)", () => {
+  it("c4-1: 'queue' is Background Worker, not Database", () => {
+    expect(containerGroup("event-queue", "Event Queue")).toBe("Background Worker");
+    expect(containerGroup("job-queue", "Job Queue")).toBe("Background Worker");
+  });
+  it("c4-1: legit databases still classify as Database", () => {
+    expect(containerGroup("user-db", "User Database")).toBe("Database");
+    expect(containerGroup("cache", "Redis Cache")).toBe("Database");
+  });
+  it("c4-2: 'Stripe client' / 'API client' is not a Person", () => {
+    expect(isPersonCap("Stripe client")).toBe(false);
+    expect(isPersonCap("API client")).toBe(false);
+    expect(isPersonCap("Email client")).toBe(false);
+  });
+  it("c4-2: 'client' is not a Web App on its own (no other matching token)", () => {
+    expect(containerGroup("stripe-client", "Stripe client")).toBe("Application");
+    expect(containerGroup("email-client", "Email client")).toBe("Application");
+    // 'API client' still classifies as API Service via the 'api' token,
+    // which is correct — it IS an API consumer.
+    expect(containerGroup("api-client", "API client")).toBe("API Service");
+  });
+  it("c4-2: real Persons still classify as Person", () => {
+    expect(isPersonCap("end user")).toBe(true);
+    expect(isPersonCap("admin operator")).toBe(true);
+    expect(isPersonCap("guest viewer")).toBe(true);
+  });
+  it("c4-2: real Web Apps still classify as Web App", () => {
+    expect(containerGroup("dashboard-ui", "Dashboard UI")).toBe("Web App");
+    expect(containerGroup("admin-frontend", "Admin Frontend")).toBe("Web App");
+  });
+});
+
 describe("analyzeC4", () => {
   it("matches full fixture", () => {
     expect(analyzeC4(fullIn)).toEqual(fullOut);
