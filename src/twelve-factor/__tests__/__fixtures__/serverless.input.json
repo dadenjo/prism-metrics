@@ -1,0 +1,17 @@
+{
+  "deploymentTarget": "serverless",
+  "factors": [
+    { "factor": "codebase", "status": "pass" },
+    { "factor": "dependencies", "status": "pass" },
+    { "factor": "config", "status": "pass" },
+    { "factor": "backing_services", "status": "pass" },
+    { "factor": "build_release_run", "status": "pass" },
+    { "factor": "processes", "status": "n/a" },
+    { "factor": "port_binding", "status": "n/a" },
+    { "factor": "concurrency", "status": "n/a" },
+    { "factor": "disposability", "status": "n/a" },
+    { "factor": "dev_prod_parity", "status": "pass" },
+    { "factor": "logs", "status": "pass" },
+    { "factor": "admin_processes", "status": "n/a" }
+  ]
+}
