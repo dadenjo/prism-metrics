@@ -1,8 +1,10 @@
 {
-  "deploymentFrequency": "elite",
-  "leadTimeForChanges": "elite",
-  "changeFailureRate": "elite",
-  "meanTimeToRestore": "elite",
+  "predictedDeploymentFrequency": "elite",
+  "predictedLeadTimeForChanges": "elite",
+  "predictedChangeFailureRate": "elite",
+  "predictedMeanTimeToRestore": "elite",
   "overallRank": 3,
-  "overallLevel": "elite"
+  "overallLevel": "elite",
+  "predictionConfidence": 0.6,
+  "insufficient": false
 }

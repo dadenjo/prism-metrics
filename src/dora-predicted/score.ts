@@ -4,6 +4,14 @@
  *
  * Note: these predict the _architectural drivers_ of DORA outcomes,
  * not the outcomes themselves (which need CI/CD logs and incident data).
+ *
+ * Audit fixes:
+ *   dora-1 — empty signals (every value zero) no longer fall through to
+ *     'elite' / 'high overall'. Returns 'insufficient' explicitly so a
+ *     zero-signal repo isn't rewarded as a high-DORA team.
+ *   dora-3 — predictionConfidence: number added; per-metric fields
+ *     renamed to predicted* so downstream UIs can't strip the
+ *     prediction nature.
  */
 
 import type { DoraLevel, DoraScoreResult, DoraSignals } from "./types.js";
@@ -13,6 +21,7 @@ const LEVEL_RANK: Record<DoraLevel, number> = {
   high: 2,
   medium: 1,
   low: 0,
+  insufficient: 0,
 };
 
 function rankToLevel(avg: number): DoraLevel {
@@ -22,8 +31,6 @@ function rankToLevel(avg: number): DoraLevel {
   return "low";
 }
 
-// Dashboard: coherence > 80 && cycles === 0 → elite; ≥60 && ≤2 → high;
-// ≥40 → medium; else low.
 function deploymentFrequency(sig: DoraSignals): DoraLevel {
   if (sig.coherenceScore > 80 && sig.importCycles === 0) return "elite";
   if (sig.coherenceScore >= 60 && sig.importCycles <= 2) return "high";
@@ -31,11 +38,6 @@ function deploymentFrequency(sig: DoraSignals): DoraLevel {
   return "low";
 }
 
-// Dashboard: driftRiskLevel = floor(driftCount / 3)
-//   cogAvg < 30 && driftRisk === 0    → elite
-//   cogAvg < 50 && driftRisk <= 1     → high
-//   cogAvg < 70 && driftRisk <= 2     → medium
-//   else                              → low
 function leadTimeForChanges(sig: DoraSignals): DoraLevel {
   const driftRiskLevel = Math.floor(sig.driftCount / 3);
   const cog = sig.averageCognitiveLoad;
@@ -45,11 +47,6 @@ function leadTimeForChanges(sig: DoraSignals): DoraLevel {
   return "low";
 }
 
-// Dashboard: criticalDrifted shortcut → low.
-//   cycles === 0 && drift === 0      → elite
-//   cycles ≤ 2  && drift ≤ 3         → high
-//   cycles ≤ 5  && drift ≤ 8         → medium
-//   else                              → low
 function changeFailureRate(sig: DoraSignals): DoraLevel {
   if (sig.criticalDrifted) return "low";
   if (sig.importCycles === 0 && sig.driftCount === 0) return "elite";
@@ -58,11 +55,6 @@ function changeFailureRate(sig: DoraSignals): DoraLevel {
   return "low";
 }
 
-// Dashboard:
-//   drift === 0 && cog < 40           → elite
-//   drift ≤ 3  && cog < 55            → high
-//   criticalDrifted || (drift > 8 && cog > 65)  → low
-//   else                              → medium
 function meanTimeToRestore(sig: DoraSignals): DoraLevel {
   const cog = sig.averageCognitiveLoad;
   if (sig.driftCount === 0 && cog < 40) return "elite";
@@ -71,20 +63,54 @@ function meanTimeToRestore(sig: DoraSignals): DoraLevel {
   return "medium";
 }
 
+/**
+ * dora-1 — detect the zero-signal state. Trigger when:
+ *   - totalCapabilities is provided and === 0, OR
+ *   - all signals are at default-zero (coherenceScore=0, no cycles,
+ *     no drift, no cog load, no critical drift)
+ */
+function isInsufficientSignal(sig: DoraSignals): boolean {
+  if (sig.totalCapabilities === 0) return true;
+  return (
+    sig.coherenceScore === 0 &&
+    sig.importCycles === 0 &&
+    sig.driftCount === 0 &&
+    !sig.criticalDrifted &&
+    sig.averageCognitiveLoad === 0 &&
+    sig.highCogLoadCapabilities === 0
+  );
+}
+
 export function analyzeDoraPredicted(sig: DoraSignals): DoraScoreResult {
+  if (isInsufficientSignal(sig)) {
+    return {
+      predictedDeploymentFrequency: "insufficient",
+      predictedLeadTimeForChanges: "insufficient",
+      predictedChangeFailureRate: "insufficient",
+      predictedMeanTimeToRestore: "insufficient",
+      overallRank: null,
+      overallLevel: "insufficient",
+      predictionConfidence: 0,
+      insufficient: true,
+    };
+  }
   const df = deploymentFrequency(sig);
   const lt = leadTimeForChanges(sig);
   const cfr = changeFailureRate(sig);
   const mttr = meanTimeToRestore(sig);
   const overallRank =
     (LEVEL_RANK[df] + LEVEL_RANK[lt] + LEVEL_RANK[cfr] + LEVEL_RANK[mttr]) / 4;
-  const overallLevel = rankToLevel(overallRank);
   return {
-    deploymentFrequency: df,
-    leadTimeForChanges: lt,
-    changeFailureRate: cfr,
-    meanTimeToRestore: mttr,
+    predictedDeploymentFrequency: df,
+    predictedLeadTimeForChanges: lt,
+    predictedChangeFailureRate: cfr,
+    predictedMeanTimeToRestore: mttr,
     overallRank,
-    overallLevel,
+    overallLevel: rankToLevel(overallRank),
+    // 0.6 baseline — these are architectural proxies for DORA outcomes,
+    // not measurements. Future iteration could scale by signal
+    // completeness.
+    predictionConfidence: 0.6,
+    insufficient: false,
   };
 }
