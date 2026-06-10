@@ -946,7 +946,8 @@ footer p { margin: 0.4rem 0; }
 <section id="repro" class="scroll-margin">
 <h2>Reproducibility appendix</h2>
 <p>To regenerate this handbook from scratch:</p>
-<pre><code>cd /Users/schuldes/prism-metrics
+<pre><code>git clone https://github.com/dadenjo/prism-metrics.git
+cd prism-metrics
 npm install
 npm test               # all 286 tests should pass
 # regenerate fixtures (4 per framework × 14 frameworks)
