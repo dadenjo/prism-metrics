@@ -89,6 +89,114 @@ describe("dora-5: cliff boundary tests", () => {
   });
 });
 
+// ── dora-7 (pass-2) — meanTimeToRestore criticalDrifted + high-drift+cog branches ──
+// Pre-pass-2 the MTTR 'low' branch (criticalDrifted=true OR driftCount>8+cog>65)
+// was only exercised via the critical-drift fixture which hit it via the
+// criticalDrifted path. The 'driftCount > 8 && cog > 65' arm had no test.
+describe("dora-7 — MTTR low-branch covers both predicates independently", () => {
+  const BASE: DoraSignals = {
+    coherenceScore: 80,
+    importCycles: 0,
+    driftCount: 0,
+    criticalDrifted: false,
+    averageCognitiveLoad: 30,
+    highCogLoadCapabilities: 0,
+    totalCapabilities: 10,
+  };
+  it("criticalDrifted=true with otherwise-mid-range signals forces MTTR to 'low'", () => {
+    // criticalDrifted is checked AFTER the elite + high branches, so it
+    // only forces 'low' when neither shortcut matches. With drift=5 + cog=60
+    // the otherwise-medium repo drops to low under critical pressure.
+    const r = analyzeDoraPredicted({
+      ...BASE,
+      driftCount: 5,
+      averageCognitiveLoad: 60,
+      criticalDrifted: true,
+    });
+    expect(r.predictedMeanTimeToRestore).toBe("low");
+  });
+  it("driftCount > 8 AND cog > 65 (no critical) forces MTTR to 'low'", () => {
+    const r = analyzeDoraPredicted({
+      ...BASE,
+      driftCount: 9,
+      averageCognitiveLoad: 66,
+      criticalDrifted: false,
+    });
+    expect(r.predictedMeanTimeToRestore).toBe("low");
+  });
+  it("driftCount > 8 alone (low cog) does NOT trigger 'low' MTTR", () => {
+    const r = analyzeDoraPredicted({
+      ...BASE,
+      driftCount: 9,
+      averageCognitiveLoad: 50,  // not > 65
+      criticalDrifted: false,
+    });
+    expect(r.predictedMeanTimeToRestore).not.toBe("low");
+  });
+  it("cog > 65 alone (low drift) does NOT trigger 'low' MTTR", () => {
+    const r = analyzeDoraPredicted({
+      ...BASE,
+      driftCount: 5,  // not > 8
+      averageCognitiveLoad: 70,
+      criticalDrifted: false,
+    });
+    expect(r.predictedMeanTimeToRestore).not.toBe("low");
+  });
+  it("driftCount exactly 8 + cog 66 does NOT trigger (strict >, not >=)", () => {
+    const r = analyzeDoraPredicted({
+      ...BASE,
+      driftCount: 8,
+      averageCognitiveLoad: 66,
+      criticalDrifted: false,
+    });
+    expect(r.predictedMeanTimeToRestore).not.toBe("low");
+  });
+});
+
+describe("dora — meanTimeToRestore elite + high paths", () => {
+  const BASE: DoraSignals = {
+    coherenceScore: 80,
+    importCycles: 0,
+    driftCount: 0,
+    criticalDrifted: false,
+    averageCognitiveLoad: 30,
+    highCogLoadCapabilities: 0,
+    totalCapabilities: 10,
+  };
+  it("driftCount=0 + cog<40 → elite MTTR", () => {
+    const r = analyzeDoraPredicted(BASE);
+    expect(r.predictedMeanTimeToRestore).toBe("elite");
+  });
+  it("driftCount<=3 + cog<55 → high MTTR", () => {
+    const r = analyzeDoraPredicted({ ...BASE, driftCount: 2, averageCognitiveLoad: 50 });
+    expect(r.predictedMeanTimeToRestore).toBe("high");
+  });
+  it("mid-range (no extremes) → medium MTTR", () => {
+    const r = analyzeDoraPredicted({ ...BASE, driftCount: 5, averageCognitiveLoad: 60 });
+    expect(r.predictedMeanTimeToRestore).toBe("medium");
+  });
+});
+
+describe("dora — changeFailureRate branch coverage (per dora-2/dora-7 area)", () => {
+  const BASE: DoraSignals = {
+    coherenceScore: 80,
+    importCycles: 0,
+    driftCount: 0,
+    criticalDrifted: false,
+    averageCognitiveLoad: 30,
+    highCogLoadCapabilities: 0,
+    totalCapabilities: 10,
+  };
+  it("criticalDrifted=true forces CFR to 'low'", () => {
+    const r = analyzeDoraPredicted({ ...BASE, criticalDrifted: true });
+    expect(r.predictedChangeFailureRate).toBe("low");
+  });
+  it("clean signals → CFR 'elite'", () => {
+    const r = analyzeDoraPredicted(BASE);
+    expect(r.predictedChangeFailureRate).toBe("elite");
+  });
+});
+
 describe("DORA_PREDICTED_METHODOLOGY", () => {
   it("calls out predicted-not-measured", () => {
     expect(DORA_PREDICTED_METHODOLOGY.honestGap).toMatch(/predict/i);
