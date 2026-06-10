@@ -24,6 +24,16 @@ import type {
 } from "./types.js";
 
 const SLOPE = 10;
+/**
+ * mono-4: UNHEALTHY_THRESHOLD documented.
+ *
+ * 50 = the score below which a capability is flagged unhealthy. The
+ * number corresponds to crossTargetDeps = 5 (since healthScore =
+ * 100 − 10 × deps). The choice mirrors the dashboard's traffic-light
+ * banding: 5+ cross-target deps for a single capability is the point
+ * where 'modular' becomes 'tangled' on a typical monorepo. Configurable
+ * via a future API parameter if a project's threshold differs.
+ */
 const UNHEALTHY_THRESHOLD = 50;
 
 export function analyzeMonorepo(sig: MonorepoSignals): MonorepoResult {

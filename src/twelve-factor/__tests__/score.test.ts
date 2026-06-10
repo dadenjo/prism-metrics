@@ -51,6 +51,17 @@ describe("PLATFORM_OWNED_FACTORS", () => {
   });
 });
 
+describe("tf-4: empty factors edge case", () => {
+  it("empty factors:[] → noData=true (not 0/F)", () => {
+    const r = analyzeTwelveFactor({ factors: [] });
+    expect(r.noData).toBe(true);
+    expect(r.grade).toBe("N/A");
+    expect(r.score).toBe(0);
+    expect(r.readiness).toBe(null);
+    expect(r.confidence).toBe(0);
+  });
+});
+
 describe("TWELVE_FACTOR_METHODOLOGY", () => {
   it("references the score file", () => {
     expect(TWELVE_FACTOR_METHODOLOGY.formula.codeRef).toContain("score.ts");
