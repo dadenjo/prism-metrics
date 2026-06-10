@@ -10,7 +10,7 @@ Open methodology and pure scoring implementations for the architecture
 frameworks used by **prism0x2A**. Every scorer is a pure TypeScript
 function: same input, same output, no I/O, no side effects.
 
-📖 **[Read the Fachkonzept &amp; implementation audit handbook](docs/handbook.html)** — every framework's definition, scoring formula, and audit findings in one document.
+📖 **[Read the Fachkonzept &amp; implementation audit handbook](https://dadenjo.github.io/prism-metrics/)** — every framework's definition, scoring formula, and audit findings in one document (also at [`docs/handbook.html`](docs/handbook.html)).
 
 ## Install
 
