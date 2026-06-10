@@ -1,6 +1,16 @@
 # prism-metrics
 
-Open methodology and pure scoring implementations for the architecture frameworks used by prism0x2A.
+[![npm version](https://img.shields.io/npm/v/prism-metrics.svg)](https://www.npmjs.com/package/prism-metrics)
+[![tests](https://img.shields.io/badge/tests-272%20passing-brightgreen.svg)](#test-coverage)
+[![coverage](docs/badges/coverage.svg)](#test-coverage)
+[![audit](https://img.shields.io/badge/audit%20findings-51%20of%2057%20closed-brightgreen.svg)](#audit--verification)
+[![license](https://img.shields.io/npm/l/prism-metrics.svg)](LICENSE)
+
+Open methodology and pure scoring implementations for the architecture
+frameworks used by **prism0x2A**. Every scorer is a pure TypeScript
+function: same input, same output, no I/O, no side effects.
+
+📖 **[Read the Fachkonzept &amp; implementation audit handbook](docs/handbook.html)** — every framework's definition, scoring formula, and audit findings in one document.
 
 ## Install
 
@@ -40,28 +50,54 @@ Every framework exports the same three things:
 
 See `src/<framework>/methodology.ts` for the human-readable specs.
 
-## Frameworks in v0.2.0
+## Frameworks (14)
 
-| Subpath | Description |
-| --- | --- |
-| `prism-metrics/solid` | SOLID principles (SRP, OCP, LSP, ISP, DIP) — file/interface heuristics |
-| `prism-metrics/clean-arch` | Clean Architecture dependency-rule violations |
-| `prism-metrics/hexagonal` | Ports & Adapters violations |
-| `prism-metrics/c4` | C4 model coverage (L1–L3, no headline score) |
-| `prism-metrics/twelve-factor` | Twelve-Factor App per-factor scoring |
-| `prism-metrics/dora-predicted` | DORA four key metrics predicted from architectural signals (not measured) |
-| `prism-metrics/conways-law` | Team/code coupling alignment |
-| `prism-metrics/wardley` | Wardley map evolution-stage classification |
-| `prism-metrics/iso-25010` | ISO/IEC 25010 — 6 of 8 characteristics |
-| `prism-metrics/eip` | Enterprise Integration Patterns detection |
-| `prism-metrics/ddd` | DDD bounded-context inference |
-| `prism-metrics/eda` | Event-driven pattern detection |
-| `prism-metrics/monorepo` | Monorepo per-capability isolation health |
-| `prism-metrics/auto-detect` | Framework auto-detection from manifest signals |
+| Subpath | Description | Tests | Coverage |
+| --- | --- | ---: | ---: |
+| `prism-metrics/iso-25010` | ISO/IEC 25010 — 6 of 8 quality characteristics | 16 | 100% lines |
+| `prism-metrics/solid` | SOLID principles — file/interface heuristics | 32 | 98.8% lines |
+| `prism-metrics/clean-arch` | Clean Architecture dependency-rule violations | 15 | **100%** |
+| `prism-metrics/hexagonal` | Ports & Adapters violations | 17 | **100%** |
+| `prism-metrics/eip` | Enterprise Integration Patterns detection | 20 | 100% lines |
+| `prism-metrics/eda` | Event-driven pattern detection | 20 | 100% lines |
+| `prism-metrics/conways-law` | Team/code coupling alignment proxy | 11 | 96.5% lines |
+| `prism-metrics/wardley` | Wardley map evolution-stage classification | 20 | 100% lines |
+| `prism-metrics/twelve-factor` | Twelve-Factor App per-factor scoring | 11 | 97.0% lines |
+| `prism-metrics/monorepo` | Monorepo per-capability isolation health | 10 | **100%** |
+| `prism-metrics/dora-predicted` | DORA four key metrics — predicted, not measured | 12 | 95.1% lines |
+| `prism-metrics/ddd` | DDD bounded-context inference | 15 | **100%** |
+| `prism-metrics/c4` | C4 model coverage (L1–L3, no headline score) | 17 | 99.0% lines |
+| `prism-metrics/auto-detect` | Framework auto-detection from manifest signals | 13 | 94.3% lines |
+| **core** (foundation) | InsufficientSignalResult + scanner-exclusions primitives | 43 | **100%** |
+
+**Totals**: 272 tests passing · 96.4% line coverage · 88.1% branch coverage.
+
+## Audit &amp; Verification
+
+The 2026-06-09 multi-agent audit reviewed every framework against
+its published methodology. **51 of 57 findings are closed** as of
+0.6.0; the remaining 6 are LOW-severity items documented in each
+framework's `honestGap`.
+
+The complete audit — Fachkonzept, expected results, implementation
+review per framework, plus empirical verification — lives in:
+
+- 📖 [**docs/handbook.html**](docs/handbook.html) — single-file HTML handbook (629 LOC)
+- 📊 [**docs/handbook.evidence.json**](docs/handbook.evidence.json) — machine-readable evidence per finding
+- 📋 [**docs/scanner-exclusions.md**](docs/scanner-exclusions.md) — methodology disclosure for what gets skipped during a scan
+
+Major audit-driven changes (0.4.0 → 0.6.0):
+
+- **0.4.0**: foundation `InsufficientSignalResult` + scanner-exclusions module; iso-1/iso-2 (empty-input + security cliff)
+- **0.5.0**: tf-1/tf-2 (deployment-target awareness + honest 'unknown'); mono-1/mono-2 (noData + polyglot); dora-1/dora-3 (insufficient guard + prediction confidence)
+- **0.6.0**: c4-1/c4-2 (queue + client collisions); iso-3/iso-4 (continuous perf curve + churn double-count); 9 boundary/regression tests across tf, mono, dora, solid
+
+See `CHANGELOG.md` for the per-version detail.
 
 ## Verify on your own data
 
-Every scorer ships with `input.json` / `expected.json` fixture pairs under `src/<framework>/__tests__/__fixtures__/`. To reproduce scores locally:
+Every scorer ships with `input.json` / `expected.json` fixture pairs
+under `src/<framework>/__tests__/__fixtures__/`. To reproduce locally:
 
 ```bash
 git clone https://github.com/dadenjo/prism-metrics
@@ -70,7 +106,12 @@ npm install
 npm test
 ```
 
-104 fixture-backed assertions cover every scorer. Same input, same output, no I/O — the scorers are pure functions.
+The scorers are pure functions — same input, same output, no I/O.
+Run with `--coverage` to see line/branch breakdown per module:
+
+```bash
+npx vitest run --coverage
+```
 
 Inside your own project:
 
@@ -87,25 +128,6 @@ const result = analyzeCleanArch({
 
 // { score: 100, grade: 'A+', totalViolations: 0, ... }
 ```
-
-## What's new in 0.3.0
-
-- **auto-detect** — added `node:test` (Node.js built-in test runner) as the 15th library signature, detected via a script-driven heuristic (`node --test` or `tsx --test` in `package.json` scripts). The detector now accepts an optional `scripts` field on `AutoDetectSignals` (backward compatible). Methodology `coverage` text clarified accordingly.
-
-## What's new in 0.2.0
-
-This release aligns every scorer with the prism0x2A dashboard reference implementation, so the public package can serve as the single source of truth for framework scoring. Highlights:
-
-- **iso-25010** — six LOCKED_FORMULA per-characteristic sub-formulas (functional_suitability, performance_efficiency, reliability, security, maintainability, portability) now match the dashboard exactly. Adds `hardcodedConfigHits` and rebases `averageChurn` to a per-capability raw count.
-- **dora-predicted** — level assignment for Lead Time (driftRiskLevel buckets), Change Failure Rate (cycles AND drift), and MTTR (criticalDrifted + cog-load shortcut) now mirrors the dashboard. `criticalDriftCount` renamed to boolean `criticalDrifted`.
-- **eda** — `hasEda` is ANY-of-five (producers OR consumers OR brokers OR cqrs OR sagas), confidence is the weighted file-category sum the dashboard uses.
-- **eip** — pattern catalog expanded from 8 to **18 patterns** across 5 categories; new `detectEipPatterns(candidates)` runs the regex catalog; `architectureType` now produces dashboard's 5 labels (event_driven_saga, event_driven_pubsub, message_based, content_based_routing, point_to_point) and emits `missingPatternSuggestions`.
-- **c4** — exports `containerGroup(id, name)` and `isPersonCap(name)` from the dashboard's `buildC4Model` heuristics. Diagram rendering remains a UI concern.
-- **wardley** — exports `classifyEvolution(input)` and `classifyValueChain(name, id)` so callers can derive stage/visibility from raw signals.
-- **ddd** — exports `classifyContext`, `extractUbiquitousLanguage`, `inferRelationshipPattern`; vocabulary aligned with dashboard (`ContextType` = core_domain/supporting/generic; `RelationshipPattern` = upstream_downstream/shared_kernel/anticorruption_layer/open_host_service/conformist/partnership).
-- **auto-detect** — primary export renamed to `detectFrameworks` (`analyzeAutoDetect` kept as alias); 14 dep-driven detectors + 6 file/dir-driven detectors with hand-calibrated dashboard confidence; new `architectureStyle` inference (1 of 8 styles).
-
-Breaking changes affect signal/result shapes for the scorers above — see each module's TypeScript types for the new contract.
 
 ## Scanner exclusions (methodology, not internals)
 
@@ -126,9 +148,31 @@ See [`docs/scanner-exclusions.md`](docs/scanner-exclusions.md) for the
 full list and the empirical trigger (Atomar's ISO 25010 Security `10 / F`
 result driven by hits inside `.claude/worktrees/`).
 
+## Test Coverage
+
+Generated via `@vitest/coverage-v8`. Per-framework line / branch coverage
+is tracked in [`docs/coverage-summary.json`](docs/coverage-summary.json)
+and surfaced in the handbook's Verification box per framework.
+
+| Framework | Lines | Branches | Score-file lines |
+| --- | ---: | ---: | ---: |
+| clean-arch · ddd · hexagonal · monorepo | **100.0%** | **100.0%** | 100% |
+| eda · eip · iso-25010 · wardley | 100.0% | 84–99% | 100% |
+| c4 · solid | 98.8–99.0% | 96.9–97.6% | 98% |
+| twelve-factor | 97.0% | 98.3% | 94% |
+| conways-law | 96.5% | 93.3% | 93% |
+| dora-predicted · auto-detect | 94–95% | 92–94% | 89–90% |
+| **TOTAL** | **96.4%** | **88.1%** | |
+
 ## Honest gaps
 
-The methodology constants spell out where signals are weak (heuristic naming, sample caps, predictive-not-measured for DORA, 6-of-8 for ISO 25010). Read the `honestGap` field before using a score in production.
+The methodology constants spell out where signals are weak — heuristic
+naming, sample caps, predictive-not-measured for DORA, 6-of-8 for ISO
+25010, single-team-undefined for Conway's Law. **Read the `honestGap`
+field before using a score in production.**
+
+The handbook's "Cross-cutting findings" + per-framework "Implementation
+audit" sections document every known limitation explicitly.
 
 ## License
 

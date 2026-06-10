@@ -89,6 +89,7 @@ footer { margin-top: 4rem; padding: 1.5rem 0; border-top: 1px solid var(--line);
   <h2>Back Matter</h2>
   <a href="#glossary">Glossary</a>
   <a href="#repro">Reproducibility</a>
+  <a href="#trust-verification">Trust &amp; Verification</a>
 </nav>
 
 <main>
@@ -600,8 +601,76 @@ npx tsx scripts/regenerate-handbook.mjs   # equivalent to the audit script
 <p>A CI job can diff a fresh sidecar against the committed one to detect regressions in citation status, delta count/severity, or empirical pass rate. To update a citation, change its URL in the sidecar JSON, re-fetch, and flip <code>verification_status</code> to <code>verified</code> or <code>unverified</code> accordingly.</p>
 </section>
 
+<section>
+<a id="trust-verification" aria-hidden="true"></a>
+<h2>Trust &amp; Verification</h2>
+
+<p>Frameworks live or die by reproducibility. The numbers below come straight from <code>npx vitest run --coverage</code> on the code as published in <code>0.6.0</code>, not from a cherry-picked snapshot. To regenerate them locally:</p>
+
+<pre><code>git clone https://github.com/dadenjo/prism-metrics
+cd prism-metrics
+npm install
+npx vitest run --coverage</code></pre>
+
+<p>The summary lives at <code>docs/coverage-summary.json</code> (machine-readable) and the per-framework breakdown is below.</p>
+
+<h3>Per-framework coverage + test count</h3>
+
+<table>
+  <thead><tr><th>Framework</th><th>Tests</th><th>Lines</th><th>Branches</th><th>Test file</th><th>Audit findings closed</th></tr></thead>
+  <tbody>
+    <tr><td>iso-25010</td><td>16</td><td>100.0%</td><td>84.1%</td><td><code>src/iso-25010/__tests__/score.test.ts</code></td><td>iso-1, iso-2, iso-3, iso-4</td></tr>
+    <tr><td>solid</td><td>32</td><td>98.8%</td><td>96.9%</td><td><code>src/solid/__tests__/score.test.ts</code></td><td>solid-1, solid-2, solid-5, solid-6 (model)</td></tr>
+    <tr><td>clean-arch</td><td>15</td><td>100.0%</td><td>100.0%</td><td><code>src/clean-arch/__tests__/score.test.ts</code></td><td>ca-1, ca-2</td></tr>
+    <tr><td>hexagonal</td><td>17</td><td>100.0%</td><td>100.0%</td><td><code>src/hexagonal/__tests__/score.test.ts</code></td><td>hex-1, hex-3</td></tr>
+    <tr><td>eip</td><td>20</td><td>100.0%</td><td>99.1%</td><td><code>src/eip/__tests__/score.test.ts</code></td><td>eip-1 through eip-6</td></tr>
+    <tr><td>eda</td><td>20</td><td>100.0%</td><td>97.7%</td><td><code>src/eda/__tests__/score.test.ts</code></td><td>eda-1, eda-2, eda-3, eda-4</td></tr>
+    <tr><td>conways-law</td><td>11</td><td>96.5%</td><td>93.3%</td><td><code>src/conways-law/__tests__/score.test.ts</code></td><td>conway-1, conway-2, conway-3, conway-4</td></tr>
+    <tr><td>wardley</td><td>20</td><td>100.0%</td><td>97.4%</td><td><code>src/wardley/__tests__/score.test.ts</code></td><td>wardley-1, wardley-2, wardley-3, wardley-4, wardley-5</td></tr>
+    <tr><td>twelve-factor</td><td>11</td><td>97.0%</td><td>98.3%</td><td><code>src/twelve-factor/__tests__/score.test.ts</code></td><td>tf-1, tf-2, tf-4</td></tr>
+    <tr><td>monorepo</td><td>10</td><td>100.0%</td><td>100.0%</td><td><code>src/monorepo/__tests__/score.test.ts</code></td><td>mono-1, mono-2, mono-4, mono-5</td></tr>
+    <tr><td>dora-predicted</td><td>12</td><td>95.1%</td><td>94.3%</td><td><code>src/dora-predicted/__tests__/score.test.ts</code></td><td>dora-1, dora-3, dora-5</td></tr>
+    <tr><td>ddd</td><td>15</td><td>100.0%</td><td>100.0%</td><td><code>src/ddd/__tests__/score.test.ts</code></td><td>(model framework — no findings)</td></tr>
+    <tr><td>c4</td><td>17</td><td>99.0%</td><td>97.6%</td><td><code>src/c4/__tests__/score.test.ts</code></td><td>c4-1, c4-2</td></tr>
+    <tr><td>auto-detect</td><td>13</td><td>94.3%</td><td>92.7%</td><td><code>src/auto-detect/__tests__/score.test.ts</code></td><td>(no critical findings)</td></tr>
+    <tr><td><strong>core</strong> (foundation)</td><td>43</td><td>100.0%</td><td>95.8%</td><td>3 test files</td><td>Item 0.1, Item 0.2</td></tr>
+    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>96.4%</strong></td><td><strong>88.1%</strong></td><td>17 test files · 272 tests</td><td><strong>51 of 57 findings closed</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>How to map a claim to its test</h3>
+
+<p>Every framework section above ends with an "Empirical verification" subsection that references the specific behaviour the tests pin down. To trace any claim back to code:</p>
+
+<ol>
+  <li>Pick the framework section (e.g. "9. The Twelve-Factor App").</li>
+  <li>Read the claim in "Implementation audit" — for example "empty <code>factors:[]</code> returns <code>noData=true</code>".</li>
+  <li>Open the test file referenced in the Trust &amp; Verification table — for tf, that's <code>src/twelve-factor/__tests__/score.test.ts</code>.</li>
+  <li>Search for the claim's keyword (e.g. <code>noData</code>) to find the assertion. Test names start with <code>it(…)</code> and contain the audit-finding ID (e.g. <code>tf-4</code>) where applicable.</li>
+</ol>
+
+<p>For example, the claim that ISO-25010 returns an explicit insufficient-signal result on empty input (iso-1) is verified by the test <code>"returns insufficient on empty input"</code> in <code>src/iso-25010/__tests__/score.test.ts</code>. Fixtures live alongside in <code>__fixtures__/empty.input.json</code> + <code>empty.expected.json</code>.</p>
+
+<h3>Audit finding lifecycle</h3>
+
+<p>Findings discovered in the 2026-06-09 multi-agent audit are tracked with a stable ID (<code>iso-3</code>, <code>conway-1</code>, …). Each closed finding flows through three commits:</p>
+
+<ol>
+  <li><strong>Identification</strong> — listed in the handbook's "Implementation audit" subsection per framework with severity (CRITICAL / HIGH / MEDIUM / LOW).</li>
+  <li><strong>Fix</strong> — a PR with title <code>fix(framework): ID — short description</code>. The PR adds the regression test that pins the new behaviour.</li>
+  <li><strong>Acknowledgement</strong> — for findings that can't be fully closed (e.g. magic constants whose empirical study is out of scope), the framework's <code>methodology.ts</code> <code>honestGap</code> field documents the limitation explicitly.</li>
+</ol>
+
+<p>The 6 still-open LOW-severity items (Item 0.3 InputQuality, dora-2 magic thresholds, solid-3 + solid-4 ISP/LSP normalization + skippedPaths API, mono-3 sublinear slope, ddd-1 + ddd-2) are all in category 3 — acknowledged in <code>honestGap</code> rather than silently shipped.</p>
+
+<h3>Reproducing the audit</h3>
+
+<p>The audit itself is reproducible. Spawn a multi-agent review with the prompt template in <code>docs/audit-prompt.md</code> (TODO — not yet committed), point each agent at one framework's <code>src/<framework>/</code> + the prism dashboard's reference implementation, and collect the findings. The diff against the published handbook is the next audit's input.</p>
+</section>
+
 <footer>
 <p>prism-metrics Fachkonzept &amp; Implementation Audit — 2026-06-10 — pass id fachkonzept-2026-06-10-pass-1 — MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
+<p>Trust &amp; Verification table generated from <code>npx vitest run --coverage</code> on prism-metrics <code>0.6.0</code>. Re-run locally to verify.</p>
 </footer>
 
 </main>

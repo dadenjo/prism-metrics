@@ -1,0 +1,62 @@
+# prism-metrics CI
+#
+# Runs on every push + PR. Produces:
+#   - `npm test` pass/fail (272 tests as of 0.6.0)
+#   - Coverage summary committed to docs/coverage-summary.json on main
+#   - A coverage badge SVG kept under docs/badges/ so the README can
+#     reference it without an external service.
+#
+# Why no Codecov / Coveralls: prism-metrics is small enough that
+# we publish the JSON directly. External services add an auth hop
+# and a possible point of failure for what should be a transparent,
+# reproducible number.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx vitest run --coverage
+      - name: Upload coverage summary
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p docs/badges
+          cp coverage/coverage-summary.json docs/coverage-summary.json
+          # Generate a tiny inline badge from the total line coverage.
+          LINES=$(node -e "console.log(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json','utf8')).total.lines.pct)")
+          COLOR=$(node -e "const p=$LINES; console.log(p>=90?'brightgreen':p>=80?'green':p>=70?'yellow':'orange')")
+          cat > docs/badges/coverage.svg <<EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="116" height="20" role="img" aria-label="coverage: ${LINES}%">
+            <linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
+            <clipPath id="r"><rect width="116" height="20" rx="3" fill="#fff"/></clipPath>
+            <g clip-path="url(#r)"><rect width="61" height="20" fill="#555"/><rect x="61" width="55" height="20" fill="$COLOR"/><rect width="116" height="20" fill="url(#s)"/></g>
+            <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110" text-rendering="geometricPrecision">
+              <text x="315" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">coverage</text>
+              <text x="315" y="140" transform="scale(.1)">coverage</text>
+              <text x="875" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">${LINES}%</text>
+              <text x="875" y="140" transform="scale(.1)">${LINES}%</text>
+            </g>
+          </svg>
+          EOF
+
+      - name: Commit coverage artifacts
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "prism-metrics-ci"
+          git config user.email "ci@prism-metrics.local"
+          git add docs/coverage-summary.json docs/badges/coverage.svg
+          git diff --staged --quiet || git commit -m "ci: refresh coverage summary + badge [skip ci]"
+          git push || echo "push failed — non-blocking"
