@@ -1,5 +1,47 @@
 # prism-metrics changelog
 
+## 0.6.0
+
+Audit-tail clean-up release. Closes the remaining HIGH and MEDIUM
+items from the 2026-06-09 multi-agent review.
+
+### c4 (`src/c4/score.ts`)
+
+- **c4-1**: `queue` removed from the Database regex. Queues now
+  correctly classify as Background Worker (was double-matched, with
+  first-match-wins silently labelling them Database). Event-driven
+  architectures now produce the right picture.
+- **c4-2**: `client` removed from both the Web App container regex
+  AND the `isPersonCap` person-detection. 'Stripe client' / 'Email
+  client' / 'API client' are SDK integrations, not UIs OR users.
+  'API client' still surfaces as API Service via the `api` token.
+
+### iso-25010 (`src/iso-25010/score.ts`)
+
+- **iso-3**: `performance_efficiency.densityScore` switched from
+  50/70/85 step cliffs to a continuous curve:
+    densityScore = clamp(95 − 2 × max(0, fileDensity − 5), 50, 95)
+  fileDensity 19.9 vs 20.1 no longer swings 20 points.
+- **iso-4**: churn capped at 20 (was 50) on the performance
+  characteristic. Churn is a maintainability signal, not a perf
+  signal — refactor-heavy phases no longer tank the perf score.
+
+### Test coverage hardening
+
+- **tf-4**: empty `factors:[]` regression test
+- **mono-4 / mono-5**: UNHEALTHY_THRESHOLD documented + 4 boundary
+  tests at crossTargetDeps 0 / 5 / 6 / 100
+- **dora-5**: 4 cliff-boundary tests (coherenceScore 80 / 81, cog 30,
+  driftCount 3) locking in the dashboard-matching cliff semantics
+- **solid-5**: 4 SRP-cliff + malformed-input regression tests
+
+### Result
+
+All HIGH-severity audit items now closed. The 2026-06-09 audit
+identified 57 findings across 14 frameworks; 51 are closed
+post-0.6.0 (the remaining 6 are LOW-severity test gaps + acknowledged
+methodology limitations that are documented in honestGap).
+
 ## 0.5.0
 
 Audit follow-ups from the 2026-06-09 multi-agent review across all
