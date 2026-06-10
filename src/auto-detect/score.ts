@@ -24,7 +24,10 @@ function extractVersion(
 ): string | undefined {
   const v = deps?.[pkg];
   if (!v) return undefined;
-  return v.replace(/[\^~>=]/, "");
+  // auto-1 (pass-2): strip ALL leading range / comparator characters, not
+  // just the first one. Pre-fix `>=1.0.0` became `=1.0.0` and `~>1.2`
+  // became `>1.2`. Now produces clean semver-ish strings.
+  return v.replace(/^[\^~>=<\s]+/, "");
 }
 
 function checkDep(
@@ -271,17 +274,23 @@ export function detectFrameworks(
   }
 
   // DDD: bounded-contexts/ or contexts/
-  const hasBoundedContexts =
-    allDirs.has("bounded-contexts") || allDirs.has("contexts");
-  if (hasBoundedContexts) {
+  // auto-6 (pass-2): use the directory name that actually matched in the
+  // emitted signal label (was hard-coded "bounded-contexts/" even when
+  // "contexts/" triggered the detection).
+  const matchedDddDir = allDirs.has("bounded-contexts")
+    ? "bounded-contexts/"
+    : allDirs.has("contexts")
+      ? "contexts/"
+      : null;
+  if (matchedDddDir !== null) {
     frameworks.push({
       id: "ddd",
       name: "Domain-Driven Design",
       category: "architecture_pattern",
       confidence: 0.82,
-      signals: ["directory: bounded-contexts/ or contexts/"],
+      signals: [`directory: ${matchedDddDir}`],
     });
-    detectionSignals.push("directory: bounded-contexts/");
+    detectionSignals.push(`directory: ${matchedDddDir}`);
   }
 
   // Build systems
