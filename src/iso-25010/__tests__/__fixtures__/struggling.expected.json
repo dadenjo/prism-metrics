@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "overallScore": 34,
+  "overallScore": 38,
   "grade": "F",
   "characteristics": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "id": "performance_efficiency",
-      "score": 40
+      "score": 65
     },
     {
       "id": "reliability",

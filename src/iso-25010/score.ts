@@ -46,12 +46,23 @@ function functionalSuitability(sig: Iso25010Signals): number {
 
 // LOCKED_FORMULA — performance_efficiency
 //   densityScore = files-per-cap > 20 ? 50 : > 10 ? 70 : 85
-//   churnPenalty = min(50, avgChurn × 2)
-//   score        = max(0, round(densityScore − churnPenalty))
+//
+// iso-3 + iso-4 fixed (W11-audit):
+//   densityScore continuous: clamp(95 − 2 × max(0, fileDensity − 5), 50, 95)
+//     - fileDensity 5  → 95
+//     - fileDensity 10 → 85
+//     - fileDensity 20 → 65
+//     - fileDensity 25+ → 50 (floor)
+//     Pre-fix: 50/70/85 step cliffs at exactly 10 and 20 swung 20 points
+//     between fileDensity 19.9 and 20.1.
+//
+//   churnPenalty capped at 20 (was 50). Churn is a maintainability
+//   signal, not a performance signal — capping the bleed-into-perf
+//   at 20 stops refactor-heavy phases from tanking the perf score.
 function performanceEfficiency(sig: Iso25010Signals): number {
-  const churnPenalty = Math.min(50, sig.averageChurn * 2);
+  const churnPenalty = Math.min(20, sig.averageChurn * 0.8);
   const fileDensity = sig.fileDensity;
-  const densityScore = fileDensity > 20 ? 50 : fileDensity > 10 ? 70 : 85;
+  const densityScore = clamp(95 - 2 * Math.max(0, fileDensity - 5), 50, 95);
   return clamp(densityScore - churnPenalty, 0, 100);
 }
 
