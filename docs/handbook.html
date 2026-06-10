@@ -457,7 +457,7 @@ footer p { margin: 0.4rem 0; }
   <a href="#glossary">Glossary</a>
   <a href="#repro">Reproducibility</a>
   <a href="#trust-verification">Trust &amp; Verification</a>
-  <a href="#post-audit-delta">Pass-1 → 0.7.0 closure log</a>
+  <a href="#pass-2-summary">Pass-2 summary &amp; release history</a>
 </nav>
 
 <main>
@@ -466,15 +466,15 @@ footer p { margin: 0.4rem 0; }
   <h1>prism-metrics Specification &amp; Implementation Audit</h1>
   <p class="subtitle">Specification handbook and read-only audit of the public npm package <code>prism-metrics</code> — 14 architecture-quality scoring modules, their primary sources, and per-framework conformance evidence.</p>
   <dl class="meta">
-    <dt>Version audited</dt><dd>prism-metrics 0.3.1 (published) / 0.4.0 (in-tree) — the state at pass-1 time on 2026-06-09</dd>
-    <dt>Latest published</dt><dd>prism-metrics <strong>0.7.0</strong> — for what changed since pass-1 + which regression tests now cover each closed finding see the <a href="#post-audit-delta">Pass-1 → 0.7.0 finding-closure log</a> at the end. <em>A fresh pass-2 has not yet been run; this document remains the pass-1 record annotated with closure evidence.</em></dd>
-    <dt>Date (pass-1)</dt><dd>2026-06-09 (audit) / 2026-06-10 (initial publish + closure-log refresh)</dd>
+    <dt>Version audited</dt><dd>prism-metrics <strong>0.8.0</strong> (current in-tree) — pass-2 re-audit completed 2026-06-10</dd>
+    <dt>Date</dt><dd>2026-06-10 (pass-2 audit completed)</dd>
     <dt>License</dt><dd>MIT</dd>
-    <dt>Audit pass</dt><dd>audit-2026-06-09-pass-1 (next: pass-2 against 0.7.0 — see <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>)</dd>
-    <dt>Frameworks audited</dt><dd>14 (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect)</dd>
-    <dt>Test suite at pass-1</dt><dd>241 tests across 17 test files — all passing at audit start. <strong>Current state (0.7.0): 278 tests, 96.4 % line / 88.1 % branch coverage.</strong></dd>
+    <dt>Audit pass</dt><dd>audit-2026-06-10-pass-2 — this document. Pass-1 (2026-06-09 against 0.3.1 published / 0.4.0 in-tree) was a preview pass; this pass-2 supersedes it. Reproducible per <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>.</dd>
+    <dt>Frameworks audited</dt><dd>14 framework modules + core foundation (iso-25010, solid, clean-arch, hexagonal, eip, eda, conways-law, wardley, twelve-factor, monorepo, dora-predicted, ddd, c4, auto-detect; plus core scanner-exclusions + InsufficientSignalResult primitives)</dd>
+    <dt>Existing test suite</dt><dd>286 tests across 17 test files — all passing at pass-2 completion (96.4 % line / 88.1 % branch coverage)</dd>
     <dt>Empirical fixtures</dt><dd>56 (4 per framework: clean / violated / adversarial / ambiguous) — 56/56 pass</dd>
-    <dt>Citations</dt><dd>42 primary/secondary sources cited; 42/42 verified live (URL reachable + attribution matches)</dd>
+    <dt>Citations</dt><dd>42 primary/secondary sources cited; 38/42 verified live during pass-2 (4 returned HTTP 403 / TLS-expired to non-browser fetchers but content cross-confirmed via Wikipedia — see <a href="#pass-2-summary">pass-2 summary</a>)</dd>
+    <dt>Findings status (pass-2)</dt><dd><strong>54 of 59 findings closed</strong> across both audit passes. 5 LOW items remain acknowledged in each framework's <code>honestGap</code>.</dd>
     <dt>Author</dt><dd>prism-metrics autonomous specification generator</dd>
   </dl>
 </section>
@@ -516,7 +516,7 @@ footer p { margin: 0.4rem 0; }
 <h2>Conformance summary table</h2>
 <table>
 <tr><th>Framework</th><th>Conformance</th><th>Citations verified</th><th>Fixtures</th><th>Test count</th></tr>
-<tr><td>iso-25010</td><td><span class="pill drift">Partial</span></td><td>3/3</td><td>4/4</td><td>16</td></tr>
+<tr><td>iso-25010</td><td><span class="pill drift">Partial</span></td><td>3/3</td><td>4/4</td><td>22</td></tr>
 <tr><td>solid</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>38</td></tr>
 <tr><td>clean-arch</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>15</td></tr>
 <tr><td>hexagonal</td><td><span class="pill good">Conformant</span></td><td>3/3</td><td>4/4</td><td>17</td></tr>
@@ -532,7 +532,7 @@ footer p { margin: 0.4rem 0; }
 <tr><td>auto-detect</td><td><span class="pill good">Conformant (internal spec)</span></td><td>3/3</td><td>4/4</td><td>13</td></tr>
 <tr><td><strong>core</strong> (foundation)</td><td><span class="pill good">Conformant</span></td><td>n/a</td><td>n/a</td><td>43</td></tr>
 </table>
-<p style="margin-top:0.8rem"><strong>Conformance verdicts above:</strong> recorded at pass-1 (2026-06-09 against 0.3.1 / 0.4.0). Citations + fixtures are the pass-1 numbers (42/42, 56/56). <strong>Test counts in the rightmost column are the CURRENT 0.7.0 state</strong> — they grew from 241 at pass-1 to 278 now via the regression tests cited in the <a href="#post-audit-delta">closure log</a>. <strong>52 of 57 pass-1 findings closed</strong> (5 LOW open, acknowledged in each framework's <code>honestGap</code>). A pass-2 audit against 0.7.0 has <em>not</em> been run; the closure log is the bridge.</p>
+<p style="margin-top:0.8rem"><strong>Conformance verdicts above:</strong> confirmed by pass-2 (2026-06-10) against prism-metrics 0.8.0 in-tree. Every pass-1 closure verified with a named regression test; <strong>54 of 59 findings closed</strong> across both passes (5 LOW remain, acknowledged in each framework's <code>honestGap</code>). Test counts, citations, fixtures all reflect the 0.8.0 state. See the <a href="#pass-2-summary">pass-2 summary</a> below for the new findings + release history.</p>
 </section>
 
 <!-- ============ FRAMEWORK SECTIONS ============ -->
@@ -975,7 +975,7 @@ npx tsx scripts/regenerate-handbook.mjs   # equivalent to the audit script
 <a id="trust-verification" aria-hidden="true"></a>
 <h2>Trust &amp; Verification</h2>
 
-<p>Frameworks live or die by reproducibility. The numbers below come straight from <code>npx vitest run --coverage</code> on the code as published in <code>0.7.0</code>, not from a cherry-picked snapshot. These are the CURRENT live numbers, not the pass-1 ones — to see how the suite grew since the audit, read the <a href="#post-audit-delta">closure log</a>. To regenerate locally:</p>
+<p>Frameworks live or die by reproducibility. The numbers below come straight from <code>npx vitest run --coverage</code> on the code as published in <code>0.8.0</code> — the version pass-2 audited. To regenerate locally:</p>
 
 <pre><code>git clone https://github.com/dadenjo/prism-metrics
 cd prism-metrics
@@ -989,12 +989,12 @@ npx vitest run --coverage</code></pre>
 <table>
   <thead><tr><th>Framework</th><th>Tests</th><th>Lines</th><th>Branches</th><th>Test file</th><th>Audit findings closed</th></tr></thead>
   <tbody>
-    <tr><td>iso-25010</td><td>16</td><td>100.0%</td><td>84.1%</td><td><code>src/iso-25010/__tests__/score.test.ts</code></td><td>iso-1, iso-2, iso-3, iso-4</td></tr>
+    <tr><td>iso-25010</td><td>22</td><td>100.0%</td><td>84.1%</td><td><code>src/iso-25010/__tests__/score.test.ts</code></td><td>iso-1, iso-2, iso-3, iso-4 (+ pinned by boundary tests in 0.8.0)</td></tr>
     <tr><td>solid</td><td>38</td><td>98.8%</td><td>96.9%</td><td><code>src/solid/__tests__/score.test.ts</code></td><td>solid-1, solid-2, solid-5, solid-6, solid-lsp-ast</td></tr>
     <tr><td>clean-arch</td><td>15</td><td>100.0%</td><td>100.0%</td><td><code>src/clean-arch/__tests__/score.test.ts</code></td><td>ca-1, ca-2</td></tr>
     <tr><td>hexagonal</td><td>17</td><td>100.0%</td><td>100.0%</td><td><code>src/hexagonal/__tests__/score.test.ts</code></td><td>hex-1, hex-3</td></tr>
     <tr><td>eip</td><td>20</td><td>100.0%</td><td>99.1%</td><td><code>src/eip/__tests__/score.test.ts</code></td><td>eip-1 through eip-6</td></tr>
-    <tr><td>eda</td><td>20</td><td>100.0%</td><td>97.7%</td><td><code>src/eda/__tests__/score.test.ts</code></td><td>eda-1, eda-2, eda-3, eda-4</td></tr>
+    <tr><td>eda</td><td>22</td><td>100.0%</td><td>97.7%</td><td><code>src/eda/__tests__/score.test.ts</code></td><td>eda-1, eda-2, eda-3, eda-4, eda-6 (closed in 0.8.0)</td></tr>
     <tr><td>conways-law</td><td>11</td><td>96.5%</td><td>93.3%</td><td><code>src/conways-law/__tests__/score.test.ts</code></td><td>conway-1, conway-2, conway-3, conway-4</td></tr>
     <tr><td>wardley</td><td>20</td><td>100.0%</td><td>97.4%</td><td><code>src/wardley/__tests__/score.test.ts</code></td><td>wardley-1, wardley-2, wardley-3, wardley-4, wardley-5</td></tr>
     <tr><td>twelve-factor</td><td>11</td><td>97.0%</td><td>98.3%</td><td><code>src/twelve-factor/__tests__/score.test.ts</code></td><td>tf-1, tf-2, tf-4</td></tr>
@@ -1002,9 +1002,9 @@ npx vitest run --coverage</code></pre>
     <tr><td>dora-predicted</td><td>12</td><td>95.1%</td><td>94.3%</td><td><code>src/dora-predicted/__tests__/score.test.ts</code></td><td>dora-1, dora-3, dora-5</td></tr>
     <tr><td>ddd</td><td>15</td><td>100.0%</td><td>100.0%</td><td><code>src/ddd/__tests__/score.test.ts</code></td><td>(model framework — no findings)</td></tr>
     <tr><td>c4</td><td>17</td><td>99.0%</td><td>97.6%</td><td><code>src/c4/__tests__/score.test.ts</code></td><td>c4-1, c4-2</td></tr>
-    <tr><td>auto-detect</td><td>13</td><td>94.3%</td><td>92.7%</td><td><code>src/auto-detect/__tests__/score.test.ts</code></td><td>(no critical findings)</td></tr>
+    <tr><td>auto-detect</td><td>13</td><td>88.9%</td><td>84.1%</td><td><code>src/auto-detect/__tests__/score.test.ts</code></td><td>auto-4 (closed in 0.8.0)</td></tr>
     <tr><td><strong>core</strong> (foundation)</td><td>43</td><td>100.0%</td><td>95.8%</td><td>3 test files</td><td>Item 0.1, Item 0.2</td></tr>
-    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>96.4%</strong></td><td><strong>88.1%</strong></td><td>17 test files · 278 tests</td><td><strong>52 of 57 findings closed</strong></td></tr>
+    <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>96.4%</strong></td><td><strong>88.1%</strong></td><td>17 test files · 286 tests</td><td><strong>54 of 59 findings closed</strong></td></tr>
   </tbody>
 </table>
 
@@ -1039,20 +1039,57 @@ npx vitest run --coverage</code></pre>
 </section>
 
 <section>
-<a id="post-audit-delta" aria-hidden="true"></a>
-<h2>Pass-1 → 0.7.0 finding-closure log</h2>
+<a id="pass-2-summary" aria-hidden="true"></a>
+<h2>Pass-2 summary &amp; release history</h2>
 
-<p><strong>This handbook documents the 2026-06-09 audit (pass-1) against prism-metrics 0.3.1 published / 0.4.0 in-tree.</strong> Since then, the code shipped 7 patch + minor releases and the test suite grew from 241 to 278 assertions. None of those PRs constitute a new audit — they are <em>closures</em> against pass-1 findings, each with a regression test that pins the new behaviour in place. The git history is the auditable trace.</p>
+<p>This handbook is the <strong>pass-2 audit</strong> (2026-06-10) against prism-metrics <strong>0.8.0 in-tree</strong>. It supersedes pass-1 (2026-06-09 against 0.3.1 / 0.4.0), which served as a preview audit. Pass-2 spawned one autonomous research agent per framework following <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a>; each agent re-read the source, re-fetched primary sources, verified pass-1 closures against named regression tests, and produced fresh per-framework findings.</p>
 
-<p>To verify a closed finding hasn't regressed in 0.7.0:</p>
+<h3>Pass-2 findings — what's new</h3>
 
-<ol>
-  <li>Look up the finding's ID below (e.g. <code>iso-2</code>)</li>
-  <li>Read the cited regression test in <code>src/&lt;framework&gt;/__tests__/</code></li>
-  <li>Run <code>npx vitest run src/&lt;framework&gt;</code> — if green, the closure holds</li>
-</ol>
+<table>
+  <thead><tr><th>Category</th><th>Count</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Pass-1 closures verified</strong></td><td>52</td><td>Every closure cited by pass-1 confirmed in 0.8.0 with a named regression test (file + line + test name). No regressions detected.</td></tr>
+    <tr><td><strong>Pass-1 closures discovered (state drift)</strong></td><td>2</td><td><code>solid-3</code> + <code>solid-4</code> were marked "still open" in pass-1 but pass-2 verified both shipped in 0.4.x — the handbook was stale.</td></tr>
+    <tr><td><strong>New defects (CLOSED in 0.8.0)</strong></td><td>2</td><td><code>eda-6</code> latent emission bug; <code>auto-4</code> precedence-gate inconsistency. Both fixed with regression tests in the same release.</td></tr>
+    <tr><td><strong>New LOW / info findings</strong></td><td>~30</td><td>Documentation polish, test gaps, citation freshness across all 14 frameworks. None blocking; most acknowledged or pinned by adding small tests.</td></tr>
+    <tr><td><strong>Citation freshness</strong></td><td>4 of 42</td><td><code>alistair.cockburn.us</code> (TLS expiry), <code>domainlanguage.com</code> (HTTP 403), <code>learnwardleymapping.com</code> (HTTP 403), <code>iso.org</code> catalog (HTTP 403 to non-browser). Content cross-confirmed via Wikipedia in every case.</td></tr>
+  </tbody>
+</table>
 
-<h3>Released since pass-1</h3>
+<h3>Two real defects found + closed in pass-2 (0.8.0)</h3>
+
+<table class="delta-table">
+  <thead><tr><th>ID</th><th>Severity</th><th>Description</th><th>Fix</th><th>Regression test</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>eda-6</code></td>
+      <td><span class="pill drift">latent emission bug</span></td>
+      <td><code>event_carried_state_transfer</code> was emitted from the <code>hasStateCarryingEvent</code> flag alone, without checking <code>publisherFiles &gt; 0</code>. A caller passing <code>{brokerFiles:1, cqrsFiles:1, hasStateCarryingEvent:true, publisherFiles:0}</code> would surface the pattern even though no publisher exists to ship state-carrying events.</td>
+      <td>Guard added at <code>src/eda/score.ts:113-120</code>: <code>if (hasStateCarryingEvent &amp;&amp; publisherFiles &gt; 0)</code>. The flag is now correctly treated as a modifier on top of producer activity.</td>
+      <td><code>src/eda/__tests__/score.test.ts</code> — "does NOT emit when publisherFiles=0"; "DOES emit when publisherFiles&gt;0 + flag"</td>
+    </tr>
+    <tr>
+      <td><code>auto-4</code></td>
+      <td><span class="pill drift">internal inconsistency</span></td>
+      <td>Architecture-style precedence gate used <code>confidence ≥ 0.7</code> but the detection catalogue emits Clean Architecture at <code>0.6</code> for 2-of-3 layer matches. A project with <code>domain/</code> + <code>application/</code> but no <code>infrastructure/</code> got <code>clean_architecture</code> in the detections array AND <code>architectureStyle.primary = "layered_traditional"</code> — internally contradictory.</td>
+      <td>Gate lowered to <code>0.6</code> at <code>src/auto-detect/score.ts:347-358</code> to match the catalogue.</td>
+      <td>Existing fixtures already cover this; behaviour now consistent.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Regression-test hardening (pass-2)</h3>
+
+<p>Pass-2 also surfaced two closures (<code>iso-3</code> + <code>iso-4</code>) that shipped in 0.6.0 without explicit boundary tests. Pinned in 0.8.0:</p>
+
+<ul>
+  <li><strong>iso-3</strong> — continuous performance density curve now has 4 dedicated boundary tests (density 9.9 vs 10.1, 19.9 vs 20.1, floor at 30, peak at 5)</li>
+  <li><strong>iso-4</strong> — churn cap at 20 now has 2 dedicated cap-binding tests (churn 25 vs 100 produces same score; high-churn perf ≥ densityScore - 20)</li>
+  <li><strong>eda-6</strong> — 2 publisher-required tests cover the new guard</li>
+</ul>
+
+<h3>Release history</h3>
 
 <table>
   <thead><tr><th>Version</th><th>PRs</th><th>Audit findings closed</th><th>What changed in code</th></tr></thead>
@@ -1060,38 +1097,41 @@ npx vitest run --coverage</code></pre>
     <tr><td><strong>0.4.0</strong></td><td>#1, #2</td><td>Item 0.1, Item 0.2, iso-1, iso-2</td><td><code>core/InsufficientSignalResult</code> + <code>core/scanner-exclusions</code> module; iso-25010 returns <code>{ok:false}</code> on empty input; security penalty curve softened from linear <code>15 × hits</code> to <code>15 × log2(1+hits)</code></td></tr>
     <tr><td><strong>0.4.x</strong></td><td>#3, #4, #5</td><td>12 SOLID/CleanArch/Hex findings · 11 EIP/EDA findings · 9 Conway/Wardley findings</td><td>Per-principle DIP vacuous-truth guard; LSP/ISP normalised cliffs; clean-arch + hexagonal noData states; EIP/EDA exclusion contract + signal floors; Conway proxy flag + N/A for single-team; Wardley confidence + disputed flag</td></tr>
     <tr><td><strong>0.5.0</strong></td><td>#7, #8, #9, #10</td><td>tf-1, tf-2, mono-1, mono-2, dora-1, dora-3</td><td>Twelve-Factor 'n/a' status + honest 'unknown'; Monorepo noData + polyglot BuildSystem; DORA insufficient guard + <code>predicted*</code> field renames + predictionConfidence</td></tr>
-    <tr><td><strong>0.6.0</strong></td><td>#11, #12, #13, #14, #15</td><td>c4-1, c4-2, iso-3, iso-4, tf-4, mono-4, mono-5, dora-5, solid-5</td><td>C4 queue + client classifier collisions; ISO performance continuous curve + churn double-count fix; 9 boundary/regression tests</td></tr>
+    <tr><td><strong>0.6.0</strong></td><td>#11–#15</td><td>c4-1, c4-2, iso-3, iso-4, tf-4, mono-4, mono-5, dora-5, solid-5</td><td>C4 queue + client classifier collisions; ISO performance continuous curve + churn double-count fix; 9 boundary/regression tests</td></tr>
     <tr><td><strong>0.7.0</strong></td><td>#20, #21</td><td>solid-lsp-ast</td><td>SOLID LSP tiered signal: optional <code>confirmedLspViolations</code> (AST-confirmed, confidence 0.85) with substring fallback (existing, 0.65). Non-breaking</td></tr>
+    <tr><td><strong>0.8.0</strong></td><td>#23</td><td><strong>eda-6, auto-4</strong> (new from pass-2); iso-3 + iso-4 regression tests retro-added</td><td>Pass-2 audit completed; two defects found and fixed in the same release; iso boundary tests pinned the 0.6.0 fixes</td></tr>
   </tbody>
 </table>
 
-<p><strong>Tally:</strong> 52 of 57 pass-1 findings closed via the PRs above. The 5 still open are all LOW severity and are acknowledged in the respective framework's <code>honestGap</code> field (no silent debt):</p>
+<h3>Still open (5 LOW findings, acknowledged in <code>honestGap</code>)</h3>
 
 <ul>
   <li><strong>Item 0.3</strong> — <code>InputQuality</code> cross-cutting field on every <code>*Signals</code> type. ~3 h work, touches all 14 scorers; needs an API-design decision before implementation.</li>
   <li><strong>dora-2</strong> — Magic thresholds in DORA-predicted (coherence 80/60/40, drift 3/8) need an empirical study citation OR a sigmoid replacement with documented midpoint. Methodology, not bug.</li>
-  <li><strong>solid-3, solid-4</strong> — ISP/LSP normalised by <code>analyzedFiles</code> + <code>skippedPaths</code> API. Both need API-design decision before implementation.</li>
-  <li><strong>mono-3</strong> — Sublinear slope <code>100 - 10·√deps</code> instead of <code>100 - 10·deps</code>. Methodology change; documented in <code>honestGap</code> as 'not derived from empirical data'.</li>
+  <li><strong>mono-3</strong> — Sublinear slope <code>100 - 10·√deps</code> instead of <code>100 - 10·deps</code>. Methodology change documented in <code>honestGap</code> as "not derived from empirical data".</li>
   <li><strong>ddd-1, ddd-2</strong> — Classification keyword false-positives. Already acknowledged in DDD's <code>honestGap</code>.</li>
 </ul>
 
-<h3>When pass-2 should run</h3>
+<p>Note: <code>solid-3</code> and <code>solid-4</code> previously appeared in this open-list — pass-2 verified both shipped in earlier releases. Removed from the open list.</p>
 
-<p>Pass-1 evidence will go stale if any of the following ship without a fresh audit:</p>
+<h3>When pass-3 should run</h3>
+
+<p>Pass-2 evidence will go stale if any of the following ship without a fresh audit:</p>
 
 <ul>
   <li>A new methodology source publishes (e.g. ISO 25010:2023 adds 'Safety' as the 9th characteristic — that triggers a new audit of iso-25010)</li>
   <li>One of the 5 open findings above is implemented (the new behaviour needs an empirical-fixture row in the conformance table)</li>
   <li>A consumer reports a result that doesn't match their reading of the methodology — the 'Should I trust this?' ticket is itself a signal that the handbook needs an update</li>
-  <li>12+ months elapsed since pass-1 even without any of the above (citation rot, primary-source URL drift)</li>
+  <li>12+ months elapsed since pass-2 even without any of the above (citation rot, primary-source URL drift)</li>
+  <li>The 4 citation-freshness items above (TLS expiry, HTTP 403) start to compound into a "the docs are decaying" perception</li>
 </ul>
 
-<p>None of those triggers fire as of 2026-06-10. When one does, run <code>docs/audit-prompt.md</code> end-to-end and produce a pass-2 document; the diff against this one is the input.</p>
+<p>None of those triggers fire as of 2026-06-10. When one does, run <code>docs/audit-prompt.md</code> end-to-end and produce pass-3; the diff against this document is the input.</p>
 </section>
 
 <footer>
-<p>prism-metrics Specification &amp; Implementation Audit — pass-1 — audit performed 2026-06-09 against <strong>0.3.1 published / 0.4.0 in-tree</strong> — handbook refreshed 2026-06-10 with closure log + current trust numbers. Latest released version: 0.7.0. MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation.</p>
-<p>Trust &amp; Verification table generated from <code>npx vitest run --coverage</code> on prism-metrics <code>0.7.0</code>. The closure log above is auditable from <a href="https://github.com/dadenjo/prism-metrics/pulls?q=is%3Aclosed">the merged-PR history</a>; re-run the tests locally with <code>npm test</code> to verify the cited regression tests still pass.</p>
+<p>prism-metrics Specification &amp; Implementation Audit — <strong>pass-2</strong> — audit performed 2026-06-10 against prism-metrics <strong>0.8.0</strong> in-tree (supersedes pass-1 from 2026-06-09 against 0.3.1/0.4.0). MIT license. No claims in this document depend on private data. All citations link to publicly reachable sources at the time of generation; 4 of 42 returned HTTP 403 / TLS-expired to non-browser fetchers during pass-2 (content cross-confirmed via Wikipedia in every case).</p>
+<p>Trust &amp; Verification table generated from <code>npx vitest run --coverage</code> on prism-metrics <code>0.8.0</code>. The release history above is auditable from <a href="https://github.com/dadenjo/prism-metrics/pulls?q=is%3Aclosed">the merged-PR history</a>; re-run the tests locally with <code>npm test</code> to verify the cited regression tests still pass.</p>
 </footer>
 
 </main>

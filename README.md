@@ -1,9 +1,9 @@
 # prism-metrics
 
 [![npm version](https://img.shields.io/npm/v/prism-metrics.svg)](https://www.npmjs.com/package/prism-metrics)
-[![tests](https://img.shields.io/badge/tests-278%20passing-brightgreen.svg)](#test-coverage)
+[![tests](https://img.shields.io/badge/tests-286%20passing-brightgreen.svg)](#test-coverage)
 [![coverage](docs/badges/coverage.svg)](#test-coverage)
-[![audit](https://img.shields.io/badge/audit%20findings-52%20of%2057%20closed-brightgreen.svg)](#audit--verification)
+[![audit](https://img.shields.io/badge/audit%20findings-54%20of%2059%20closed-brightgreen.svg)](#audit--verification)
 [![license](https://img.shields.io/npm/l/prism-metrics.svg)](LICENSE)
 
 Open methodology and pure scoring implementations for the architecture
@@ -70,13 +70,13 @@ See `src/<framework>/methodology.ts` for the human-readable specs.
 | `prism-metrics/auto-detect` | Framework auto-detection from manifest signals | 13 | 94.3% lines |
 | **core** (foundation) | InsufficientSignalResult + scanner-exclusions primitives | 43 | **100%** |
 
-**Totals**: 278 tests passing · 96.4% line coverage · 88.1% branch coverage.
+**Totals**: 286 tests passing · 96.4% line coverage · 88.1% branch coverage.
 
 ## Audit &amp; Verification
 
 The 2026-06-09 multi-agent audit reviewed every framework against
-its published methodology. **52 of 57 findings are closed** as of
-0.7.0; the remaining 5 are LOW-severity items documented in each
+its published methodology. **54 of 59 findings are closed** as of
+0.8.0 (pass-2); the remaining 5 are LOW-severity items documented in each
 framework's `honestGap`.
 
 The complete audit — concept summary, expected results, implementation
@@ -86,12 +86,13 @@ review per framework, plus empirical verification — lives in:
 - 📊 [**docs/handbook.evidence.json**](docs/handbook.evidence.json) — machine-readable evidence per finding
 - 📋 [**docs/scanner-exclusions.md**](docs/scanner-exclusions.md) — methodology disclosure for what gets skipped during a scan
 
-Major audit-driven changes (0.4.0 → 0.7.0):
+Major audit-driven changes (0.4.0 → 0.8.0):
 
 - **0.4.0**: foundation `InsufficientSignalResult` + scanner-exclusions module; iso-1/iso-2 (empty-input + security cliff)
 - **0.5.0**: tf-1/tf-2 (deployment-target awareness + honest 'unknown'); mono-1/mono-2 (noData + polyglot); dora-1/dora-3 (insufficient guard + prediction confidence)
 - **0.6.0**: c4-1/c4-2 (queue + client collisions); iso-3/iso-4 (continuous perf curve + churn double-count); 9 boundary/regression tests across tf, mono, dora, solid
 - **0.7.0**: solid-lsp-ast (tiered LSP signal — optional `confirmedLspViolations` from AST analysers, fallback to substring scan)
+- **0.8.0**: **pass-2 audit completed**; eda-6 (latent emission bug) + auto-4 (precedence-gate inconsistency) found + closed; iso-3 + iso-4 dedicated boundary tests retro-added
 
 See `CHANGELOG.md` for the per-version detail.
 
