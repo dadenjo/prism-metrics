@@ -1032,7 +1032,7 @@ npx vitest run --coverage</code></pre>
 
 <h3>Reproducing the audit</h3>
 
-<p>The audit itself is reproducible. Spawn a multi-agent review with the prompt template in <code>docs/audit-prompt.md</code> (TODO — not yet committed), point each agent at one framework's <code>src/<framework>/</code> + the prism dashboard's reference implementation, and collect the findings. The diff against the published handbook is the next audit's input.</p>
+<p>The audit itself is reproducible. The prompt template lives at <a href="audit-prompt.md"><code>docs/audit-prompt.md</code></a> — spawn one agent per framework, point it at <code>src/&lt;framework&gt;/</code> plus the primary methodology source, and collect the findings. The diff against the published handbook is the next audit's input. Per-framework agent runs are independent and parallelisable; the previous (2026-06-10) full pass cost approximately <span class="pill info">$3-5</span> at Claude Sonnet 4.6 rates and ~1.5 h wall-clock with parallelisation.</p>
 </section>
 
 <footer>
