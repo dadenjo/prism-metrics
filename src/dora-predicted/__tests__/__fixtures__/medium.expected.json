@@ -1,8 +1,10 @@
 {
-  "deploymentFrequency": "medium",
-  "leadTimeForChanges": "medium",
-  "changeFailureRate": "medium",
-  "meanTimeToRestore": "medium",
+  "predictedDeploymentFrequency": "medium",
+  "predictedLeadTimeForChanges": "medium",
+  "predictedChangeFailureRate": "medium",
+  "predictedMeanTimeToRestore": "medium",
   "overallRank": 1,
-  "overallLevel": "medium"
+  "overallLevel": "medium",
+  "predictionConfidence": 0.6,
+  "insufficient": false
 }

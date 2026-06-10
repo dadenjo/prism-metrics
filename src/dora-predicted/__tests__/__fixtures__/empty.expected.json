@@ -1,0 +1,10 @@
+{
+  "predictedDeploymentFrequency": "insufficient",
+  "predictedLeadTimeForChanges": "insufficient",
+  "predictedChangeFailureRate": "insufficient",
+  "predictedMeanTimeToRestore": "insufficient",
+  "overallRank": null,
+  "overallLevel": "insufficient",
+  "predictionConfidence": 0,
+  "insufficient": true
+}
